@@ -12,11 +12,10 @@ import io.vertx.core.json.JsonObject;
 @ProxyGen
 public interface PostgresService {
 
-    @Fluent
-    Future<JsonObject> executeWriteQuery(final String query);
 
-    @Fluent
-    Future<JsonObject> executeDeleteQuery(final String query);
+    Future<JsonObject> executeWriteQuery(final JsonObject query);
+
+    Future<JsonObject> executeDeleteQuery(final JsonObject query);
 
     @GenIgnore
     static PostgresService createProxy(Vertx vertx, String address){
