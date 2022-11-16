@@ -5,6 +5,7 @@ import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -13,8 +14,8 @@ import io.vertx.core.json.JsonObject;
 @ProxyGen
 public interface RabbitMQService {
 
-  @Fluent
-  RabbitMQService consume(String queue, Handler<AsyncResult<JsonObject>> handler);
+
+  Future<JsonObject> consume(String queue);
 
   @GenIgnore
   static RabbitMQService createProxy(Vertx vertx, String address) {
