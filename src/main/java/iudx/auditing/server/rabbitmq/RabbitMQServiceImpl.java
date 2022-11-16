@@ -1,9 +1,6 @@
 package iudx.auditing.server.rabbitmq;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.rabbitmq.QueueOptions;
 import io.vertx.rabbitmq.RabbitMQClient;
@@ -37,7 +34,8 @@ public class RabbitMQServiceImpl implements RabbitMQService {
 
   }
   @Override
-  public RabbitMQService consume(String queue, Handler<AsyncResult<JsonObject>> handler) {
+  public Future<JsonObject> consume(String queue) {
+    Promise<JsonObject> promise = Promise.promise();
     client.basicConsumer(queue, options, receivedResultHandler -> {
       if (receivedResultHandler.succeeded()) {
         RabbitMQConsumer mqConsumer = receivedResultHandler.result();
@@ -50,16 +48,17 @@ public class RabbitMQServiceImpl implements RabbitMQService {
             ServerOriginContextFactory serverOriginContextFactory= new ServerOriginContextFactory();
             ServerStrategy serverStrategy=serverOriginContextFactory.create(serverOrigin);
             String query= serverStrategy.buildWriteQuery(body);
-
-            handler.handle(Future.succeededFuture(new JsonObject("body")));
+            promise.complete();
+           // handler.handle(Future.succeededFuture(new JsonObject("body")));
           } else {
-            handler.handle(Future.failedFuture("null/empty message"));
+           // handler.handle(Future.failedFuture("null/empty message"));
+            promise.fail("null/empty message");
           }
         });
       }
     });
 
-    return this;
+    return promise.future();
   }
 
 }
