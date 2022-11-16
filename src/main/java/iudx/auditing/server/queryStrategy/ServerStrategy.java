@@ -4,4 +4,5 @@ import io.vertx.core.json.JsonObject;
 
 public interface ServerStrategy {
   String buildWriteQuery(JsonObject request);
+  String buildDeleteQuery(JsonObject request);
 }

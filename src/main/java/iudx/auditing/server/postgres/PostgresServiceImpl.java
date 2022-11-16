@@ -22,6 +22,7 @@ public class PostgresServiceImpl implements PostgresService {
   @Override
   public Future<JsonObject> executeWriteQuery(JsonObject query) {
     Promise<JsonObject> promise = Promise.promise();
+    JsonObject response = new JsonObject();
     pgPool
         .withConnection(
             connection ->
@@ -30,14 +31,13 @@ public class PostgresServiceImpl implements PostgresService {
                 if (rows.succeeded()){
                   LOGGER.info("Table Updated successfully");
 
-                  //TODO: Call Immudb
-                  promise.complete();
+                  response.put("message", "Table Updated Successfully");
+                  promise.complete(response);
                 }
                 if(rows.failed()){
-
-                  executeDeleteQuery(query);
-                  LOGGER.error("Info failed:"+ rows.cause());
-                  //promise.fail(rows.cause().toString());
+                LOGGER.error("Info failed:"+ rows.cause());
+                response.put("message", rows.cause().getMessage());
+                promise.fail(rows.cause().getMessage());
                 }
               }
             );
@@ -47,20 +47,22 @@ public class PostgresServiceImpl implements PostgresService {
   @Override
   public Future<JsonObject> executeDeleteQuery(JsonObject query) {
     Promise<JsonObject> promise = Promise.promise();
-
+    JsonObject response = new JsonObject();
     pgPool
         .withConnection(
                 connection ->
                         connection.query(query.getString(DELETE_QUERY_KEY)).execute()).onComplete(
                 rows->{
                   if (rows.succeeded()){
-                    LOGGER.info("Table deleted successfully");
+                    LOGGER.info("Table row deleted successfully");
 
-                    promise.complete();
+                    response.put("message", "Table row deleted Successfully");
+                    promise.complete(response);
                   }
                   if(rows.failed()){
                     LOGGER.error("Info failed:"+ rows.cause());
-                    promise.fail(rows.cause().toString());
+                    response.put("message", rows.cause().getMessage());
+                    promise.fail(rows.cause().getMessage());
                   }
                 }
             );
