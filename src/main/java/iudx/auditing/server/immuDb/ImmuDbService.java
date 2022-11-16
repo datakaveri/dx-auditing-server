@@ -11,10 +11,10 @@ import io.vertx.core.json.JsonObject;
 @VertxGen
 @ProxyGen
 public interface ImmuDbService {
-    @Fluent
-    Future<JsonObject> executeQuery(final String query);
 
-    @GenIgnore
+    Future<JsonObject> executeWriteQuery(final String query);
+
+
     static ImmuDbService createProxy(Vertx vertx, String address) {
         return new ImmuDbServiceVertxEBProxy(vertx, address);
     }

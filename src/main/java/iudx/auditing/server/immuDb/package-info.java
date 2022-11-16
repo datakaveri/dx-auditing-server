@@ -1,4 +1,4 @@
-@ModuleGen(groupPackage = "udx.auditing.server.immuDb",
+@ModuleGen(groupPackage = "iudx.auditing.server.immuDb",
         name = "iudx-auditing-server-immuDb-service",useFutures = true)
 package iudx.auditing.server.immuDb;
 
