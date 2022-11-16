@@ -7,8 +7,8 @@ import io.vertx.pgclient.PgPool;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static iudx.auditing.server.common.Constants.QUERY_KEY;
-import static iudx.auditing.server.common.Constants.QUERY_KEY1;
+import static iudx.auditing.server.common.Constants.INSERT_QUERY_KEY;
+import static iudx.auditing.server.common.Constants.DELETE_QUERY_KEY;
 
 public class PostgresServiceImpl implements PostgresService {
   private static final Logger LOGGER = LogManager.getLogger(PostgresServiceImpl.class);
@@ -25,7 +25,7 @@ public class PostgresServiceImpl implements PostgresService {
     pgPool
         .withConnection(
             connection ->
-                connection.query(query.getString(QUERY_KEY)).execute()).onComplete(
+                connection.query(query.getString(INSERT_QUERY_KEY)).execute()).onComplete(
               rows->{
                 if (rows.succeeded()){
                   LOGGER.info("Table Updated successfully");
@@ -51,7 +51,7 @@ public class PostgresServiceImpl implements PostgresService {
     pgPool
         .withConnection(
                 connection ->
-                        connection.query(query.getString(QUERY_KEY1)).execute()).onComplete(
+                        connection.query(query.getString(DELETE_QUERY_KEY)).execute()).onComplete(
                 rows->{
                   if (rows.succeeded()){
                     LOGGER.info("Table deleted successfully");
