@@ -18,6 +18,7 @@
         <openjdk.version>11</openjdk.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
+        <disruptor.version>3.4.4</disruptor.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
         <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
         <checkstyle.version>10.3.1</checkstyle.version>
@@ -83,13 +84,16 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-micrometer-metrics</artifactId>
-            <version>4.3.2</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-hazelcast</artifactId>
-            <version>4.3.2</version>
         </dependency>
+        <dependency>
+			<groupId>com.lmax</groupId>
+			<artifactId>disruptor</artifactId>
+			<version>${disruptor.version}</version>
+		</dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
@@ -103,22 +107,18 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-codegen</artifactId>
-            <version>4.3.2</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-rabbitmq-client</artifactId>
-            <version>4.3.2</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web-client</artifactId>
-            <version>4.3.2</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-service-proxy</artifactId>
-            <version>4.3.2</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
@@ -311,7 +311,7 @@
                                 <argument>{project.build.directory}/${project.artifactId}-dev-${project.version}-fat.jar
                                 </argument>
                                 <argument>-c</argument>
-                                <argument>./configs/config-dev.json</argument>
+                                <argument>./secrets/all-verticles-configs/config-dev.json</argument>
                             </arguments>
                         </configuration>
                     </execution>
