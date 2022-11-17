@@ -11,13 +11,19 @@ public class Constants {
     public static final String IUDX_ID = "iudxID";
     public static final String IID = "iid";
     public static final String RESPONSE_SIZE = "response_size";
-    public static final String TABLE_NAME = "tableName";
+    public static final String TIME = "time";
+    public static final String PRIMARY_KEY = "primaryKey";
+    public static final String DATABASE_TABLE_NAME = "tableName";
+    public static final String ISO_TIME = "isoTime";
+    public static final String PROVIDER_ID = "providerId";
     public static final String WRITE_QUERY4CAT =
             "INSERT INTO $0 (id, userRole, userId, iid, api, method, time, iudxID) VALUES ('$1','$2','$3','$4','$5','$6',$7,'$8')";
     public static final String WRITE_QUERY4RS =
             "INSERT INTO $0 (id,api,userid,epochtime,resourceid,isotime,providerid,size) VALUES ('$1','$2','$3',$4,'$5','$6','$7',$8)";
     public static final String WRITE_QUERY4AUTH =
             "INSERT INTO $0 (id,body,endpoint,method,time,userid) VALUES ('$1','$2','$3','$4',$5,'$6')";
+    public static final String DELETE_QUERY =
+            "DELETE FROM $0 WHERE id = '$1'";
 
 
 }
