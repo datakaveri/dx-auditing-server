@@ -21,7 +21,13 @@
     },
     {
       "id": "iudx.auditing.server.processor.ProcessorVerticle",
-      "verticleInstances": 1
+      "verticleInstances": 1,
+      "immudbRsTableName": "",
+      "immudbCatTableName": "",
+      "immudbAuthTableName": "",
+      "postgresRsTableName": "",
+      "postgresCatTableName": "",
+      "postgresAuthTableName": ""
     },
     {
       "id": "iudx.auditing.server.postgres.PostgresVerticle",

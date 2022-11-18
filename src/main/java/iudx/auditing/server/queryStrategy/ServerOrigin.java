@@ -18,10 +18,11 @@ public enum ServerOrigin {
   public String getOriginRole() {
     return this.originRole;
   }
-  public static ServerOrigin fromRole(final String originRole){
+
+  public static ServerOrigin fromRole(final String originRole) {
     return Stream.of(values())
-      .filter(v -> v.originRole.equalsIgnoreCase(originRole))
-      .findAny()
-      .orElse(null);
+        .filter(v -> v.originRole.equalsIgnoreCase(originRole))
+        .findAny()
+        .orElse(null);
   }
 }

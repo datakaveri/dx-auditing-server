@@ -1,5 +1,7 @@
 package iudx.auditing.server.postgres;
 
+import static iudx.auditing.server.common.Constants.PG_SERVICE_ADDRESS;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
@@ -10,54 +12,52 @@ import io.vertx.sqlclient.PoolOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static iudx.auditing.server.common.Constants.PG_SERVICE_ADDRESS;
-
 public class PostgresVerticle extends AbstractVerticle {
-    private static final Logger LOGGER = LogManager.getLogger(PostgresVerticle.class);
+  private static final Logger LOGGER = LogManager.getLogger(PostgresVerticle.class);
 
-    private ServiceBinder binder;
+  private ServiceBinder binder;
 
-    private PgConnectOptions connectOptions;
-    private PoolOptions poolOptions;
-    private PgPool pool;
+  private PgConnectOptions connectOptions;
+  private PoolOptions poolOptions;
+  private PgPool pool;
 
-    private String databaseIP;
-    private int databasePort;
-    private String databaseName;
-    private String databaseUserName;
-    private String databasePassword;
-    private int poolSize;
-    private MessageConsumer<JsonObject> consumer;
+  private String databaseIP;
+  private int databasePort;
+  private String databaseName;
+  private String databaseUserName;
+  private String databasePassword;
+  private int poolSize;
+  private MessageConsumer<JsonObject> consumer;
 
-    private PostgresService pgService;
+  private PostgresService pgService;
 
-    @Override
-    public void start() throws Exception {
-        databaseIP = config().getString("databaseIp");
-        databasePort = config().getInteger("databasePort");
-        databaseName = config().getString("databaseName");
-        databaseUserName = config().getString("databaseUserName");
-        databasePassword = config().getString("databasePassword");
-        poolSize = config().getInteger("poolSize");
+  @Override
+  public void start() throws Exception {
+    databaseIP = config().getString("databaseIp");
+    databasePort = config().getInteger("databasePort");
+    databaseName = config().getString("databaseName");
+    databaseUserName = config().getString("databaseUserName");
+    databasePassword = config().getString("databasePassword");
+    poolSize = config().getInteger("poolSize");
 
-        this.connectOptions =
-                new PgConnectOptions()
-                        .setPort(databasePort)
-                        .setHost(databaseIP)
-                        .setDatabase(databaseName)
-                        .setUser(databaseUserName)
-                        .setPassword(databasePassword)
-                        .setReconnectAttempts(2)
-                        .setReconnectInterval(1000);
+    this.connectOptions =
+        new PgConnectOptions()
+            .setPort(databasePort)
+            .setHost(databaseIP)
+            .setDatabase(databaseName)
+            .setUser(databaseUserName)
+            .setPassword(databasePassword)
+            .setReconnectAttempts(2)
+            .setReconnectInterval(1000);
 
-        this.poolOptions = new PoolOptions().setMaxSize(poolSize);
-        this.pool = PgPool.pool(vertx, connectOptions, poolOptions);
+    this.poolOptions = new PoolOptions().setMaxSize(poolSize);
+    this.pool = PgPool.pool(vertx, connectOptions, poolOptions);
 
-        pgService = new PostgresServiceImpl(this.pool);
+    pgService = new PostgresServiceImpl(this.pool);
 
-        binder = new ServiceBinder(vertx);
-        consumer = binder.setAddress(PG_SERVICE_ADDRESS).register(PostgresService.class, pgService);
+    binder = new ServiceBinder(vertx);
+    consumer = binder.setAddress(PG_SERVICE_ADDRESS).register(PostgresService.class, pgService);
 
-        LOGGER.info("Postgres Verticle deployed.");
-    }
+    LOGGER.info("Postgres Verticle deployed.");
+  }
 }
