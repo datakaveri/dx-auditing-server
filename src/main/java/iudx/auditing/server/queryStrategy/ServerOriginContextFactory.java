@@ -3,17 +3,17 @@ package iudx.auditing.server.queryStrategy;
 import io.vertx.core.json.JsonObject;
 
 public class ServerOriginContextFactory {
-  private final ServerStrategy resourceServerStrategy;
-  private final ServerStrategy catalogueServerStrategy;
-  private final ServerStrategy authServerStrategy;
+  private final AuditingServerStrategy resourceServerStrategy;
+  private final AuditingServerStrategy catalogueServerStrategy;
+  private final AuditingServerStrategy authServerStrategy;
 
   public ServerOriginContextFactory(JsonObject config) {
-    this.resourceServerStrategy = new ResourceStrategy(config);
-    this.catalogueServerStrategy = new CatalogueStrategy(config);
-    this.authServerStrategy = new AuthStrategy(config);
+    this.resourceServerStrategy = new ResourceAuditingStrategy(config);
+    this.catalogueServerStrategy = new CatalogueAuditingStrategy(config);
+    this.authServerStrategy = new AuthAuditingStrategy(config);
   }
 
-  public ServerStrategy create(ServerOrigin serverOrigin) {
+  public AuditingServerStrategy create(ServerOrigin serverOrigin) {
     switch (serverOrigin) {
       case RS_SERVER:
         {

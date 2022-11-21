@@ -14,10 +14,10 @@ import static javax.xml.transform.OutputKeys.METHOD;
 
 import io.vertx.core.json.JsonObject;
 
-public class AuthStrategy implements ServerStrategy {
+public class AuthAuditingStrategy implements AuditingServerStrategy {
   JsonObject config;
 
-  AuthStrategy(JsonObject config) {
+  AuthAuditingStrategy(JsonObject config) {
     this.config = config;
   }
 

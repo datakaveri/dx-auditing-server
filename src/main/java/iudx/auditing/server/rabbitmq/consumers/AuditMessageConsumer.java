@@ -24,7 +24,7 @@ public class AuditMessageConsumer implements IConsumer {
   private final Vertx vertx;
 
   private final QueueOptions options =
-      new QueueOptions().setKeepMostRecent(true).setMaxInternalQueueSize(10000).setAutoAck(false);
+      new QueueOptions().setKeepMostRecent(true).setMaxInternalQueueSize(100).setAutoAck(false);
 
   public AuditMessageConsumer(
       Vertx vertx, RabbitMQOptions options, MessageProcessService msgService) {
@@ -39,45 +39,33 @@ public class AuditMessageConsumer implements IConsumer {
   }
 
   private void consume() {
-    client
-        .start()
-        .onSuccess(
-            successHandler -> {
-              client.basicConsumer(
-                  AUDIT_LATEST_QUEUE,
-                  options,
-                  receiveResultHandler -> {
-                    if (receiveResultHandler.succeeded()) {
-                      RabbitMQConsumer mqConsumer = receiveResultHandler.result();
-                      mqConsumer.handler(
-                          message -> {
-                            mqConsumer.pause();
-                            LOGGER.debug("message consumption paused.");
-                            long deliveryTag = message.envelope().getDeliveryTag();
-                            JsonObject request =
-                                message.body().toJsonObject().put(DELIVERY_TAG, deliveryTag);
-                            Future<JsonObject> processResult = msgService.process(request);
-                            processResult.onComplete(
-                                handler -> {
-                                  if (handler.succeeded()) {
-                                    LOGGER.debug(
-                                        "Latest message published in databases ");
-                                    client.basicAck(handler.result().getLong(DELIVERY_TAG), false);
-                                    mqConsumer.resume();
-                                    LOGGER.debug("message consumption resumed");
-                                  } else {
-                                    LOGGER.error("Error while publishing messages for processing");
-                                    mqConsumer.resume();
-                                    LOGGER.debug("message consumption resumed");
-                                  }
-                                });
-                          });
-                    }
-                  });
-            })
-        .onFailure(
-            failureHandler -> {
-              LOGGER.fatal("Rabbit client startup failed for Latest message Q consumer.");
+    client.start().onSuccess(successHandler -> {
+      client.basicConsumer(AUDIT_LATEST_QUEUE, options, receiveResultHandler -> {
+        if (receiveResultHandler.succeeded()) {
+          RabbitMQConsumer mqConsumer = receiveResultHandler.result();
+          mqConsumer.handler(message -> {
+            mqConsumer.pause();
+            LOGGER.debug("message consumption paused.");
+            long deliveryTag = message.envelope().getDeliveryTag();
+            JsonObject request = message.body().toJsonObject().put(DELIVERY_TAG, deliveryTag);
+            Future<JsonObject> processResult = msgService.process(request);
+            processResult.onComplete(handler -> {
+              if (handler.succeeded()) {
+                LOGGER.debug("Latest message published in databases ");
+                client.basicAck(handler.result().getLong(DELIVERY_TAG), false);
+                mqConsumer.resume();
+                LOGGER.debug("message consumption resumed");
+              } else {
+                LOGGER.error("Error while publishing messages for processing");
+                mqConsumer.resume();
+                LOGGER.debug("message consumption resumed");
+              }
             });
+          });
+        }
+      });
+    }).onFailure(failureHandler -> {
+      LOGGER.fatal("Rabbit client startup failed for Latest message Q consumer.");
+    });
   }
 }
