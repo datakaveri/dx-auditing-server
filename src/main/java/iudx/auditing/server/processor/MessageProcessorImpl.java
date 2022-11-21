@@ -1,6 +1,6 @@
 package iudx.auditing.server.processor;
 
-import static iudx.auditing.server.common.Constants.IMMUDB_DELETE_QUERY_KEY;
+import static iudx.auditing.server.common.Constants.IMMUDB_WRITE_QUERY;
 import static iudx.auditing.server.common.Constants.ORIGIN;
 import static iudx.auditing.server.common.Constants.PG_DELETE_QUERY_KEY;
 import static iudx.auditing.server.common.Constants.PG_INSERT_QUERY_KEY;
@@ -82,6 +82,6 @@ public class MessageProcessorImpl implements MessageProcessService {
     return new JsonObject()
         .put(PG_INSERT_QUERY_KEY, postgresWriteQuery)
         .put(PG_DELETE_QUERY_KEY, postgresDeleteQuery)
-        .put(IMMUDB_DELETE_QUERY_KEY, immudbWriteQuery);
+        .put(IMMUDB_WRITE_QUERY, immudbWriteQuery);
   }
 }

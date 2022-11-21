@@ -1,6 +1,6 @@
 package iudx.auditing.server.immudb;
 
-import static iudx.auditing.server.common.Constants.IMMUDB_DELETE_QUERY_KEY;
+import static iudx.auditing.server.common.Constants.IMMUDB_WRITE_QUERY;
 import static iudx.auditing.server.common.Constants.RESULT;
 
 import io.vertx.core.Future;
@@ -24,7 +24,7 @@ public class ImmudbServiceImpl implements ImmudbService {
     JsonObject response = new JsonObject();
     pgClient
         .withConnection(
-            connection -> connection.query(query.getString(IMMUDB_DELETE_QUERY_KEY)).execute())
+            connection -> connection.query(query.getString(IMMUDB_WRITE_QUERY)).execute())
         .onComplete(
             rows -> {
               if (rows.succeeded()) {

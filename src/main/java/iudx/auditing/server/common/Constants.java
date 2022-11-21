@@ -11,5 +11,5 @@ public class Constants {
   public static final String PG_SERVICE_ADDRESS = "iudx.auditing.postgres.service";
   public static final String PG_INSERT_QUERY_KEY = "postgresInsertQuery";
   public static final String PG_DELETE_QUERY_KEY = "postgresDeleteQuery";
-  public static final String IMMUDB_DELETE_QUERY_KEY = "postgresDeleteQuery";
+  public static final String IMMUDB_WRITE_QUERY = "immudbWriteQuery";
 }
