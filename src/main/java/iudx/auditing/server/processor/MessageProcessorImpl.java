@@ -13,7 +13,7 @@ import iudx.auditing.server.immudb.ImmudbService;
 import iudx.auditing.server.postgres.PostgresService;
 import iudx.auditing.server.queryStrategy.ServerOrigin;
 import iudx.auditing.server.queryStrategy.ServerOriginContextFactory;
-import iudx.auditing.server.queryStrategy.ServerStrategy;
+import iudx.auditing.server.queryStrategy.AuditingServerStrategy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,31 +42,27 @@ public class MessageProcessorImpl implements MessageProcessService {
     JsonObject queries = queryBuilder(message);
     Promise<JsonObject> promise = Promise.promise();
     Future<JsonObject> insertInPostgres = postgresService.executeWriteQuery(queries);
-    insertInPostgres
-        .onSuccess(
-            insertInImmudbHandler -> {
-              Future<JsonObject> insertInImmudb = immudbService.executeWriteQuery(queries);
-              insertInImmudb.onComplete(
-                  immudbHandler -> {
-                    if (insertInImmudb.succeeded()) {
-                      promise.complete(message);
-                    } else {
-                      Future<JsonObject> deleteFromPostgres =
-                          postgresService.executeDeleteQuery(queries);
-                      deleteFromPostgres.onSuccess(
-                          postgresHandler -> {
-                            if (deleteFromPostgres.succeeded()) {
-                              promise.fail(immudbHandler.cause().getMessage());
-                              LOGGER.info("success delete");
-                            }
-                          });
-                    }
-                  });
-            })
-        .onFailure(
-            failureHandler -> {
-              promise.fail("failed to insert in postgres " + failureHandler.getCause());
-            });
+    insertInPostgres.onSuccess(insertInImmudbHandler -> {
+      Future<JsonObject> insertInImmudb = immudbService.executeWriteQuery(queries);
+      insertInImmudb.onComplete(immudbHandler -> {
+        if (insertInImmudb.succeeded()) {
+          promise.complete(message);
+        } else {
+          Future<JsonObject> deleteFromPostgres = postgresService.executeDeleteQuery(queries);
+          deleteFromPostgres.onComplete(postgresHandler -> {
+            if (deleteFromPostgres.succeeded()) {
+              LOGGER.info("Rollback : success delete");
+              promise.fail(immudbHandler.cause().getMessage());
+            }else {
+              LOGGER.info("Rollback : delete failed");
+              promise.fail(immudbHandler.cause().getMessage());
+            }
+          });
+        }
+      });
+    }).onFailure(failureHandler -> {
+      promise.fail("failed to insert in postgres " + failureHandler.getCause());
+    });
 
     return promise.future();
   }
@@ -75,7 +71,7 @@ public class MessageProcessorImpl implements MessageProcessService {
     String origin = request.getString(ORIGIN);
     ServerOrigin serverOrigin = ServerOrigin.fromRole(origin);
     ServerOriginContextFactory serverOriginContextFactory = new ServerOriginContextFactory(config);
-    ServerStrategy serverStrategy = serverOriginContextFactory.create(serverOrigin);
+    AuditingServerStrategy serverStrategy = serverOriginContextFactory.create(serverOrigin);
     String postgresWriteQuery = serverStrategy.buildPostgresWriteQuery(request);
     String postgresDeleteQuery = serverStrategy.buildPostgresDeleteQuery(request);
     String immudbWriteQuery = serverStrategy.buildImmudbDeleteQuery(request);

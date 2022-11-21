@@ -15,10 +15,10 @@ import static iudx.auditing.server.queryStrategy.util.Constants.USER_ROLE;
 
 import io.vertx.core.json.JsonObject;
 
-public class CatalogueStrategy implements ServerStrategy {
+public class CatalogueAuditingStrategy implements AuditingServerStrategy {
   private final JsonObject config;
 
-  CatalogueStrategy(JsonObject config) {
+  CatalogueAuditingStrategy(JsonObject config) {
     this.config = config;
   }
 

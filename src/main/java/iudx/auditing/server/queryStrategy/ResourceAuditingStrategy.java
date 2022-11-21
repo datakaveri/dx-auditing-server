@@ -15,10 +15,10 @@ import static iudx.auditing.server.queryStrategy.util.Constants.USER_ID;
 
 import io.vertx.core.json.JsonObject;
 
-public class ResourceStrategy implements ServerStrategy {
+public class ResourceAuditingStrategy implements AuditingServerStrategy {
   private final JsonObject config;
 
-  public ResourceStrategy(JsonObject config) {
+  public ResourceAuditingStrategy(JsonObject config) {
     this.config = config;
   }
 
