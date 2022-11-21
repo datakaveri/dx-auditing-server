@@ -1,6 +1,5 @@
 package iudx.auditing.server.postgres;
 
-import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
@@ -12,13 +11,12 @@ import io.vertx.core.json.JsonObject;
 @ProxyGen
 public interface PostgresService {
 
+  Future<JsonObject> executeWriteQuery(final JsonObject query);
 
-    Future<JsonObject> executeWriteQuery(final JsonObject query);
+  Future<JsonObject> executeDeleteQuery(final JsonObject query);
 
-    Future<JsonObject> executeDeleteQuery(final JsonObject query);
-
-    @GenIgnore
-    static PostgresService createProxy(Vertx vertx, String address){
-        return new PostgresServiceVertxEBProxy(vertx, address);
-    }
+  @GenIgnore
+  static PostgresService createProxy(Vertx vertx, String address) {
+    return new PostgresServiceVertxEBProxy(vertx, address);
+  }
 }

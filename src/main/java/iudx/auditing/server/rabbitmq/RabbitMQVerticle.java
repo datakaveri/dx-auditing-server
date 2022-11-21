@@ -43,9 +43,6 @@ public class RabbitMQVerticle extends AbstractVerticle {
   private ServiceBinder binder;
   private MessageConsumer<JsonObject> consumer;
 
-  public RabbitMQVerticle() {
-  }
-
   @Override
   public void start() throws Exception {
 
@@ -73,7 +70,6 @@ public class RabbitMQVerticle extends AbstractVerticle {
     config.setRequestedChannelMax(requestedChannelMax);
     config.setNetworkRecoveryInterval(networkRecoveryInterval);
     config.setAutomaticRecoveryEnabled(true);
-
     webConfig = new WebClientOptions();
     webConfig.setKeepAlive(true);
     webConfig.setConnectTimeout(86400000);
@@ -91,7 +87,7 @@ public class RabbitMQVerticle extends AbstractVerticle {
     prodOptions.setVirtualHost(prodVhost);
     messageProcessService = MessageProcessService.createProxy(vertx, MSG_PROCESS_ADDRESS);
 
-    auditConsumer= new AuditMessageConsumer(vertx,internalVhostOptions,messageProcessService);
+    auditConsumer = new AuditMessageConsumer(vertx, internalVhostOptions, messageProcessService);
     auditConsumer.start();
     binder = new ServiceBinder(vertx);
 
