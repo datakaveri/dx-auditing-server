@@ -34,7 +34,7 @@ public class ImmudbServiceImpl implements ImmudbService {
               } else {
                 LOGGER.error("Info: failed :" + rows.cause());
                 response.put(RESULT, rows.cause());
-                promise.fail(rows.cause().getMessage());
+                promise.fail(rows.cause());
               }
             });
     return promise.future();

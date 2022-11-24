@@ -54,7 +54,7 @@
             <artifactId>vertx-junit5</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
+      <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>${junit-jupiter.version}</version>
@@ -66,6 +66,14 @@
             <version>${junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>5.7.0</version>
+            <scope>test</scope>
+        </dependency>
+
+
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-core</artifactId>
@@ -196,6 +204,17 @@
                         <jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
                     </systemPropertyVariables>
                     <excludes>
+                        <exclude>**/*VertxEBProxy.class</exclude>
+                        <exclude>**/*VertxProxyHandler.class</exclude>
+                        <exclude>**/*Verticle.class</exclude>
+                        <exclude>iudx/auditing/server/deploy/*.class</exclude>
+                        <exclude>iudx/auditing/server/common/Constants.class</exclude>
+                        <exclude>iudx/auditing/server/queryStrategy/util/*.class</exclude>
+                        <exclude>iudx/auditing/server/rabbitmq/*.class</exclude>
+                        <exclude>iudx/auditing/server/rabbitmq/consumers/*.class</exclude>
+                        <exclude>iudx/auditing/server/postgres/PostgresService.class</exclude>
+                        <exclude>iudx/auditing/server/immudb/ImmudbService.class</exclude>
+                        <exclude>iudx/auditing/server/processor/MessageProcessService.class</exclude>
                     </excludes>
                 </configuration>
             </plugin>
