@@ -26,6 +26,10 @@
         <maven-surefire-report-plugin.version>3.0.0-M7</maven-surefire-report-plugin.version>
         <vertx.version>4.3.4</vertx.version>
         <junit-jupiter.version>5.7.0</junit-jupiter.version>
+        <testcontainer.params>1.17.3</testcontainer.params>
+        <testcontainer-postgres.version>1.17.3</testcontainer-postgres.version>
+
+        <log4j2.version>2.17.1</log4j2.version>
 
         <main.verticle>iudx.auditing.server.MainVerticle</main.verticle>
         <launcher.class>io.vertx.core.Launcher</launcher.class>
@@ -67,6 +71,17 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>5.7.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-junit5</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-core</artifactId>
             <version>1.9.2</version>
@@ -102,6 +117,12 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
+            <version>2.17.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
             <version>2.17.1</version>
         </dependency>
         <dependency>
@@ -156,6 +177,37 @@
             <version>3.11.1</version>
             <scope>test</scope>
         </dependency>
+        <!-- test container dependency-->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testcontainer.params}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- test container dependency for JUnit5-->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${testcontainer.params}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- test container dependency for postgresql-->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${testcontainer.params}</version>
+            <scope>test</scope>
+        </dependency>
+        <!--<dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>2.0.0</version>
+        </dependency>-->
     </dependencies>
 
     <build>
