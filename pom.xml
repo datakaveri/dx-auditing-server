@@ -26,6 +26,7 @@
         <maven-surefire-report-plugin.version>3.0.0-M7</maven-surefire-report-plugin.version>
         <vertx.version>4.3.4</vertx.version>
         <junit-jupiter.version>5.7.0</junit-jupiter.version>
+        <micrometer.version>1.9.2</micrometer.version>
         <exec.mainClass>iudx.auditing.server.deploy.Deployer</exec.mainClass>
         <exec.mainClassDev>iudx.auditing.server.deploy.DeployerDev
         </exec.mainClassDev>
@@ -138,6 +139,11 @@
             <groupId>com.github.docker-java</groupId>
             <artifactId>docker-java-transport-zerodep</artifactId>
             <version>3.2.13</version>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <version>${micrometer.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
