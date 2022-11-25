@@ -1,4 +1,4 @@
-ARG VERSION="0.0.1-SNAPSHOT"
+ARG VERSION="1.0.0-SNAPSHOT"
 
 # Using maven base image in builder stage to build Java code.
 FROM maven:3-openjdk-11-slim as builder
@@ -18,18 +18,12 @@ ARG VERSION
 ENV JAR="iudx.auditing.server-cluster-${VERSION}-fat.jar"
 
 WORKDIR /usr/share/app
-# Copying openapi docs 
-COPY docs docs
 
 # Copying clustered fatjar from builder stage to final image
 COPY --from=builder /usr/share/app/target/${JAR} ./fatjar.jar
 
-EXPOSE 8080 8443
+EXPOSE 9000
 # Creating a non-root user
 RUN  useradd -r -u 1001 -g root audit-user
-# Create storage directory and owned by audit-user
-RUN mkdir -p /usr/share/app/storage/temp-dir && chown audit-user /usr/share/app/storage/temp-dir
-# hint for volume mount 
-VOLUME /usr/share/app/storage/temp-dir
 # Setting non-root user to use when container starts
 USER audit-user
