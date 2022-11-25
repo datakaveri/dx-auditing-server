@@ -29,8 +29,6 @@
         <exec.mainClass>iudx.auditing.server.deploy.Deployer</exec.mainClass>
         <exec.mainClassDev>iudx.auditing.server.deploy.DeployerDev
         </exec.mainClassDev>
-        <main.verticle>iudx.auditing.server.MainVerticle</main.verticle>
-        <launcher.class>io.vertx.core.Launcher</launcher.class>
     </properties>
 
     <dependencyManagement>
