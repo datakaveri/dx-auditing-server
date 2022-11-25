@@ -26,7 +26,9 @@
         <maven-surefire-report-plugin.version>3.0.0-M7</maven-surefire-report-plugin.version>
         <vertx.version>4.3.4</vertx.version>
         <junit-jupiter.version>5.7.0</junit-jupiter.version>
-
+        <exec.mainClass>iudx.auditing.server.deploy.Deployer</exec.mainClass>
+        <exec.mainClassDev>iudx.auditing.server.deploy.DeployerDev
+        </exec.mainClassDev>
         <main.verticle>iudx.auditing.server.MainVerticle</main.verticle>
         <launcher.class>io.vertx.core.Launcher</launcher.class>
     </properties>
