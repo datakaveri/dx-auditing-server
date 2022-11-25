@@ -24,7 +24,7 @@ public class AuditMessageConsumer implements IConsumer {
   private final Vertx vertx;
 
   private final QueueOptions options =
-      new QueueOptions().setKeepMostRecent(true).setMaxInternalQueueSize(100).setAutoAck(false);
+      new QueueOptions().setKeepMostRecent(true).setMaxInternalQueueSize(1000).setAutoAck(false);
 
   public AuditMessageConsumer(
       Vertx vertx, RabbitMQOptions options, MessageProcessService msgService) {
@@ -52,7 +52,7 @@ public class AuditMessageConsumer implements IConsumer {
             processResult.onComplete(handler -> {
               if (handler.succeeded()) {
                 LOGGER.debug("Latest message published in databases ");
-                client.basicAck(handler.result().getLong(DELIVERY_TAG), false);
+                client.basicAck(handler.result().getLong(DELIVERY_TAG), true);
                 mqConsumer.resume();
                 LOGGER.debug("message consumption resumed");
               } else {

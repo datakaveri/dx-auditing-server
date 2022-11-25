@@ -8,7 +8,6 @@ import static iudx.auditing.server.queryStrategy.util.Constants.BODY;
 import static iudx.auditing.server.queryStrategy.util.Constants.DELETE_QUERY;
 import static iudx.auditing.server.queryStrategy.util.Constants.EPOCH_TIME;
 import static iudx.auditing.server.queryStrategy.util.Constants.PRIMARY_KEY;
-import static iudx.auditing.server.queryStrategy.util.Constants.RS_PG_TABLE_NAME;
 import static iudx.auditing.server.queryStrategy.util.Constants.USER_ID;
 import static javax.xml.transform.OutputKeys.METHOD;
 
@@ -29,7 +28,7 @@ public class AuthAuditingStrategy implements AuditingServerStrategy {
     String methodName = request.getString(METHOD);
     long time = request.getLong(EPOCH_TIME);
     String userId = request.getString(USER_ID);
-    String databaseTableName = config.getString(RS_PG_TABLE_NAME);
+    String databaseTableName = config.getString(AUTH_PG_TABLE_NAME);
 
     return AUTH_WRITE_QUERY
         .replace("$0", databaseTableName)
