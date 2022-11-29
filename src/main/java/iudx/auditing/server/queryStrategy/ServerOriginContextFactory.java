@@ -27,6 +27,14 @@ public class ServerOriginContextFactory {
         {
           return authServerStrategy;
         }
+      case GIS_SERVER:
+        {
+          return resourceServerStrategy;
+        }
+      case DI_SERVER:
+        {
+          return resourceServerStrategy;
+        }
       default:
         throw new IllegalArgumentException(serverOrigin + "serverOrigin is not defined");
     }

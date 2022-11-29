@@ -55,7 +55,7 @@ public class MessageProcessorImpl implements MessageProcessService {
               promise.fail(immudbHandler.cause().getMessage());
             }else {
               LOGGER.info("Rollback : delete failed");
-              promise.fail(immudbHandler.cause().getMessage());
+              promise.fail(deleteFromPostgres.cause().getMessage());
             }
           });
         }
