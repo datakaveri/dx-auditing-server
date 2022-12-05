@@ -12,4 +12,16 @@ public class Constants {
   public static final String PG_INSERT_QUERY_KEY = "postgresInsertQuery";
   public static final String PG_DELETE_QUERY_KEY = "postgresDeleteQuery";
   public static final String IMMUDB_WRITE_QUERY = "immudbWriteQuery";
+
+  public static final String RS_SERVER ="rs-server";
+  public static final String CAT_SERVER ="cat-server";
+
+  public static final String AAA_SERVER ="auth-server";
+
+  public static final String FILE_SERVER ="file-server";
+
+  public static final String GIS_SERVER ="gis-server";
+
+  public static final String DI_SERVER ="data-ingestion";
+
 }

@@ -42,27 +42,34 @@ public class MessageProcessorImpl implements MessageProcessService {
     JsonObject queries = queryBuilder(message);
     Promise<JsonObject> promise = Promise.promise();
     Future<JsonObject> insertInPostgres = postgresService.executeWriteQuery(queries);
-    insertInPostgres.onSuccess(insertInImmudbHandler -> {
-      Future<JsonObject> insertInImmudb = immudbService.executeWriteQuery(queries);
-      insertInImmudb.onComplete(immudbHandler -> {
-        if (insertInImmudb.succeeded()) {
-          promise.complete(message);
-        } else {
-          Future<JsonObject> deleteFromPostgres = postgresService.executeDeleteQuery(queries);
-          deleteFromPostgres.onComplete(postgresHandler -> {
-            if (deleteFromPostgres.succeeded()) {
-              LOGGER.info("Rollback : success delete");
-              promise.fail(immudbHandler.cause().getMessage());
-            }else {
-              LOGGER.info("Rollback : delete failed");
-              promise.fail(deleteFromPostgres.cause().getMessage());
-            }
-          });
-        }
-      });
-    }).onFailure(failureHandler -> {
-      promise.fail("failed to insert in postgres " + failureHandler.getCause());
-    });
+    insertInPostgres
+        .onSuccess(
+            insertInImmudbHandler -> {
+              Future<JsonObject> insertInImmudb = immudbService.executeWriteQuery(queries);
+              insertInImmudb.onComplete(
+                  immudbHandler -> {
+                    if (insertInImmudb.succeeded()) {
+                      promise.complete(message);
+                    } else {
+                      Future<JsonObject> deleteFromPostgres =
+                          postgresService.executeDeleteQuery(queries);
+                      deleteFromPostgres.onComplete(
+                          postgresHandler -> {
+                            if (deleteFromPostgres.succeeded()) {
+                              LOGGER.info("Rollback : success delete");
+                              promise.fail(immudbHandler.cause().getMessage());
+                            } else {
+                              LOGGER.info("Rollback : delete failed");
+                              promise.fail(deleteFromPostgres.cause().getMessage());
+                            }
+                          });
+                    }
+                  });
+            })
+        .onFailure(
+            failureHandler -> {
+              promise.fail("failed to insert in postgres " + failureHandler.getCause());
+            });
 
     return promise.future();
   }
@@ -78,6 +85,7 @@ public class MessageProcessorImpl implements MessageProcessService {
     return new JsonObject()
         .put(PG_INSERT_QUERY_KEY, postgresWriteQuery)
         .put(PG_DELETE_QUERY_KEY, postgresDeleteQuery)
-        .put(IMMUDB_WRITE_QUERY, immudbWriteQuery);
+        .put(IMMUDB_WRITE_QUERY, immudbWriteQuery)
+        .put(ORIGIN, origin);
   }
 }

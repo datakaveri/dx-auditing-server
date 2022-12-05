@@ -16,7 +16,9 @@ public class ServerOriginContextFactory {
   public AuditingServerStrategy create(ServerOrigin serverOrigin) {
     switch (serverOrigin) {
       case RS_SERVER:
-        {
+      case DI_SERVER:
+      case GIS_SERVER:
+      case FILE_SERVER:{
           return resourceServerStrategy;
         }
       case CAT_SERVER:
@@ -26,14 +28,6 @@ public class ServerOriginContextFactory {
       case AAA_SERVER:
         {
           return authServerStrategy;
-        }
-      case GIS_SERVER:
-        {
-          return resourceServerStrategy;
-        }
-      case DI_SERVER:
-        {
-          return resourceServerStrategy;
         }
       default:
         throw new IllegalArgumentException(serverOrigin + "serverOrigin is not defined");

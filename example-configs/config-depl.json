@@ -47,12 +47,17 @@
       "id": "iudx.auditing.server.metering.MeteringVerticle",
       "isWorkerVerticle": false,
       "verticleInstances": 1,
-      "meteringDatabaseIP": "localhost",
+      "meteringDatabaseIP": "db-ip",
       "meteringDatabasePort": 1234,
-      "meteringDatabaseName": "db-name",
-      "meteringDatabaseUserName": "abcd",
-      "meteringDatabasePassword": "****",
-      "meteringDatabaseTableName": "1234db",
+      "meteringRSDatabaseName": "rs-db-name",
+      "meteringRSDatabaseUserName": "rs-db-userName",
+      "meteringRSDatabasePassword": "rs-db-password",
+      "meteringAAADatabaseName": "aaa-db-name",
+      "meteringAAADatabaseUserName": "aaa-db-userName",
+      "meteringAAADatabasePassword": "aaa-db-password",
+      "meteringCATDatabaseName": "cat-db-name",
+      "meteringCATDatabaseUserName": "cat-db-userName",
+      "meteringCATDatabasePassword": "cat-db-password",
       "meteringPoolSize": 25
     }
   ]
