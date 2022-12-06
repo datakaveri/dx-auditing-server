@@ -104,7 +104,7 @@ class MessageProcessorImplTest {
                 .put(METHOD, "method")
                 .put(EPOCH_TIME, 5000)
                 .put(USER_ID, "userid")
-                .put(CAT_PG_TABLE_NAME, "tableName");
+                .put(AUTH_PG_TABLE_NAME, "tableName");
 
         when(config.getString((anyString()))).thenReturn("tableName");
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
@@ -127,7 +127,7 @@ class MessageProcessorImplTest {
                 .put(METHOD, "method")
                 .put(EPOCH_TIME, 5000)
                 .put(USER_ID, "userid")
-                .put(CAT_PG_TABLE_NAME, "tableName");
+                .put(AUTH_IMMUDB_TABLE_NAME, "tableName");
 
         when(config.getString((anyString()))).thenReturn("tableName");
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
