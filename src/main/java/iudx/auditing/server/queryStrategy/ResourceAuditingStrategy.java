@@ -24,7 +24,6 @@ public class ResourceAuditingStrategy implements AuditingServerStrategy {
 
   @Override
   public String buildPostgresWriteQuery(JsonObject request) {
-
     String userId = request.getString(USER_ID);
     String primaryKey = request.getString(PRIMARY_KEY);
     String resourceId = request.getString(ID);

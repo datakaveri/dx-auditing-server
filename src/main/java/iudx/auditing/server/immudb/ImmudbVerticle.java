@@ -14,15 +14,30 @@ import org.apache.logging.log4j.Logger;
 
 public class ImmudbVerticle extends AbstractVerticle {
   private static final Logger LOGGER = LogManager.getLogger(ImmudbVerticle.class);
-  PgConnectOptions connectOptions;
+  PgConnectOptions connectOptionsForRS;
+  PgConnectOptions connectOptionsForAAA;
+  PgConnectOptions connectOptionsForCAT;
   PoolOptions poolOptions;
-  PgPool pool;
+  PgPool poolForRS;
+  PgPool poolForAAA;
+  PgPool poolForCAT;
   private String databaseIP;
   private int databasePort;
-  private String databaseName;
-  private String databaseTableName;
-  private String databaseUserName;
-  private String databasePassword;
+  private String databaseNameRS;
+
+  private String databaseUserNameRS;
+  private String databasePasswordRS;
+
+  private String databaseNameAAA;
+
+  private String databaseUserNameAAA;
+  private String databasePasswordAAA;
+
+  private String databaseNameCAT;
+
+  private String databaseUserNameCAT;
+  private String databasePasswordCAT;
+
   private int poolSize;
   private ServiceBinder binder;
   private MessageConsumer<JsonObject> consumer;
@@ -33,27 +48,56 @@ public class ImmudbVerticle extends AbstractVerticle {
 
     databaseIP = config().getString("meteringDatabaseIP");
     databasePort = config().getInteger("meteringDatabasePort");
-    databaseName = config().getString("meteringDatabaseName");
-    databaseUserName = config().getString("meteringDatabaseUserName");
-    databasePassword = config().getString("meteringDatabasePassword");
-    databaseTableName = config().getString("meteringDatabaseTableName");
     poolSize = config().getInteger("meteringPoolSize");
 
-    this.connectOptions =
+    databaseNameRS = config().getString("meteringRSDatabaseName");
+    databaseUserNameRS = config().getString("meteringRSDatabaseUserName");
+    databasePasswordRS = config().getString("meteringRSDatabasePassword");
+
+    databaseNameAAA = config().getString("meteringAAADatabaseName");
+    databaseUserNameAAA = config().getString("meteringAAADatabaseUserName");
+    databasePasswordAAA = config().getString("meteringAAADatabasePassword");
+
+    databaseNameCAT = config().getString("meteringCATDatabaseName");
+    databaseUserNameCAT = config().getString("meteringCATDatabaseUserName");
+    databasePasswordCAT = config().getString("meteringCATDatabasePassword");
+
+    this.connectOptionsForRS =
         new PgConnectOptions()
             .setPort(databasePort)
             .setHost(databaseIP)
-            .setDatabase(databaseName)
-            .setUser(databaseUserName)
-            .setPassword(databasePassword)
+            .setDatabase(databaseNameRS)
+            .setUser(databaseUserNameRS)
+            .setPassword(databasePasswordRS)
+            .setReconnectAttempts(2)
+            .setReconnectInterval(1000);
+
+    this.connectOptionsForAAA =
+        new PgConnectOptions()
+            .setPort(databasePort)
+            .setHost(databaseIP)
+            .setDatabase(databaseNameAAA)
+            .setUser(databaseUserNameAAA)
+            .setPassword(databasePasswordAAA)
+            .setReconnectAttempts(2)
+            .setReconnectInterval(1000);
+
+    this.connectOptionsForCAT =
+        new PgConnectOptions()
+            .setPort(databasePort)
+            .setHost(databaseIP)
+            .setDatabase(databaseNameCAT)
+            .setUser(databaseUserNameCAT)
+            .setPassword(databasePasswordCAT)
             .setReconnectAttempts(2)
             .setReconnectInterval(1000);
 
     this.poolOptions = new PoolOptions().setMaxSize(poolSize);
-    this.pool = PgPool.pool(vertx, connectOptions, poolOptions);
-
+    this.poolForRS = PgPool.pool(vertx, connectOptionsForRS, poolOptions);
+    this.poolForAAA = PgPool.pool(vertx, connectOptionsForAAA, poolOptions);
+    this.poolForCAT = PgPool.pool(vertx, connectOptionsForCAT, poolOptions);
     binder = new ServiceBinder(vertx);
-    immuDbService = new ImmudbServiceImpl(pool);
+    immuDbService = new ImmudbServiceImpl(poolForRS, poolForAAA, poolForCAT);
     consumer =
         binder.setAddress(IMMUDB_SERVICE_ADDRESS).register(ImmudbService.class, immuDbService);
     LOGGER.info("ImmudbVerticle Verticle Started");

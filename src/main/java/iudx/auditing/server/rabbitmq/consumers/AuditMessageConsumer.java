@@ -51,7 +51,7 @@ public class AuditMessageConsumer implements IConsumer {
             Future<JsonObject> processResult = msgService.process(request);
             processResult.onComplete(handler -> {
               if (handler.succeeded()) {
-                LOGGER.debug("Latest message published in databases ");
+                LOGGER.info("Latest message published in databases.");
                 client.basicAck(handler.result().getLong(DELIVERY_TAG), true);
                 mqConsumer.resume();
                 LOGGER.debug("message consumption resumed");

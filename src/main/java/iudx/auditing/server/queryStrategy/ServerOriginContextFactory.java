@@ -16,7 +16,9 @@ public class ServerOriginContextFactory {
   public AuditingServerStrategy create(ServerOrigin serverOrigin) {
     switch (serverOrigin) {
       case RS_SERVER:
-        {
+      case DI_SERVER:
+      case GIS_SERVER:
+      case FILE_SERVER:{
           return resourceServerStrategy;
         }
       case CAT_SERVER:
