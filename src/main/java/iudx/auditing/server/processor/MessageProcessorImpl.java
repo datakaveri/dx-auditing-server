@@ -78,6 +78,7 @@ public class MessageProcessorImpl implements MessageProcessService {
     return new JsonObject()
         .put(PG_INSERT_QUERY_KEY, postgresWriteQuery)
         .put(PG_DELETE_QUERY_KEY, postgresDeleteQuery)
-        .put(IMMUDB_WRITE_QUERY, immudbWriteQuery);
+        .put(IMMUDB_WRITE_QUERY, immudbWriteQuery)
+        .put(ORIGIN, origin);
   }
 }

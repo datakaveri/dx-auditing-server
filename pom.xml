@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project
+        xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>datakaveri.org</groupId>
@@ -31,10 +32,8 @@
         <vertx.version>4.3.4</vertx.version>
         <junit-jupiter.version>5.7.0</junit-jupiter.version>
         <exec.mainClass>iudx.auditing.server.deploy.Deployer</exec.mainClass>
-        <exec.mainClassDev>iudx.auditing.server.deploy.DeployerDev
-        </exec.mainClassDev>
+        <exec.mainClassDev>iudx.auditing.server.deploy.DeployerDev</exec.mainClassDev>
     </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -44,7 +43,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!--  log4j2 bom to keep org.apache.logging.log4j artifacts version in sync -->
+            <!--   log4j2 bom to keep org.apache.logging.log4j artifacts version in sync  -->
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-bom</artifactId>
@@ -54,7 +53,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>io.vertx</groupId>
@@ -65,7 +63,7 @@
             <artifactId>vertx-junit5</artifactId>
             <scope>test</scope>
         </dependency>
-      <dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>${junit-jupiter.version}</version>
@@ -76,52 +74,6 @@
             <artifactId>junit-jupiter-engine</artifactId>
             <version>${junit-jupiter.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
-            <version>5.7.0</version>
-            <scope>test</scope>
-        </dependency>
-
-
-        <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-core</artifactId>
-            <version>1.9.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.hazelcast</groupId>
-            <artifactId>hazelcast-zookeeper</artifactId>
-            <version>4.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.hazelcast</groupId>
-            <artifactId>hazelcast</artifactId>
-            <version>4.2.4</version>
-        </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-micrometer-metrics</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-hazelcast</artifactId>
-        </dependency>
-        <dependency>
-			<groupId>com.lmax</groupId>
-			<artifactId>disruptor</artifactId>
-			<version>${disruptor.version}</version>
-		</dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>2.17.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>2.17.1</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
@@ -153,7 +105,7 @@
             <artifactId>jackson-core-asl</artifactId>
             <version>1.9.13</version>
         </dependency>
-        <!-- Packages for Vertx metrics through micrometer  -->
+        <!--  Packages for Vertx metrics through micrometer   -->
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-micrometer-metrics</artifactId>
@@ -168,7 +120,7 @@
             <artifactId>micrometer-registry-prometheus</artifactId>
             <version>${micrometer.version}</version>
         </dependency>
-        <!-- Packages for Hazelcast clustering based on Zookeeper discovery -->
+        <!--  Packages for Hazelcast clustering based on Zookeeper discovery  -->
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-hazelcast</artifactId>
@@ -183,8 +135,8 @@
             <artifactId>curator-x-discovery</artifactId>
             <version>${curator.version}</version>
         </dependency>
-        <!--  -->
-        <!-- log4j2 logging dependencies-->
+        <!--    -->
+        <!--  log4j2 logging dependencies -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
@@ -193,12 +145,63 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
         </dependency>
-        <!-- slf4j to log4j2 bridge adapter, needed for 'io.netty' logs -->
+        <!--  slf4j to log4j2 bridge adapter, needed for 'io.netty' logs  -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
         </dependency>
-        <!--LMAX Disruptor for enabling Asynchronous log4j2 Logging  -->
+        <!-- LMAX Disruptor for enabling Asynchronous log4j2 Logging   -->
+        <dependency>
+            <groupId>com.lmax</groupId>
+            <artifactId>disruptor</artifactId>
+            <version>${lmax-disruptor.version}</version>
+        </dependency>
+        <!--  Packages for Vertx metrics through micrometer   -->
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-micrometer-metrics</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+            <version>${micrometer.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <version>${micrometer.version}</version>
+        </dependency>
+        <!--  Packages for Hazelcast clustering based on Zookeeper discovery  -->
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-hazelcast</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast-zookeeper</artifactId>
+            <version>${hazelcast.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-x-discovery</artifactId>
+            <version>${curator.version}</version>
+        </dependency>
+        <!--    -->
+        <!--  log4j2 logging dependencies -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+        <!--  slf4j to log4j2 bridge adapter, needed for 'io.netty' logs  -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+        </dependency>
+        <!-- LMAX Disruptor for enabling Asynchronous log4j2 Logging   -->
         <dependency>
             <groupId>com.lmax</groupId>
             <artifactId>disruptor</artifactId>
@@ -227,10 +230,8 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
-
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -265,22 +266,9 @@
                     <systemPropertyVariables>
                         <jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
                     </systemPropertyVariables>
-                    <excludes>
-                        <exclude>**/*VertxEBProxy.class</exclude>
-                        <exclude>**/*VertxProxyHandler.class</exclude>
-                        <exclude>**/*Verticle.class</exclude>
-                        <exclude>iudx/auditing/server/deploy/*.class</exclude>
-                        <exclude>iudx/auditing/server/common/Constants.class</exclude>
-                        <exclude>iudx/auditing/server/queryStrategy/util/*.class</exclude>
-                        <exclude>iudx/auditing/server/rabbitmq/*.class</exclude>
-                        <exclude>iudx/auditing/server/rabbitmq/consumers/*.class</exclude>
-                        <exclude>iudx/auditing/server/postgres/PostgresService.class</exclude>
-                        <exclude>iudx/auditing/server/immudb/ImmudbService.class</exclude>
-                        <exclude>iudx/auditing/server/processor/MessageProcessService.class</exclude>
-                    </excludes>
+                    <excludes></excludes>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -293,7 +281,7 @@
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <!-- <violationSeverity>warning</violationSeverity> -->
+                    <!--  <violationSeverity>warning</violationSeverity>  -->
                     <consoleOutput>true</consoleOutput>
                     <encoding>UTF-8</encoding>
                     <configLocation>google_checks.xml</configLocation>
@@ -334,14 +322,13 @@
                                 </transformer>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/services/io.vertx.core.spi.VerticleFactory
-                                    </resource>
-                                    <resource>META-INF/services/io.vertx.core.spi.VertxServiceProvider
-                                    </resource>
+                                    <resource>META-INF/services/io.vertx.core.spi.VerticleFactory</resource>
+                                    <resource>META-INF/services/io.vertx.core.spi.VertxServiceProvider</resource>
                                 </transformer>
                             </transformers>
-                            <artifactSet></artifactSet>
-                            <outputFile>${project.build.directory}/${project.artifactId}-dev-${project.version}-fat.jar
+                            <artifactSet/>
+                            <outputFile>
+                                ${project.build.directory}/${project.artifactId}-dev-${project.version}-fat.jar
                             </outputFile>
                         </configuration>
                     </execution>
@@ -372,13 +359,11 @@
                                 </transformer>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/services/io.vertx.core.spi.VerticleFactory
-                                    </resource>
-                                    <resource>META-INF/services/io.vertx.core.spi.VertxServiceProvider
-                                    </resource>
+                                    <resource>META-INF/services/io.vertx.core.spi.VerticleFactory</resource>
+                                    <resource>META-INF/services/io.vertx.core.spi.VertxServiceProvider</resource>
                                 </transformer>
                             </transformers>
-                            <artifactSet></artifactSet>
+                            <artifactSet/>
                             <outputFile>
                                 ${project.build.directory}/${project.artifactId}-cluster-${project.version}-fat.jar
                             </outputFile>
@@ -406,7 +391,8 @@
                             <mainClass>iudx.auditing.server.deploy.DeployerDev</mainClass>
                             <arguments>
                                 <argument>-jar</argument>
-                                <argument>{project.build.directory}/${project.artifactId}-dev-${project.version}-fat.jar
+                                <argument>
+                                    {project.build.directory}/${project.artifactId}-dev-${project.version}-fat.jar
                                 </argument>
                                 <argument>-c</argument>
                                 <argument>./secrets/all-verticles-configs/config-dev.json</argument>
@@ -434,7 +420,6 @@
             </plugin>
         </plugins>
     </build>
-
     <reporting>
         <plugins>
             <plugin>
@@ -462,7 +447,6 @@
                     <configLocation>google_checks.xml</configLocation>
                     <failOnViolation>false</failOnViolation>
                 </configuration>
-
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -483,8 +467,6 @@
                     </reportSet>
                 </reportSets>
             </plugin>
-
         </plugins>
     </reporting>
-
 </project>

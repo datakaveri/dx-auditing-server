@@ -7,7 +7,8 @@ public enum ServerOrigin {
   CAT_SERVER("cat-server"),
   AAA_SERVER("auth-server"),
   FILE_SERVER("file-server"),
-  GIS_SERVER("gis-server");
+  GIS_SERVER("gis-server"),
+  DI_SERVER("data-ingestion");
 
   private final String originRole;
 
