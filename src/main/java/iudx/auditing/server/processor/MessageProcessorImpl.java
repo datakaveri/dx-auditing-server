@@ -56,7 +56,7 @@ public class MessageProcessorImpl implements MessageProcessService {
                       deleteFromPostgres.onComplete(
                           postgresHandler -> {
                             if (deleteFromPostgres.succeeded()) {
-                              LOGGER.info("Rollback : success delete");
+                              LOGGER.error("Rollback : success delete. Message Origin: {}",message.getString(ORIGIN));
                               promise.fail(immudbHandler.cause().getMessage());
                             } else {
                               LOGGER.info("Rollback : delete failed");

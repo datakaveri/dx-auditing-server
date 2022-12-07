@@ -56,7 +56,7 @@ public class AuditMessageConsumer implements IConsumer {
                 mqConsumer.resume();
                 LOGGER.debug("message consumption resumed");
               } else {
-                LOGGER.error("Error while publishing messages for processing");
+                LOGGER.error("Error while publishing messages for processing "+handler.result());
                 mqConsumer.resume();
                 LOGGER.debug("message consumption resumed");
               }
