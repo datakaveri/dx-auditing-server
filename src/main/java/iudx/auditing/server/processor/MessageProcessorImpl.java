@@ -70,7 +70,6 @@ public class MessageProcessorImpl implements MessageProcessService {
             failureHandler -> {
               promise.fail("failed to insert in postgres " + failureHandler.getCause());
             });
-
     return promise.future();
   }
 
