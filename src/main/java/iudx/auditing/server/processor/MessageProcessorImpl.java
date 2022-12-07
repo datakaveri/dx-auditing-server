@@ -42,28 +42,34 @@ public class MessageProcessorImpl implements MessageProcessService {
     JsonObject queries = queryBuilder(message);
     Promise<JsonObject> promise = Promise.promise();
     Future<JsonObject> insertInPostgres = postgresService.executeWriteQuery(queries);
-    insertInPostgres.onSuccess(insertInImmudbHandler -> {
-      Future<JsonObject> insertInImmudb = immudbService.executeWriteQuery(queries);
-      insertInImmudb.onComplete(immudbHandler -> {
-        if (insertInImmudb.succeeded()) {
-          promise.complete(message);
-        } else {
-          Future<JsonObject> deleteFromPostgres = postgresService.executeDeleteQuery(queries);
-          deleteFromPostgres.onComplete(postgresHandler -> {
-            if (deleteFromPostgres.succeeded()) {
-              LOGGER.info("Rollback : success delete");
-              promise.fail(immudbHandler.cause().getMessage());
-            }else {
-              LOGGER.info("Rollback : delete failed");
-              promise.fail(postgresHandler.cause().getMessage());
-            }
-          });
-        }
-      });
-    }).onFailure(failureHandler -> {
-      promise.fail("failed to insert in postgres " + failureHandler.getCause());
-    });
-
+    insertInPostgres
+        .onSuccess(
+            insertInImmudbHandler -> {
+              Future<JsonObject> insertInImmudb = immudbService.executeWriteQuery(queries);
+              insertInImmudb.onComplete(
+                  immudbHandler -> {
+                    if (insertInImmudb.succeeded()) {
+                      promise.complete(message);
+                    } else {
+                      Future<JsonObject> deleteFromPostgres =
+                          postgresService.executeDeleteQuery(queries);
+                      deleteFromPostgres.onComplete(
+                          postgresHandler -> {
+                            if (deleteFromPostgres.succeeded()) {
+                              LOGGER.error("Rollback : success delete. Message Origin: {}",message.getString(ORIGIN));
+                              promise.fail(immudbHandler.cause().getMessage());
+                            } else {
+                              LOGGER.info("Rollback : delete failed");
+                              promise.fail(deleteFromPostgres.cause().getMessage());
+                            }
+                          });
+                    }
+                  });
+            })
+        .onFailure(
+            failureHandler -> {
+              promise.fail("failed to insert in postgres " + failureHandler.getCause());
+            });
     return promise.future();
   }
 
