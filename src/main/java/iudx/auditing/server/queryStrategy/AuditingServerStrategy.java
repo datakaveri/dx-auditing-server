@@ -7,5 +7,5 @@ public interface AuditingServerStrategy {
 
   String buildPostgresDeleteQuery(JsonObject request);
 
-  String buildImmudbDeleteQuery(JsonObject request);
+  String buildImmudbWriteQuery(JsonObject request);
 }

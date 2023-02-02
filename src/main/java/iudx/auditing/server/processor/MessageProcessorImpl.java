@@ -80,7 +80,7 @@ public class MessageProcessorImpl implements MessageProcessService {
     AuditingServerStrategy serverStrategy = serverOriginContextFactory.create(serverOrigin);
     String postgresWriteQuery = serverStrategy.buildPostgresWriteQuery(request);
     String postgresDeleteQuery = serverStrategy.buildPostgresDeleteQuery(request);
-    String immudbWriteQuery = serverStrategy.buildImmudbDeleteQuery(request);
+    String immudbWriteQuery = serverStrategy.buildImmudbWriteQuery(request);
     return new JsonObject()
         .put(PG_INSERT_QUERY_KEY, postgresWriteQuery)
         .put(PG_DELETE_QUERY_KEY, postgresDeleteQuery)
