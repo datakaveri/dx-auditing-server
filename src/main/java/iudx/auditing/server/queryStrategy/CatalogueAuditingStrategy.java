@@ -55,7 +55,7 @@ public class CatalogueAuditingStrategy implements AuditingServerStrategy {
   }
 
   @Override
-  public String buildImmudbDeleteQuery(JsonObject request) {
+  public String buildImmudbWriteQuery(JsonObject request) {
     String primaryKey = request.getString(PRIMARY_KEY);
     String userRole = request.getString(USER_ROLE);
     String userId = request.getString(USER_ID);

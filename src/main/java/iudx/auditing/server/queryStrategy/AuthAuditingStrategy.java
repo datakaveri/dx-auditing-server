@@ -49,7 +49,7 @@ public class AuthAuditingStrategy implements AuditingServerStrategy {
   }
 
   @Override
-  public String buildImmudbDeleteQuery(JsonObject request) {
+  public String buildImmudbWriteQuery(JsonObject request) {
     String primaryKey = request.getString(PRIMARY_KEY);
     String body = request.getJsonObject(BODY).toString();
     String endPoint = request.getString(API);

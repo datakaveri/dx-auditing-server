@@ -55,7 +55,7 @@ public class ResourceAuditingStrategy implements AuditingServerStrategy {
   }
 
   @Override
-  public String buildImmudbDeleteQuery(JsonObject request) {
+  public String buildImmudbWriteQuery(JsonObject request) {
     String userId = request.getString(USER_ID);
     String primaryKey = request.getString(PRIMARY_KEY);
     String resourceId = request.getString(ID);
