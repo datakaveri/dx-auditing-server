@@ -1,14 +1,6 @@
 package iudx.auditing.server.queryStrategy;
 
-import static iudx.auditing.server.queryStrategy.util.Constants.API;
-import static iudx.auditing.server.queryStrategy.util.Constants.AUTH_IMMUDB_TABLE_NAME;
-import static iudx.auditing.server.queryStrategy.util.Constants.AUTH_PG_TABLE_NAME;
-import static iudx.auditing.server.queryStrategy.util.Constants.AUTH_WRITE_QUERY;
-import static iudx.auditing.server.queryStrategy.util.Constants.BODY;
-import static iudx.auditing.server.queryStrategy.util.Constants.DELETE_QUERY;
-import static iudx.auditing.server.queryStrategy.util.Constants.EPOCH_TIME;
-import static iudx.auditing.server.queryStrategy.util.Constants.PRIMARY_KEY;
-import static iudx.auditing.server.queryStrategy.util.Constants.USER_ID;
+import static iudx.auditing.server.queryStrategy.util.Constants.*;
 import static javax.xml.transform.OutputKeys.METHOD;
 
 import io.vertx.core.json.JsonObject;
@@ -30,7 +22,7 @@ public class AuthAuditingStrategy implements AuditingServerStrategy {
     String userId = request.getString(USER_ID);
     String databaseTableName = config.getString(AUTH_PG_TABLE_NAME);
 
-    return AUTH_WRITE_QUERY
+    return AUTH_WRITE_QUERY_PG
         .replace("$0", databaseTableName)
         .replace("$1", primaryKey)
         .replace("$2", body)
@@ -58,7 +50,7 @@ public class AuthAuditingStrategy implements AuditingServerStrategy {
     String userId = request.getString(USER_ID);
     String databaseTableName = config.getString(AUTH_IMMUDB_TABLE_NAME);
 
-    return AUTH_WRITE_QUERY
+    return AUTH_WRITE_QUERY_IMMUDB
         .replace("$0", databaseTableName)
         .replace("$1", primaryKey)
         .replace("$2", body)

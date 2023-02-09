@@ -1,19 +1,8 @@
 package iudx.auditing.server.queryStrategy;
 
-import static iudx.auditing.server.queryStrategy.util.Constants.API;
-import static iudx.auditing.server.queryStrategy.util.Constants.CAT_IMMUDB_TABLE_NAME;
-import static iudx.auditing.server.queryStrategy.util.Constants.CAT_PG_TABLE_NAME;
-import static iudx.auditing.server.queryStrategy.util.Constants.CAT_WRITE_QUERY;
-import static iudx.auditing.server.queryStrategy.util.Constants.DELETE_QUERY;
-import static iudx.auditing.server.queryStrategy.util.Constants.EPOCH_TIME;
-import static iudx.auditing.server.queryStrategy.util.Constants.HTTP_METHOD;
-import static iudx.auditing.server.queryStrategy.util.Constants.IID;
-import static iudx.auditing.server.queryStrategy.util.Constants.IUDX_ID;
-import static iudx.auditing.server.queryStrategy.util.Constants.PRIMARY_KEY;
-import static iudx.auditing.server.queryStrategy.util.Constants.USER_ID;
-import static iudx.auditing.server.queryStrategy.util.Constants.USER_ROLE;
-
 import io.vertx.core.json.JsonObject;
+
+import static iudx.auditing.server.queryStrategy.util.Constants.*;
 
 public class CatalogueAuditingStrategy implements AuditingServerStrategy {
   private final JsonObject config;
@@ -34,7 +23,7 @@ public class CatalogueAuditingStrategy implements AuditingServerStrategy {
     String databaseTableName = config.getString(CAT_PG_TABLE_NAME);
     long time = request.getLong(EPOCH_TIME);
 
-    return CAT_WRITE_QUERY
+    return CAT_WRITE_QUERY_PG
         .replace("$0", databaseTableName)
         .replace("$1", primaryKey)
         .replace("$2", userRole)
@@ -66,7 +55,7 @@ public class CatalogueAuditingStrategy implements AuditingServerStrategy {
     String databaseTableName = config.getString(CAT_IMMUDB_TABLE_NAME);
     long time = request.getLong(EPOCH_TIME);
 
-    return CAT_WRITE_QUERY
+    return CAT_WRITE_QUERY_IMMUDB
         .replace("$0", databaseTableName)
         .replace("$1", primaryKey)
         .replace("$2", userRole)
