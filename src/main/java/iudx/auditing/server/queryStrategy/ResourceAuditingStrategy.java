@@ -1,19 +1,12 @@
 package iudx.auditing.server.queryStrategy;
 
-import static iudx.auditing.server.queryStrategy.util.Constants.API;
-import static iudx.auditing.server.queryStrategy.util.Constants.DELETE_QUERY;
-import static iudx.auditing.server.queryStrategy.util.Constants.EPOCH_TIME;
-import static iudx.auditing.server.queryStrategy.util.Constants.ID;
-import static iudx.auditing.server.queryStrategy.util.Constants.ISO_TIME;
-import static iudx.auditing.server.queryStrategy.util.Constants.PRIMARY_KEY;
-import static iudx.auditing.server.queryStrategy.util.Constants.PROVIDER_ID;
-import static iudx.auditing.server.queryStrategy.util.Constants.RS_IMMUDB_TABLE_NAME;
-import static iudx.auditing.server.queryStrategy.util.Constants.RS_PG_TABLE_NAME;
-import static iudx.auditing.server.queryStrategy.util.Constants.RS_WRITE_QUERY;
-import static iudx.auditing.server.queryStrategy.util.Constants.SIZE;
-import static iudx.auditing.server.queryStrategy.util.Constants.USER_ID;
-
 import io.vertx.core.json.JsonObject;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
+import static iudx.auditing.server.queryStrategy.util.Constants.*;
 
 public class ResourceAuditingStrategy implements AuditingServerStrategy {
   private final JsonObject config;
@@ -34,16 +27,25 @@ public class ResourceAuditingStrategy implements AuditingServerStrategy {
     long response_size = request.getLong(SIZE);
     String databaseTableName = config.getString(RS_PG_TABLE_NAME);
 
-    return RS_WRITE_QUERY
-        .replace("$0", databaseTableName)
-        .replace("$1", primaryKey)
-        .replace("$2", api)
-        .replace("$3", userId)
-        .replace("$4", Long.toString(time))
-        .replace("$5", resourceId)
-        .replace("$6", isoTime)
-        .replace("$7", providerID)
-        .replace("$8", Long.toString(response_size));
+    ZonedDateTime zonedDateTime = ZonedDateTime.parse(isoTime);
+    zonedDateTime= zonedDateTime.withZoneSameInstant(ZoneId.of("UTC"));
+
+    LocalDateTime utcTime = zonedDateTime.toLocalDateTime();
+    //In case we need T and Z in UTC
+    /*Timestamp timestamp = Timestamp.valueOf(zonedDateTime.toLocalDateTime());
+    String utcTime = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'").format(timestamp);*/
+
+    return RS_WRITE_QUERY_PG
+            .replace("$0", databaseTableName)
+            .replace("$1", primaryKey)
+            .replace("$2", api)
+            .replace("$3", userId)
+            .replace("$4", Long.toString(time))
+            .replace("$5", resourceId)
+            .replace("$6", isoTime)
+            .replace("$7", providerID)
+            .replace("$8", Long.toString(response_size))
+            .replace("$9", utcTime.toString());
   }
 
   @Override
@@ -66,7 +68,7 @@ public class ResourceAuditingStrategy implements AuditingServerStrategy {
     long response_size = request.getLong(SIZE);
     String databaseTableName = config.getString(RS_IMMUDB_TABLE_NAME);
 
-    return RS_WRITE_QUERY
+    return RS_WRITE_QUERY_IMMUDB
         .replace("$0", databaseTableName)
         .replace("$1", primaryKey)
         .replace("$2", api)

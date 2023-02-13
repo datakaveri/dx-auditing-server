@@ -17,6 +17,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
+import static iudx.auditing.server.common.Constants.ORIGIN;
 import static iudx.auditing.server.common.Constants.RESULT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -31,16 +32,16 @@ class ImmudbServiceImplTest {
     @BeforeAll
     static void setup(VertxTestContext vertxTestContext) {
         pgClient = mock(PgPool.class);
-        immudbService = new ImmudbServiceImpl(pgClient);
+        immudbService = new ImmudbServiceImpl(pgClient,pgClient,pgClient);
         vertxTestContext.completeNow();
     }
 
     @Test
     void testExecuteWriteQuery4Failure(VertxTestContext vertxTestContext) {
-        JsonObject query = mock(JsonObject.class);
+
+        JsonObject query = new JsonObject().put(ORIGIN,"cat-server");
         Future future = mock(Future.class);
         AsyncResult<?> asyncruslt = mock(AsyncResult.class);
-
         when(pgClient.withConnection(any())).thenReturn(future);
 
         doAnswer(new Answer<AsyncResult<?>>() {
@@ -57,7 +58,8 @@ class ImmudbServiceImplTest {
 
     @Test
     void testExecuteWriteQuery4Sucess(VertxTestContext vertxTestContext) {
-        JsonObject query = mock(JsonObject.class);
+
+        JsonObject query = new JsonObject().put(ORIGIN,"cat-server");
         Future future = mock(Future.class);
         SqlClient sqlClient = mock(SqlClient.class);
         AsyncResult<?> asyncruslt = mock(AsyncResult.class);
@@ -73,7 +75,6 @@ class ImmudbServiceImplTest {
                 return null;
             }
         }).when(future).onComplete(any());
-
 
         Future<JsonObject> resultJosn = immudbService.executeWriteQuery(query);
         assertEquals(resultJosn.result().getString(RESULT), "Table Updated Successfully");
