@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MAJOR_RELEASE=4
+MAJOR_RELEASE=1
 MINOR_RELEASE=5
 PATCH_RELEASE=0-alpha
 COMMIT_ID=`git log -1 --pretty=%h` # last commit-id in short form
