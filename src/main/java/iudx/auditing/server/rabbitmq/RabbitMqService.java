@@ -7,10 +7,10 @@ import io.vertx.core.Vertx;
 
 @VertxGen
 @ProxyGen
-public interface RabbitMQService {
+public interface RabbitMqService {
 
   @GenIgnore
-  static RabbitMQService createProxy(Vertx vertx, String address) {
-    return new RabbitMQServiceVertxEBProxy(vertx, address);
+  static RabbitMqService createProxy(Vertx vertx, String address) {
+    return new RabbitMqServiceVertxEBProxy(vertx, address);
   }
 }

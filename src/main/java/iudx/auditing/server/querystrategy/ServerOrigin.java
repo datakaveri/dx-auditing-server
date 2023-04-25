@@ -1,4 +1,4 @@
-package iudx.auditing.server.queryStrategy;
+package iudx.auditing.server.querystrategy;
 
 import java.util.stream.Stream;
 

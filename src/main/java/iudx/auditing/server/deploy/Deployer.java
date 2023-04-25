@@ -41,6 +41,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
+/** The Deployer class is responsible for deploying applications to a target environment. */
 public class Deployer {
   private static final Logger LOGGER = LogManager.getLogger(Deployer.class);
   private static ClusterManager mgr;
@@ -55,8 +56,7 @@ public class Deployer {
    *   <li>--hostname/-i : the hostname for clustering
    *   <li>--modules/-m : comma separated list of module names to deploy
    * </ul>
-   *
-   * e.g. <i>java -jar ./fatjar.jar --host $(hostname) -c configs/config.json -m
+   * e.g. <i>java -jar ./fatjar.jar --host $(hostname) -c configs/config.json -m</i>
    */
   public static void recursiveDeploy(Vertx vertx, JsonObject configs, int i) {
     if (i >= configs.getJsonArray("modules").size()) {
@@ -123,7 +123,7 @@ public class Deployer {
   }
 
   public static ClusterManager getClusterManager(
-      String host, List<String> zookeepers, String clusterID) {
+      String host, List<String> zookeepers, String clusterId) {
     Config config = new Config();
     config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
     config.getNetworkConfig().setPublicAddress(host);
@@ -133,7 +133,7 @@ public class Deployer {
         new DiscoveryStrategyConfig(new ZookeeperDiscoveryStrategyFactory());
     discoveryStrategyConfig.addProperty(
         ZookeeperDiscoveryProperties.ZOOKEEPER_URL.key(), String.join(",", zookeepers));
-    discoveryStrategyConfig.addProperty(ZookeeperDiscoveryProperties.GROUP.key(), clusterID);
+    discoveryStrategyConfig.addProperty(ZookeeperDiscoveryProperties.GROUP.key(), clusterId);
     config
         .getNetworkConfig()
         .getJoin()
@@ -156,7 +156,7 @@ public class Deployer {
         .setEnabled(true);
   }
 
-  public static void setJVMmetrics() {
+  public static void setJvmMetrics() {
     MeterRegistry registry = BackendRegistries.getDefaultNow();
     new JvmMemoryMetrics().bindTo(registry);
     new JvmGcMetrics().bindTo(registry);
@@ -168,7 +168,7 @@ public class Deployer {
    * Deploy clustered vert.x instance.
    *
    * @param configPath the path for JSON config file
-   * @param host
+   * @param host host
    * @param modules list of modules to deploy. If list is empty, all modules are deployed
    */
   public static void deploy(String configPath, String host, List<String> modules) {
@@ -200,7 +200,7 @@ public class Deployer {
           if (res.succeeded()) {
             vertx = res.result();
             LOGGER.debug(vertx.isMetricsEnabled());
-            setJVMmetrics();
+            setJvmMetrics();
             if (modules.isEmpty()) {
               recursiveDeploy(vertx, configuration, 0);
             } else {
@@ -214,46 +214,46 @@ public class Deployer {
   }
 
   public static void gracefulShutdown() {
-    Set<String> deployIDSet = vertx.deploymentIDs();
-    Logger LOGGER = LogManager.getLogger(Deployer.class);
-    LOGGER.info("Shutting down the application");
-    CountDownLatch latch_verticles = new CountDownLatch(deployIDSet.size());
-    CountDownLatch latch_cluster = new CountDownLatch(1);
-    CountDownLatch latch_vertx = new CountDownLatch(1);
-    LOGGER.debug("number of verticles being undeployed are:" + deployIDSet.size());
-    for (String deploymentID : deployIDSet) {
+    Set<String> deployIdSet = vertx.deploymentIDs();
+    Logger logger = LogManager.getLogger(Deployer.class);
+    logger.info("Shutting down the application");
+    CountDownLatch latchVerticles = new CountDownLatch(deployIdSet.size());
+    CountDownLatch latchCluster = new CountDownLatch(1);
+    CountDownLatch latchVertx = new CountDownLatch(1);
+    logger.debug("number of verticles being undeployed are:" + deployIdSet.size());
+    for (String deploymentId : deployIdSet) {
       vertx.undeploy(
-          deploymentID,
+          deploymentId,
           handler -> {
             if (handler.succeeded()) {
-              LOGGER.debug(deploymentID + " verticle  successfully Undeployed");
-              latch_verticles.countDown();
+              logger.debug(deploymentId + " verticle  successfully Undeployed");
+              latchVerticles.countDown();
             } else {
-              LOGGER.warn(deploymentID + "Undeploy failed!");
+              logger.warn(deploymentId + "Undeploy failed!");
             }
           });
     }
 
     try {
-      latch_verticles.await(5, TimeUnit.SECONDS);
-      LOGGER.info("All the verticles undeployed");
+      latchVerticles.await(5, TimeUnit.SECONDS);
+      logger.info("All the verticles undeployed");
       Promise<Void> promise = Promise.promise();
       // leave the cluster
       mgr.leave(promise);
-      LOGGER.info("vertx left cluster successfully");
+      logger.info("vertx left cluster successfully");
     } catch (Exception e) {
       e.printStackTrace();
     }
 
     try {
-      latch_cluster.await(5, TimeUnit.SECONDS);
+      latchCluster.await(5, TimeUnit.SECONDS);
       vertx.close(
           handler -> {
             if (handler.succeeded()) {
-              LOGGER.info("vertx closed successfully");
-              latch_vertx.countDown();
+              logger.info("vertx closed successfully");
+              latchVertx.countDown();
             } else {
-              LOGGER.warn("Vertx didn't close properly, reason:" + handler.cause());
+              logger.warn("Vertx didn't close properly, reason:" + handler.cause());
             }
           });
     } catch (Exception e) {
@@ -261,12 +261,14 @@ public class Deployer {
     }
 
     try {
-      latch_vertx.await(5, TimeUnit.SECONDS);
+      latchVertx.await(5, TimeUnit.SECONDS);
       // then shut down log4j
       if (LogManager.getContext() instanceof LoggerContext) {
-        LOGGER.debug("Shutting down log4j2");
+        logger.debug("Shutting down log4j2");
         LogManager.shutdown(LogManager.getContext());
-      } else LOGGER.warn("Unable to shutdown log4j2");
+      } else {
+        logger.warn("Unable to shutdown log4j2");
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }
