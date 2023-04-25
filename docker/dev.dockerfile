@@ -17,7 +17,7 @@ RUN mvn clean package -Dmaven.test.skip=true
 FROM eclipse-temurin:11-jre-focal
 
 ARG VERSION
-ENV JAR="iudx.file.server-dev-${VERSION}-fat.jar"
+ENV JAR="iudx.auditing.server-dev-${VERSION}-fat.jar"
 
 WORKDIR /usr/share/app
 
@@ -32,11 +32,11 @@ COPY --from=builder /usr/share/app/target/${JAR} ./fatjar.jar
 EXPOSE 8080 8443
 
 # Creating a non-root user
-RUN useradd -r -u 1001 -g root file-user
-# Create storage directory and owned by file-user
-RUN mkdir -p /usr/share/app/storage/temp-dir &&  mkdir -p /usr/share/app/storage/upload-dir  && chown -R file-user /usr/share/app/storage/
+RUN useradd -r -u 1001 -g root auditing-user
+# Create storage directory and owned by auditing-user
+RUN mkdir -p /usr/share/app/storage/temp-dir &&  mkdir -p /usr/share/app/storage/upload-dir  && chown -R auditing-user /usr/share/app/storage/
 # hint for volume mount
 VOLUME /usr/share/app/storage
 
 # Setting non-root user to use when container starts
-USER file-user
+USER auditing-user
