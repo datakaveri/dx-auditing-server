@@ -29,14 +29,10 @@ COPY google_checks.xml google_checks.xml
 # Copying dev fatjar from builder stage to final image
 COPY --from=builder /usr/share/app/target/${JAR} ./fatjar.jar
 
-EXPOSE 8080 8443
+EXPOSE 9000
 
 # Creating a non-root user
 RUN useradd -r -u 1001 -g root auditing-user
-# Create storage directory and owned by auditing-user
-RUN mkdir -p /usr/share/app/storage/temp-dir &&  mkdir -p /usr/share/app/storage/upload-dir  && chown -R auditing-user /usr/share/app/storage/
-# hint for volume mount
-VOLUME /usr/share/app/storage
 
 # Setting non-root user to use when container starts
 USER auditing-user
