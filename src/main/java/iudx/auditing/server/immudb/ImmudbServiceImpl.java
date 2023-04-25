@@ -1,14 +1,6 @@
 package iudx.auditing.server.immudb;
 
-import static iudx.auditing.server.common.Constants.AAA_SERVER;
-import static iudx.auditing.server.common.Constants.CAT_SERVER;
-import static iudx.auditing.server.common.Constants.DI_SERVER;
-import static iudx.auditing.server.common.Constants.FILE_SERVER;
-import static iudx.auditing.server.common.Constants.GIS_SERVER;
-import static iudx.auditing.server.common.Constants.IMMUDB_WRITE_QUERY;
-import static iudx.auditing.server.common.Constants.ORIGIN;
-import static iudx.auditing.server.common.Constants.RESULT;
-import static iudx.auditing.server.common.Constants.RS_SERVER;
+import static iudx.auditing.server.common.Constants.*;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;

@@ -1,8 +1,6 @@
 package iudx.auditing.server.processor;
 
-import static iudx.auditing.server.common.Constants.IMMUDB_SERVICE_ADDRESS;
-import static iudx.auditing.server.common.Constants.MSG_PROCESS_ADDRESS;
-import static iudx.auditing.server.common.Constants.PG_SERVICE_ADDRESS;
+import static iudx.auditing.server.common.Constants.*;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;

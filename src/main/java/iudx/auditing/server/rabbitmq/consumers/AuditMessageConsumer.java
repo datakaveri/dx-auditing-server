@@ -1,7 +1,6 @@
 package iudx.auditing.server.rabbitmq.consumers;
 
-import static iudx.auditing.server.common.Constants.AUDIT_LATEST_QUEUE;
-import static iudx.auditing.server.common.Constants.DELIVERY_TAG;
+import static iudx.auditing.server.common.Constants.*;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;

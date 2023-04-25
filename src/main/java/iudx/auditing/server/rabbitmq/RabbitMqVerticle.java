@@ -1,7 +1,6 @@
 package iudx.auditing.server.rabbitmq;
 
-import static iudx.auditing.server.common.Constants.MSG_PROCESS_ADDRESS;
-import static iudx.auditing.server.common.Constants.RMQ_SERVICE_ADDRESS;
+import static iudx.auditing.server.common.Constants.*;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;

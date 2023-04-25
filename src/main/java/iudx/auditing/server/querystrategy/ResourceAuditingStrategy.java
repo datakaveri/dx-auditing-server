@@ -1,18 +1,6 @@
 package iudx.auditing.server.querystrategy;
 
-import static iudx.auditing.server.querystrategy.util.Constants.API;
-import static iudx.auditing.server.querystrategy.util.Constants.DELETE_QUERY;
-import static iudx.auditing.server.querystrategy.util.Constants.EPOCH_TIME;
-import static iudx.auditing.server.querystrategy.util.Constants.ID;
-import static iudx.auditing.server.querystrategy.util.Constants.ISO_TIME;
-import static iudx.auditing.server.querystrategy.util.Constants.PRIMARY_KEY;
-import static iudx.auditing.server.querystrategy.util.Constants.PROVIDER_ID;
-import static iudx.auditing.server.querystrategy.util.Constants.RS_IMMUDB_TABLE_NAME;
-import static iudx.auditing.server.querystrategy.util.Constants.RS_PG_TABLE_NAME;
-import static iudx.auditing.server.querystrategy.util.Constants.RS_WRITE_QUERY_IMMUDB;
-import static iudx.auditing.server.querystrategy.util.Constants.RS_WRITE_QUERY_PG;
-import static iudx.auditing.server.querystrategy.util.Constants.SIZE;
-import static iudx.auditing.server.querystrategy.util.Constants.USER_ID;
+import static iudx.auditing.server.querystrategy.util.Constants.*;
 
 import io.vertx.core.json.JsonObject;
 import java.time.LocalDateTime;

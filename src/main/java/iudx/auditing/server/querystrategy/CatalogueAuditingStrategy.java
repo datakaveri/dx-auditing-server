@@ -1,18 +1,6 @@
 package iudx.auditing.server.querystrategy;
 
-import static iudx.auditing.server.querystrategy.util.Constants.API;
-import static iudx.auditing.server.querystrategy.util.Constants.CAT_IMMUDB_TABLE_NAME;
-import static iudx.auditing.server.querystrategy.util.Constants.CAT_PG_TABLE_NAME;
-import static iudx.auditing.server.querystrategy.util.Constants.CAT_WRITE_QUERY_IMMUDB;
-import static iudx.auditing.server.querystrategy.util.Constants.CAT_WRITE_QUERY_PG;
-import static iudx.auditing.server.querystrategy.util.Constants.DELETE_QUERY;
-import static iudx.auditing.server.querystrategy.util.Constants.EPOCH_TIME;
-import static iudx.auditing.server.querystrategy.util.Constants.HTTP_METHOD;
-import static iudx.auditing.server.querystrategy.util.Constants.IID;
-import static iudx.auditing.server.querystrategy.util.Constants.IUDX_ID;
-import static iudx.auditing.server.querystrategy.util.Constants.PRIMARY_KEY;
-import static iudx.auditing.server.querystrategy.util.Constants.USER_ID;
-import static iudx.auditing.server.querystrategy.util.Constants.USER_ROLE;
+import static iudx.auditing.server.querystrategy.util.Constants.*;
 
 import io.vertx.core.json.JsonObject;
 
