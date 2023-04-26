@@ -1,31 +1,23 @@
 package iudx.auditing.server.rabbitmq;
 
-import static iudx.auditing.server.common.Constants.MSG_PROCESS_ADDRESS;
-import static iudx.auditing.server.common.Constants.RMQ_SERVICE_ADDRESS;
+import static iudx.auditing.server.common.Constants.*;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClientOptions;
-import io.vertx.rabbitmq.RabbitMQClient;
 import io.vertx.rabbitmq.RabbitMQOptions;
 import io.vertx.serviceproxy.ServiceBinder;
-import iudx.auditing.server.common.IConsumer;
-import iudx.auditing.server.common.VHosts;
+import iudx.auditing.server.common.ConsumerAction;
+import iudx.auditing.server.common.VirtualHosts;
 import iudx.auditing.server.processor.MessageProcessService;
 import iudx.auditing.server.rabbitmq.consumers.AuditMessageConsumer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-public class RabbitMQVerticle extends AbstractVerticle {
-
-  private static final Logger LOGGER = LogManager.getLogger(RabbitMQVerticle.class);
-
-  private RabbitMQService rabbitMQService;
+public class RabbitMqVerticle extends AbstractVerticle {
+  private RabbitMqService rabbitMqService;
 
   private RabbitMQOptions config;
-  private RabbitMQClient client;
-  private String dataBrokerIP;
+  private String dataBrokerIp;
   private int dataBrokerPort;
   private int dataBrokerManagementPort;
   private String dataBrokerUserName;
@@ -35,7 +27,7 @@ public class RabbitMQVerticle extends AbstractVerticle {
   private int handshakeTimeout;
   private int requestedChannelMax;
   private int networkRecoveryInterval;
-  private IConsumer auditConsumer;
+  private ConsumerAction auditConsumer;
   private MessageProcessService messageProcessService;
 
   private WebClientOptions webConfig;
@@ -46,7 +38,7 @@ public class RabbitMQVerticle extends AbstractVerticle {
   @Override
   public void start() throws Exception {
 
-    dataBrokerIP = config().getString("dataBrokerIP");
+    dataBrokerIp = config().getString("dataBrokerIP");
     dataBrokerPort = config().getInteger("dataBrokerPort");
     dataBrokerManagementPort = config().getInteger("dataBrokerManagementPort");
     dataBrokerUserName = config().getString("dataBrokerUserName");
@@ -62,7 +54,7 @@ public class RabbitMQVerticle extends AbstractVerticle {
     config = new RabbitMQOptions();
     config.setUser(dataBrokerUserName);
     config.setPassword(dataBrokerPassword);
-    config.setHost(dataBrokerIP);
+    config.setHost(dataBrokerIp);
     config.setPort(dataBrokerPort);
     config.setConnectionTimeout(connectionTimeout);
     config.setRequestedHeartbeat(requestedHeartbeat);
@@ -73,17 +65,17 @@ public class RabbitMQVerticle extends AbstractVerticle {
     webConfig = new WebClientOptions();
     webConfig.setKeepAlive(true);
     webConfig.setConnectTimeout(86400000);
-    webConfig.setDefaultHost(dataBrokerIP);
+    webConfig.setDefaultHost(dataBrokerIp);
     webConfig.setDefaultPort(dataBrokerManagementPort);
     webConfig.setKeepAliveTimeout(86400000);
 
     RabbitMQOptions internalVhostOptions = new RabbitMQOptions(config);
-    String internalCommVhost = config().getString(VHosts.IUDX_INTERNAL.value);
+    String internalCommVhost = config().getString(VirtualHosts.IUDX_INTERNAL.value);
     internalVhostOptions.setVirtualHost(internalCommVhost);
-    rabbitMQService = new RabbitMQServiceImpl(vertx, internalVhostOptions);
+    rabbitMqService = new RabbitMqServiceImpl(vertx, internalVhostOptions);
 
     RabbitMQOptions prodOptions = new RabbitMQOptions(config);
-    String prodVhost = config().getString(VHosts.IUDX_PROD.value);
+    String prodVhost = config().getString(VirtualHosts.IUDX_PROD.value);
     prodOptions.setVirtualHost(prodVhost);
     messageProcessService = MessageProcessService.createProxy(vertx, MSG_PROCESS_ADDRESS);
 
@@ -92,7 +84,7 @@ public class RabbitMQVerticle extends AbstractVerticle {
     binder = new ServiceBinder(vertx);
 
     consumer =
-        binder.setAddress(RMQ_SERVICE_ADDRESS).register(RabbitMQService.class, rabbitMQService);
+        binder.setAddress(RMQ_SERVICE_ADDRESS).register(RabbitMqService.class, rabbitMqService);
   }
 
   @Override

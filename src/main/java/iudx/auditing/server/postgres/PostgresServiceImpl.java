@@ -1,8 +1,6 @@
 package iudx.auditing.server.postgres;
 
-import static iudx.auditing.server.common.Constants.PG_DELETE_QUERY_KEY;
-import static iudx.auditing.server.common.Constants.PG_INSERT_QUERY_KEY;
-import static iudx.auditing.server.common.Constants.RESULT;
+import static iudx.auditing.server.common.Constants.*;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;

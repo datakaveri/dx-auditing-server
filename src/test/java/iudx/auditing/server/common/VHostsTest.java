@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class VHostsTest {
     @ParameterizedTest
     @EnumSource
-    public void test(VHosts vHosts, VertxTestContext testContext) {
+    public void test(VirtualHosts vHosts, VertxTestContext testContext) {
         assertNotNull(vHosts);
         testContext.completeNow();
     }

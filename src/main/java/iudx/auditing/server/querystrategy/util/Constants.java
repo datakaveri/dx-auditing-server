@@ -1,4 +1,4 @@
-package iudx.auditing.server.queryStrategy.util;
+package iudx.auditing.server.querystrategy.util;
 
 public class Constants {
   public static final String SIZE = "response_size";
@@ -22,16 +22,20 @@ public class Constants {
   public static final String CAT_PG_TABLE_NAME = "postgresCatTableName";
   public static final String CAT_IMMUDB_TABLE_NAME = "immudbCatTableName";
   public static final String RS_WRITE_QUERY_IMMUDB =
-      "INSERT INTO $0 (id,api,userid,epochtime,resourceid,isotime,providerid,size) VALUES ('$1','$2','$3',$4,'$5','$6','$7',$8)";
+      "INSERT INTO $0 (id,api,userid,epochtime,resourceid,isotime,providerid,size) "
+          + "VALUES ('$1','$2','$3',$4,'$5','$6','$7',$8)";
   public static final String RS_WRITE_QUERY_PG =
-          "INSERT INTO $0 (id,api,userid,epochtime,resourceid,isotime,providerid,size,time) VALUES ('$1','$2','$3',$4,'$5','$6','$7',$8,'$9')";
+      "INSERT INTO $0 (id,api,userid,epochtime,resourceid,isotime,providerid,size,time)"
+          + " VALUES ('$1','$2','$3',$4,'$5','$6','$7',$8,'$9')";
   public static final String CAT_WRITE_QUERY_PG =
-      "INSERT INTO $0 (id, userRole, userID, iid, api, method, time, iudxID) VALUES ('$1','$2','$3','$4','$5','$6',$7,'$8')";
+      "INSERT INTO $0 (id, userRole, userID, iid, api, method, time, iudxID) "
+          + "VALUES ('$1','$2','$3','$4','$5','$6',$7,'$8')";
   public static final String CAT_WRITE_QUERY_IMMUDB =
-          "INSERT INTO $0 (id, userRole, userID, iid, api, method, time, iudxID) VALUES ('$1','$2','$3','$4','$5','$6',$7,'$8')";
+      "INSERT INTO $0 (id, userRole, userID, iid, api, method, time, iudxID) "
+          + "VALUES ('$1','$2','$3','$4','$5','$6',$7,'$8')";
   public static final String AUTH_WRITE_QUERY_PG =
       "INSERT INTO $0 (id,body,endpoint,method,time,userid) VALUES ('$1','$2','$3','$4',$5,'$6')";
   public static final String AUTH_WRITE_QUERY_IMMUDB =
-          "INSERT INTO $0 (id,body,endpoint,method,time,userid) VALUES ('$1','$2','$3','$4',$5,'$6')";
+      "INSERT INTO $0 (id,body,endpoint,method,time,userid) VALUES ('$1','$2','$3','$4',$5,'$6')";
   public static final String DELETE_QUERY = "DELETE FROM $0 WHERE id = '$1';";
 }

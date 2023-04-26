@@ -1,18 +1,17 @@
 package iudx.auditing.server.rabbitmq;
 
 import io.vertx.core.Vertx;
-import io.vertx.rabbitmq.QueueOptions;
 import io.vertx.rabbitmq.RabbitMQClient;
 import io.vertx.rabbitmq.RabbitMQOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class RabbitMQServiceImpl implements RabbitMQService {
+public class RabbitMqServiceImpl implements RabbitMqService {
 
-  private static final Logger LOGGER = LogManager.getLogger(RabbitMQServiceImpl.class);
+  private static final Logger LOGGER = LogManager.getLogger(RabbitMqServiceImpl.class);
   private final RabbitMQClient client;
 
-  public RabbitMQServiceImpl(Vertx vertx, RabbitMQOptions options) {
+  public RabbitMqServiceImpl(Vertx vertx, RabbitMQOptions options) {
     this.client = RabbitMQClient.create(vertx, options);
     this.client
         .start()

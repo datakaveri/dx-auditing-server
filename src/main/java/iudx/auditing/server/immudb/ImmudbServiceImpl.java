@@ -1,14 +1,6 @@
 package iudx.auditing.server.immudb;
 
-import static iudx.auditing.server.common.Constants.AAA_SERVER;
-import static iudx.auditing.server.common.Constants.CAT_SERVER;
-import static iudx.auditing.server.common.Constants.DI_SERVER;
-import static iudx.auditing.server.common.Constants.FILE_SERVER;
-import static iudx.auditing.server.common.Constants.GIS_SERVER;
-import static iudx.auditing.server.common.Constants.IMMUDB_WRITE_QUERY;
-import static iudx.auditing.server.common.Constants.ORIGIN;
-import static iudx.auditing.server.common.Constants.RESULT;
-import static iudx.auditing.server.common.Constants.RS_SERVER;
+import static iudx.auditing.server.common.Constants.*;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -19,21 +11,21 @@ import org.apache.logging.log4j.Logger;
 
 public class ImmudbServiceImpl implements ImmudbService {
   private static final Logger LOGGER = LogManager.getLogger(ImmudbServiceImpl.class);
-  private final PgPool pgClientForRS;
-  private final PgPool pgClientForAAA;
-  private final PgPool pgClientForCAT;
+  private final PgPool pgClientForRs;
+  private final PgPool pgClientForAaa;
+  private final PgPool pgClientForCat;
 
-  public ImmudbServiceImpl(PgPool pgClientForRS, PgPool pgClientForAAA, PgPool pgClientForCAT) {
-    this.pgClientForRS = pgClientForRS;
-    this.pgClientForAAA = pgClientForAAA;
-    this.pgClientForCAT = pgClientForCAT;
+  public ImmudbServiceImpl(PgPool pgClientForRs, PgPool pgClientForAaa, PgPool pgClientForCat) {
+    this.pgClientForRs = pgClientForRs;
+    this.pgClientForAaa = pgClientForAaa;
+    this.pgClientForCat = pgClientForCat;
   }
 
   @Override
   public Future<JsonObject> executeWriteQuery(JsonObject query) {
     Promise<JsonObject> promise = Promise.promise();
     JsonObject response = new JsonObject();
-    PgPool pgClient = PoolForOrigin(query.getString(ORIGIN));
+    PgPool pgClient = poolForOrigin(query.getString(ORIGIN));
     pgClient
         .withConnection(
             connection -> connection.query(query.getString(IMMUDB_WRITE_QUERY)).execute())
@@ -51,17 +43,18 @@ public class ImmudbServiceImpl implements ImmudbService {
             });
     return promise.future();
   }
-  private PgPool PoolForOrigin(String originServer) {
+
+  private PgPool poolForOrigin(String originServer) {
     switch (originServer) {
       case RS_SERVER:
       case DI_SERVER:
       case GIS_SERVER:
       case FILE_SERVER:
-        return pgClientForRS;
+        return pgClientForRs;
       case AAA_SERVER:
-        return pgClientForAAA;
+        return pgClientForAaa;
       case CAT_SERVER:
-        return pgClientForCAT;
+        return pgClientForCat;
       default:
         throw new IllegalArgumentException(originServer + "serverOrigin is not defined");
     }

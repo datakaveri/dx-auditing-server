@@ -1,7 +1,6 @@
 package iudx.auditing.server.processor;
 
 import io.vertx.core.Future;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -15,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static iudx.auditing.server.common.Constants.ORIGIN;
-import static iudx.auditing.server.queryStrategy.util.Constants.*;
+import static iudx.auditing.server.querystrategy.util.Constants.*;
 import static javax.xml.transform.OutputKeys.METHOD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,14 +31,13 @@ class MessageProcessorImplTest {
     @Mock
     JsonObject config;
     MessageProcessorImpl messageProcessor;
-    Vertx vertx;
     JsonObject message;
 
 
     @BeforeEach
     public void setUp(VertxTestContext vertxTestContext) {
         config = mock(JsonObject.class);
-        messageProcessor = new MessageProcessorImpl(vertx, postgresService, immudbService, config);
+        messageProcessor = new MessageProcessorImpl(postgresService, immudbService, config);
         vertxTestContext.completeNow();
     }
 

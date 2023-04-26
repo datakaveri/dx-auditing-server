@@ -6,7 +6,7 @@
   "clusterId": "iudx-auditing-server-cluster",
   "modules": [
     {
-      "id": "iudx.auditing.server.rabbitmq.RabbitMQVerticle",
+      "id": "iudx.auditing.server.rabbitmq.RabbitMqVerticle",
       "verticleInstances": 1,
       "dataBrokerIP": "",
       "dataBrokerPort": 1234,

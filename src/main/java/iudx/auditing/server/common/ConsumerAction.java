@@ -1,5 +1,5 @@
 package iudx.auditing.server.common;
 
-public interface IConsumer {
+public interface ConsumerAction {
   void start();
 }

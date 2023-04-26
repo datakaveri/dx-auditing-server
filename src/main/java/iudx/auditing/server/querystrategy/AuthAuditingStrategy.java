@@ -1,6 +1,6 @@
-package iudx.auditing.server.queryStrategy;
+package iudx.auditing.server.querystrategy;
 
-import static iudx.auditing.server.queryStrategy.util.Constants.*;
+import static iudx.auditing.server.querystrategy.util.Constants.*;
 import static javax.xml.transform.OutputKeys.METHOD;
 
 import io.vertx.core.json.JsonObject;

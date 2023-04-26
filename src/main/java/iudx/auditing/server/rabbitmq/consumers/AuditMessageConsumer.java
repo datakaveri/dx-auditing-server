@@ -1,7 +1,6 @@
 package iudx.auditing.server.rabbitmq.consumers;
 
-import static iudx.auditing.server.common.Constants.AUDIT_LATEST_QUEUE;
-import static iudx.auditing.server.common.Constants.DELIVERY_TAG;
+import static iudx.auditing.server.common.Constants.*;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -10,25 +9,23 @@ import io.vertx.rabbitmq.QueueOptions;
 import io.vertx.rabbitmq.RabbitMQClient;
 import io.vertx.rabbitmq.RabbitMQConsumer;
 import io.vertx.rabbitmq.RabbitMQOptions;
-import iudx.auditing.server.common.IConsumer;
+import iudx.auditing.server.common.ConsumerAction;
 import iudx.auditing.server.processor.MessageProcessService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class AuditMessageConsumer implements IConsumer {
+public class AuditMessageConsumer implements ConsumerAction {
 
   private static final Logger LOGGER = LogManager.getLogger(AuditMessageConsumer.class);
 
   private final RabbitMQClient client;
   private final MessageProcessService msgService;
-  private final Vertx vertx;
 
   private final QueueOptions options =
       new QueueOptions().setKeepMostRecent(true).setMaxInternalQueueSize(1000).setAutoAck(false);
 
   public AuditMessageConsumer(
       Vertx vertx, RabbitMQOptions options, MessageProcessService msgService) {
-    this.vertx = vertx;
     this.client = RabbitMQClient.create(vertx, options);
     this.msgService = msgService;
   }
@@ -56,7 +53,7 @@ public class AuditMessageConsumer implements IConsumer {
                 mqConsumer.resume();
                 LOGGER.debug("message consumption resumed");
               } else {
-                LOGGER.error("Error while publishing messages for processing "+handler.result());
+                LOGGER.error("Error while publishing messages for processing " + handler.result());
                 mqConsumer.resume();
                 LOGGER.debug("message consumption resumed");
               }

@@ -1,8 +1,8 @@
-package iudx.auditing.server.queryStrategy;
+package iudx.auditing.server.querystrategy;
+
+import static iudx.auditing.server.querystrategy.util.Constants.*;
 
 import io.vertx.core.json.JsonObject;
-
-import static iudx.auditing.server.queryStrategy.util.Constants.*;
 
 public class CatalogueAuditingStrategy implements AuditingServerStrategy {
   private final JsonObject config;
@@ -19,7 +19,7 @@ public class CatalogueAuditingStrategy implements AuditingServerStrategy {
     String iid = request.getString(IID);
     String api = request.getString(API);
     String method = request.getString(HTTP_METHOD);
-    String iudxID = request.getString(IUDX_ID);
+    String iudxId = request.getString(IUDX_ID);
     String databaseTableName = config.getString(CAT_PG_TABLE_NAME);
     long time = request.getLong(EPOCH_TIME);
 
@@ -32,7 +32,7 @@ public class CatalogueAuditingStrategy implements AuditingServerStrategy {
         .replace("$5", api)
         .replace("$6", method)
         .replace("$7", Long.toString(time))
-        .replace("$8", iudxID);
+        .replace("$8", iudxId);
   }
 
   @Override
@@ -51,7 +51,7 @@ public class CatalogueAuditingStrategy implements AuditingServerStrategy {
     String iid = request.getString(IID);
     String api = request.getString(API);
     String method = request.getString(HTTP_METHOD);
-    String iudxID = request.getString(IUDX_ID);
+    String iudxId = request.getString(IUDX_ID);
     String databaseTableName = config.getString(CAT_IMMUDB_TABLE_NAME);
     long time = request.getLong(EPOCH_TIME);
 
@@ -64,6 +64,6 @@ public class CatalogueAuditingStrategy implements AuditingServerStrategy {
         .replace("$5", api)
         .replace("$6", method)
         .replace("$7", Long.toString(time))
-        .replace("$8", iudxID);
+        .replace("$8", iudxId);
   }
 }

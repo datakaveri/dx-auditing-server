@@ -1,36 +1,27 @@
 package iudx.auditing.server.processor;
 
-import static iudx.auditing.server.common.Constants.IMMUDB_WRITE_QUERY;
-import static iudx.auditing.server.common.Constants.ORIGIN;
-import static iudx.auditing.server.common.Constants.PG_DELETE_QUERY_KEY;
-import static iudx.auditing.server.common.Constants.PG_INSERT_QUERY_KEY;
+import static iudx.auditing.server.common.Constants.*;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import iudx.auditing.server.immudb.ImmudbService;
 import iudx.auditing.server.postgres.PostgresService;
-import iudx.auditing.server.queryStrategy.ServerOrigin;
-import iudx.auditing.server.queryStrategy.ServerOriginContextFactory;
-import iudx.auditing.server.queryStrategy.AuditingServerStrategy;
+import iudx.auditing.server.querystrategy.AuditingServerStrategy;
+import iudx.auditing.server.querystrategy.ServerOrigin;
+import iudx.auditing.server.querystrategy.ServerOriginContextFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class MessageProcessorImpl implements MessageProcessService {
 
   private static final Logger LOGGER = LogManager.getLogger(MessageProcessorImpl.class);
-  private final Vertx vertx;
   private final PostgresService postgresService;
   private final ImmudbService immudbService;
   private final JsonObject config;
 
   public MessageProcessorImpl(
-      Vertx vertx,
-      PostgresService postgresService,
-      ImmudbService immudbService,
-      JsonObject config) {
-    this.vertx = vertx;
+      PostgresService postgresService, ImmudbService immudbService, JsonObject config) {
     this.postgresService = postgresService;
     this.immudbService = immudbService;
     this.config = config;
@@ -56,7 +47,9 @@ public class MessageProcessorImpl implements MessageProcessService {
                       deleteFromPostgres.onComplete(
                           postgresHandler -> {
                             if (deleteFromPostgres.succeeded()) {
-                              LOGGER.error("Rollback : success delete. Message Origin: {}",message.getString(ORIGIN));
+                              LOGGER.error(
+                                  "Rollback : success delete. Message Origin: {}",
+                                  message.getString(ORIGIN));
                               promise.fail(immudbHandler.cause().getMessage());
                             } else {
                               LOGGER.info("Rollback : delete failed");

@@ -14,29 +14,29 @@ import org.apache.logging.log4j.Logger;
 
 public class ImmudbVerticle extends AbstractVerticle {
   private static final Logger LOGGER = LogManager.getLogger(ImmudbVerticle.class);
-  PgConnectOptions connectOptionsForRS;
-  PgConnectOptions connectOptionsForAAA;
-  PgConnectOptions connectOptionsForCAT;
+  PgConnectOptions connectOptionsForRs;
+  PgConnectOptions connectOptionsForAaa;
+  PgConnectOptions connectOptionsForCat;
   PoolOptions poolOptions;
-  PgPool poolForRS;
-  PgPool poolForAAA;
-  PgPool poolForCAT;
-  private String databaseIP;
+  PgPool poolForRs;
+  PgPool poolForAaa;
+  PgPool poolForCat;
+  private String databaseIp;
   private int databasePort;
-  private String databaseNameRS;
+  private String databaseNameRs;
 
-  private String databaseUserNameRS;
-  private String databasePasswordRS;
+  private String databaseUserNameRs;
+  private String databasePasswordRs;
 
-  private String databaseNameAAA;
+  private String databaseNameAaa;
 
-  private String databaseUserNameAAA;
-  private String databasePasswordAAA;
+  private String databaseUserNameAaa;
+  private String databasePasswordAaa;
 
-  private String databaseNameCAT;
+  private String databaseNameCat;
 
-  private String databaseUserNameCAT;
-  private String databasePasswordCAT;
+  private String databaseUserNameCat;
+  private String databasePasswordCat;
 
   private int poolSize;
   private ServiceBinder binder;
@@ -46,58 +46,58 @@ public class ImmudbVerticle extends AbstractVerticle {
   @Override
   public void start() throws Exception {
 
-    databaseIP = config().getString("meteringDatabaseIP");
+    databaseIp = config().getString("meteringDatabaseIP");
     databasePort = config().getInteger("meteringDatabasePort");
     poolSize = config().getInteger("meteringPoolSize");
 
-    databaseNameRS = config().getString("meteringRSDatabaseName");
-    databaseUserNameRS = config().getString("meteringRSDatabaseUserName");
-    databasePasswordRS = config().getString("meteringRSDatabasePassword");
+    databaseNameRs = config().getString("meteringRSDatabaseName");
+    databaseUserNameRs = config().getString("meteringRSDatabaseUserName");
+    databasePasswordRs = config().getString("meteringRSDatabasePassword");
 
-    databaseNameAAA = config().getString("meteringAAADatabaseName");
-    databaseUserNameAAA = config().getString("meteringAAADatabaseUserName");
-    databasePasswordAAA = config().getString("meteringAAADatabasePassword");
+    databaseNameAaa = config().getString("meteringAAADatabaseName");
+    databaseUserNameAaa = config().getString("meteringAAADatabaseUserName");
+    databasePasswordAaa = config().getString("meteringAAADatabasePassword");
 
-    databaseNameCAT = config().getString("meteringCATDatabaseName");
-    databaseUserNameCAT = config().getString("meteringCATDatabaseUserName");
-    databasePasswordCAT = config().getString("meteringCATDatabasePassword");
+    databaseNameCat = config().getString("meteringCATDatabaseName");
+    databaseUserNameCat = config().getString("meteringCATDatabaseUserName");
+    databasePasswordCat = config().getString("meteringCATDatabasePassword");
 
-    this.connectOptionsForRS =
+    this.connectOptionsForRs =
         new PgConnectOptions()
             .setPort(databasePort)
-            .setHost(databaseIP)
-            .setDatabase(databaseNameRS)
-            .setUser(databaseUserNameRS)
-            .setPassword(databasePasswordRS)
+            .setHost(databaseIp)
+            .setDatabase(databaseNameRs)
+            .setUser(databaseUserNameRs)
+            .setPassword(databasePasswordRs)
             .setReconnectAttempts(2)
             .setReconnectInterval(1000);
 
-    this.connectOptionsForAAA =
+    this.connectOptionsForAaa =
         new PgConnectOptions()
             .setPort(databasePort)
-            .setHost(databaseIP)
-            .setDatabase(databaseNameAAA)
-            .setUser(databaseUserNameAAA)
-            .setPassword(databasePasswordAAA)
+            .setHost(databaseIp)
+            .setDatabase(databaseNameAaa)
+            .setUser(databaseUserNameAaa)
+            .setPassword(databasePasswordAaa)
             .setReconnectAttempts(2)
             .setReconnectInterval(1000);
 
-    this.connectOptionsForCAT =
+    this.connectOptionsForCat =
         new PgConnectOptions()
             .setPort(databasePort)
-            .setHost(databaseIP)
-            .setDatabase(databaseNameCAT)
-            .setUser(databaseUserNameCAT)
-            .setPassword(databasePasswordCAT)
+            .setHost(databaseIp)
+            .setDatabase(databaseNameCat)
+            .setUser(databaseUserNameCat)
+            .setPassword(databasePasswordCat)
             .setReconnectAttempts(2)
             .setReconnectInterval(1000);
 
     this.poolOptions = new PoolOptions().setMaxSize(poolSize);
-    this.poolForRS = PgPool.pool(vertx, connectOptionsForRS, poolOptions);
-    this.poolForAAA = PgPool.pool(vertx, connectOptionsForAAA, poolOptions);
-    this.poolForCAT = PgPool.pool(vertx, connectOptionsForCAT, poolOptions);
+    this.poolForRs = PgPool.pool(vertx, connectOptionsForRs, poolOptions);
+    this.poolForAaa = PgPool.pool(vertx, connectOptionsForAaa, poolOptions);
+    this.poolForCat = PgPool.pool(vertx, connectOptionsForCat, poolOptions);
     binder = new ServiceBinder(vertx);
-    immuDbService = new ImmudbServiceImpl(poolForRS, poolForAAA, poolForCAT);
+    immuDbService = new ImmudbServiceImpl(poolForRs, poolForAaa, poolForCat);
     consumer =
         binder.setAddress(IMMUDB_SERVICE_ADDRESS).register(ImmudbService.class, immuDbService);
     LOGGER.info("ImmudbVerticle Verticle Started");
