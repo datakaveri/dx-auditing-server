@@ -15,7 +15,7 @@ RUN mvn clean package -Dmaven.test.skip=true
 # Java Runtime as the base for final image
 FROM eclipse-temurin:11-jre-focal
 
-ARG VERSION
+ARG VERSION="1.0.0-SNAPSHOT"
 ENV JAR="iudx.auditing.server-cluster-${VERSION}-fat.jar"
 
 WORKDIR /usr/share/app
