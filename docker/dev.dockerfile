@@ -1,4 +1,4 @@
-ARG VERSION="0.0.1-SNAPSHOT"
+ARG VERSION="1.0.0-SNAPSHOT"
 
 # Using maven base image in builder stage to build Java code.
 FROM maven:3-eclipse-temurin-11 as builder
@@ -16,7 +16,7 @@ RUN mvn clean package -Dmaven.test.skip=true
 # Java Runtime as the base for final image
 FROM eclipse-temurin:11-jre-focal
 
-ARG VERSION="1.0.0-SNAPSHOT"
+ARG VERSION
 ENV JAR="iudx.auditing.server-dev-${VERSION}-fat.jar"
 
 WORKDIR /usr/share/app
