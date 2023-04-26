@@ -32,7 +32,7 @@ COPY --from=builder /usr/share/app/target/${JAR} ./fatjar.jar
 EXPOSE 9000
 
 # Creating a non-root user
-RUN useradd -r -u 1001 -g root auditing-user
+RUN useradd -r -u 1001 -g root audit-user
 
 # Setting non-root user to use when container starts
-USER auditing-user
+USER audit-user
