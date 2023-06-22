@@ -53,7 +53,7 @@ public class AuditMessageConsumer implements ConsumerAction {
                 mqConsumer.resume();
                 LOGGER.debug("message consumption resumed");
               } else {
-                LOGGER.error("Error while publishing messages for processing " + handler.result());
+                LOGGER.error("Error while publishing messages for processing " + handler.cause().getMessage());
                 mqConsumer.resume();
                 LOGGER.debug("message consumption resumed");
               }

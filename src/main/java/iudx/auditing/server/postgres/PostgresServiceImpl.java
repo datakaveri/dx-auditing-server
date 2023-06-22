@@ -21,47 +21,60 @@ public class PostgresServiceImpl implements PostgresService {
   @Override
   public Future<JsonObject> executeWriteQuery(JsonObject query) {
     Promise<JsonObject> promise = Promise.promise();
-    JsonObject response = new JsonObject();
-    pgPool
-        .withConnection(
-            connection -> connection.query(query.getString(PG_INSERT_QUERY_KEY)).execute())
-        .onComplete(
-            rows -> {
-              if (rows.succeeded()) {
-                LOGGER.debug("Postgres Table Updated successfully");
-                response.put(RESULT, "Postgres Table Updated Successfully");
-                promise.complete(response);
-              }
-              if (rows.failed()) {
-                LOGGER.error("Info failed:" + rows.cause().getMessage());
-                response.put(RESULT, rows.cause().getMessage());
-                promise.fail(rows.cause().getMessage());
-              }
-            });
+    if (query.getString(PG_INSERT_QUERY_KEY) != null
+        && !query.getString(PG_INSERT_QUERY_KEY).isEmpty()) {
+      JsonObject response = new JsonObject();
+      pgPool
+          .withConnection(
+              connection -> connection.query(query.getString(PG_INSERT_QUERY_KEY)).execute())
+          .onComplete(
+              rows -> {
+                if (rows.succeeded()) {
+                  LOGGER.debug("Postgres Table Updated successfully");
+                  response.put(RESULT, "Postgres Table Updated Successfully");
+                  promise.complete(response);
+                }
+                if (rows.failed()) {
+                  LOGGER.error("Info failed:" + rows.cause().getMessage());
+                  response.put(RESULT, rows.cause().getMessage());
+                  promise.fail(rows.cause().getMessage());
+                }
+              });
+    } else {
+      LOGGER.error("Could not execute write query as the query supplied is blank or null");
+      promise.fail("Could not execute write query as the query supplied is blank or null");
+    }
     return promise.future();
   }
 
   @Override
   public Future<JsonObject> executeDeleteQuery(JsonObject query) {
     Promise<JsonObject> promise = Promise.promise();
-    JsonObject response = new JsonObject();
-    pgPool
-        .withConnection(
-            connection -> connection.query(query.getString(PG_DELETE_QUERY_KEY)).execute())
-        .onComplete(
-            rows -> {
-              if (rows.succeeded()) {
-                LOGGER.debug("Postgres Table row deleted successfully");
+    if (query.getString(PG_DELETE_QUERY_KEY) != null
+        && !query.getString(PG_DELETE_QUERY_KEY).isEmpty()) {
 
-                response.put(RESULT, "Postgres Table row deleted Successfully");
-                promise.complete(response);
-              }
-              if (rows.failed()) {
-                LOGGER.error("Info failed:" + rows.cause());
-                response.put(RESULT, rows.cause().getMessage());
-                promise.fail(rows.cause().getMessage());
-              }
-            });
+      JsonObject response = new JsonObject();
+      pgPool
+          .withConnection(
+              connection -> connection.query(query.getString(PG_DELETE_QUERY_KEY)).execute())
+          .onComplete(
+              rows -> {
+                if (rows.succeeded()) {
+                  LOGGER.debug("Postgres Table row deleted successfully");
+
+                  response.put(RESULT, "Postgres Table row deleted Successfully");
+                  promise.complete(response);
+                }
+                if (rows.failed()) {
+                  LOGGER.error("Info failed:" + rows.cause());
+                  response.put(RESULT, rows.cause().getMessage());
+                  promise.fail(rows.cause().getMessage());
+                }
+              });
+    } else {
+      LOGGER.error("Could not execute delete query as the query supplied is blank or null");
+      promise.fail("Could not execute delete query as the query supplied is blank or null");
+    }
 
     return promise.future();
   }

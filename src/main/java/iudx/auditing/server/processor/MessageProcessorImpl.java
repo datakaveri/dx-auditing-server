@@ -1,6 +1,7 @@
 package iudx.auditing.server.processor;
 
 import static iudx.auditing.server.common.Constants.*;
+import static iudx.auditing.server.querystrategy.ServerOrigin.RS_SERVER_SUBS;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -32,38 +33,65 @@ public class MessageProcessorImpl implements MessageProcessService {
     LOGGER.info("message processing starts : ");
     JsonObject queries = queryBuilder(message);
     Promise<JsonObject> promise = Promise.promise();
-    Future<JsonObject> insertInPostgres = postgresService.executeWriteQuery(queries);
-    insertInPostgres
-        .onSuccess(
-            insertInImmudbHandler -> {
-              Future<JsonObject> insertInImmudb = immudbService.executeWriteQuery(queries);
-              insertInImmudb.onComplete(
-                  immudbHandler -> {
-                    if (insertInImmudb.succeeded()) {
-                      promise.complete(message);
-                    } else {
-                      Future<JsonObject> deleteFromPostgres =
-                          postgresService.executeDeleteQuery(queries);
-                      deleteFromPostgres.onComplete(
-                          postgresHandler -> {
-                            if (deleteFromPostgres.succeeded()) {
-                              LOGGER.error(
-                                  "Rollback : success delete. Message Origin: {}",
-                                  message.getString(ORIGIN));
-                              promise.fail(immudbHandler.cause().getMessage());
-                            } else {
-                              LOGGER.info("Rollback : delete failed");
-                              promise.fail(deleteFromPostgres.cause().getMessage());
-                            }
-                          });
-                    }
-                  });
-            })
-        .onFailure(
-            failureHandler -> {
-              promise.fail("failed to insert in postgres " + failureHandler.getCause());
-            });
+    if (!message.getString(ORIGIN).equals(RS_SERVER_SUBS.getOriginRole())) {
+      Future<JsonObject> insertInPostgres = postgresService.executeWriteQuery(queries);
+      insertInPostgres
+          .onSuccess(
+              insertInImmudbHandler -> {
+                Future<JsonObject> insertInImmudb = immudbService.executeWriteQuery(queries);
+                insertInImmudb.onComplete(
+                    immudbHandler -> {
+                      if (insertInImmudb.succeeded()) {
+                        promise.complete(message);
+                      } else {
+                        Future<JsonObject> deleteFromPostgres =
+                            postgresService.executeDeleteQuery(queries);
+                        deleteFromPostgres.onComplete(
+                            postgresHandler -> {
+                              if (deleteFromPostgres.succeeded()) {
+                                LOGGER.error(
+                                    "Rollback : success delete. Message Origin: {}",
+                                    message.getString(ORIGIN));
+                                promise.fail(immudbHandler.cause().getMessage());
+                              } else {
+                                LOGGER.info("Rollback : delete failed");
+                                promise.fail(deleteFromPostgres.cause().getMessage());
+                              }
+                            });
+                      }
+                    });
+              })
+          .onFailure(
+              failureHandler -> {
+                promise.fail("failed to insert in postgres " + failureHandler.getCause());
+              });
+    } else {
+      process4AuditingSubscription(queries, promise);
+    }
+
     return promise.future();
+  }
+
+  private void process4AuditingSubscription(JsonObject queries, Promise<JsonObject> promise) {
+      LOGGER.debug("inside process4AuditingSubscription");
+    Future<JsonObject> insertInPostgres = postgresService.executeWriteQuery(queries);
+    insertInPostgres.onComplete(
+        handler -> {
+          if (handler.succeeded()) {
+            promise.tryComplete(handler.result());
+          } else {
+            promise.tryFail(handler.cause().getMessage());
+          }
+        });
+    Future<JsonObject> deleteFromPostgres = postgresService.executeDeleteQuery(queries);
+    deleteFromPostgres.onComplete(
+        handler -> {
+          if (handler.succeeded()) {
+            promise.tryComplete(handler.result());
+          } else {
+            promise.tryFail(handler.cause().getMessage());
+          }
+        });
   }
 
   private JsonObject queryBuilder(JsonObject request) {
