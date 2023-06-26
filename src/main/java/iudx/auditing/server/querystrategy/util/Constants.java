@@ -39,9 +39,11 @@ public class Constants {
   public static final String AUTH_WRITE_QUERY_IMMUDB =
       "INSERT INTO $0 (id,body,endpoint,method,time,userid) VALUES ('$1','$2','$3','$4','$5','$6')";
   public static final String DELETE_QUERY = "DELETE FROM $0 WHERE id = '$1';";
-  public static final String DELETE_SUBSCRIPTION_QUERY = "DELETE FROM $0 WHERE subscription_id = '$1';";
+  public static final String DELETE_SUBSCRIPTION_QUERY =
+      "DELETE FROM $0 WHERE subscription_id = '$1';";
 
-  public static final String RS_SUBS_WRITE_QUERY_PG = "INSERT INTO $0 (subscription_id, user_id, event_type, subscription_type, resource_id) VALUES ('$1','$2','$3','$4','$5');";
-  public static final String RS_SUBS_UPDATE_QUERY_PG = "UPDATE $0 SET event_type = '$1' WHERE subscription_id = '$2'";
-
+  public static final String RS_SUBS_WRITE_QUERY_PG =
+      "INSERT INTO $0 (subscription_id, user_id, event_type, subscription_type, resource_id) VALUES ('$1','$2','$3','$4','$5');";
+  public static final String RS_SUBS_UPDATE_QUERY_PG =
+      "UPDATE $0 SET event_type = '$1' WHERE subscription_id = '$2'";
 }

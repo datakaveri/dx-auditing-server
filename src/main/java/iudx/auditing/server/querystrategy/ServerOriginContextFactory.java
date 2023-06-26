@@ -21,18 +21,22 @@ public class ServerOriginContextFactory {
       case RS_SERVER:
       case DI_SERVER:
       case GIS_SERVER:
-      case FILE_SERVER: {
-        return resourceServerStrategy;
-      }
-      case CAT_SERVER: {
-        return catalogueServerStrategy;
-      }
-      case AAA_SERVER: {
-        return authServerStrategy;
-      }
-      case RS_SERVER_SUBS:{
-        return rsSubscriptionStrategy;
-      }
+      case FILE_SERVER:
+        {
+          return resourceServerStrategy;
+        }
+      case CAT_SERVER:
+        {
+          return catalogueServerStrategy;
+        }
+      case AAA_SERVER:
+        {
+          return authServerStrategy;
+        }
+      case RS_SERVER_SUBS:
+        {
+          return rsSubscriptionStrategy;
+        }
       default:
         throw new IllegalArgumentException(serverOrigin + "serverOrigin is not defined");
     }

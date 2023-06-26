@@ -73,7 +73,7 @@ public class MessageProcessorImpl implements MessageProcessService {
   }
 
   private void process4AuditingSubscription(JsonObject queries, Promise<JsonObject> promise) {
-      LOGGER.debug("inside process4AuditingSubscription");
+    LOGGER.debug("inside process4AuditingSubscription");
     Future<JsonObject> insertInPostgres = postgresService.executeWriteQuery(queries);
     insertInPostgres.onComplete(
         handler -> {

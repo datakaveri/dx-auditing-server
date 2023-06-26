@@ -1,8 +1,8 @@
 package iudx.auditing.server.querystrategy;
 
-import io.vertx.core.json.JsonObject;
-
 import static iudx.auditing.server.querystrategy.util.Constants.*;
+
+import io.vertx.core.json.JsonObject;
 
 public class RsSubscriptionStrategy implements AuditingServerStrategy {
   private final JsonObject config;
@@ -47,7 +47,7 @@ public class RsSubscriptionStrategy implements AuditingServerStrategy {
     String subscriptionId = request.getString("subscriptionID");
     String databaseTableName = this.config.getString(RS_SUBS_TABLE_NAME);
     return RS_SUBS_UPDATE_QUERY_PG
-        .replace("$0",databaseTableName)
+        .replace("$0", databaseTableName)
         .replace("$1", eventType)
         .replace("$2", subscriptionId);
   }
