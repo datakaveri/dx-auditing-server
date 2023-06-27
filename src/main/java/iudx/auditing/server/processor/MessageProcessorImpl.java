@@ -66,25 +66,36 @@ public class MessageProcessorImpl implements MessageProcessService {
                 promise.fail("failed to insert in postgres " + failureHandler.getCause());
               });
     } else {
-      process4AuditingSubscription(queries, promise);
+      String eventType = message.getString("eventType");
+      if (eventType == null || eventType.isEmpty()) {
+        promise.tryFail("EventType is null or empty for subscription related processing");
+      } else {
+        process4AuditingSubscription(queries, promise, eventType);
+      }
     }
 
     return promise.future();
   }
 
-  private void process4AuditingSubscription(JsonObject queries, Promise<JsonObject> promise) {
+  private void process4AuditingSubscription(
+      JsonObject queries, Promise<JsonObject> promise, String eventType) {
     LOGGER.debug("inside process4AuditingSubscription");
-    Future<JsonObject> insertInPostgres = postgresService.executeWriteQuery(queries);
-    insertInPostgres.onComplete(
-        handler -> {
-          if (handler.succeeded()) {
-            promise.tryComplete(handler.result());
-          } else {
-            promise.tryFail(handler.cause().getMessage());
-          }
-        });
-    Future<JsonObject> deleteFromPostgres = postgresService.executeDeleteQuery(queries);
-    deleteFromPostgres.onComplete(
+    if (queries.getString("postgresInsertQuery") != null) {
+      executePostgresQuery(postgresService.executeWriteQuery(queries), promise);
+    } else {
+      promise.tryFail("Could not execute write query as postgres insert query is blank or null");
+    }
+    if (queries.getString("postgresDeleteQuery") != null) {
+      executePostgresQuery(postgresService.executeDeleteQuery(queries), promise);
+    } else {
+      promise.tryFail("Could not execute write query as postgres delete query is blank or null");
+    }
+  }
+
+  private void executePostgresQuery(
+      Future<JsonObject> postgresService, Promise<JsonObject> promise) {
+    Future<JsonObject> futureResult = postgresService;
+    futureResult.onComplete(
         handler -> {
           if (handler.succeeded()) {
             promise.tryComplete(handler.result());
