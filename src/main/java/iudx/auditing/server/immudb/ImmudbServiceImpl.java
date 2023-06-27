@@ -24,23 +24,29 @@ public class ImmudbServiceImpl implements ImmudbService {
   @Override
   public Future<JsonObject> executeWriteQuery(JsonObject query) {
     Promise<JsonObject> promise = Promise.promise();
-    JsonObject response = new JsonObject();
-    PgPool pgClient = poolForOrigin(query.getString(ORIGIN));
-    pgClient
-        .withConnection(
-            connection -> connection.query(query.getString(IMMUDB_WRITE_QUERY)).execute())
-        .onComplete(
-            rows -> {
-              if (rows.succeeded()) {
-                LOGGER.debug("Immudb Table updated successfully");
-                response.put(RESULT, "Table Updated Successfully");
-                promise.complete(response);
-              } else {
-                LOGGER.error("Info: failed :" + rows.cause());
-                response.put(RESULT, rows.cause());
-                promise.fail(rows.cause());
-              }
-            });
+    if (query.getString(IMMUDB_WRITE_QUERY) != null
+        && !query.getString(IMMUDB_WRITE_QUERY).isEmpty()) {
+      JsonObject response = new JsonObject();
+      PgPool pgClient = poolForOrigin(query.getString(ORIGIN));
+      pgClient
+          .withConnection(
+              connection -> connection.query(query.getString(IMMUDB_WRITE_QUERY)).execute())
+          .onComplete(
+              rows -> {
+                if (rows.succeeded()) {
+                  LOGGER.debug("Immudb Table updated successfully");
+                  response.put(RESULT, "Table Updated Successfully");
+                  promise.complete(response);
+                } else {
+                  LOGGER.error("Info: failed :" + rows.cause());
+                  response.put(RESULT, rows.cause());
+                  promise.fail(rows.cause());
+                }
+              });
+    } else {
+      LOGGER.error("Could not execute write query as the query supplied is blank or null");
+      promise.fail("Could not execute write query as the query supplied is blank or null");
+    }
     return promise.future();
   }
 

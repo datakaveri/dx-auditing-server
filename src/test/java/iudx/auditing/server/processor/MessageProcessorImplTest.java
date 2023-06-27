@@ -51,7 +51,7 @@ class MessageProcessorImplTest {
                 .put(PROVIDER_ID, "providerId")
                 .put(API, "api")
                 .put(EPOCH_TIME, 5000)
-                .put(ISO_TIME, "isoTime")
+                .put(ISO_TIME, "2000-03-03T21:00:00Z")
                 .put(SIZE, 0)
                 .put(RS_PG_TABLE_NAME, "RS_PG_TABLE_NAME")
                 .put(RS_IMMUDB_TABLE_NAME, "RS_IMMUDB_TABLE_NAME");
@@ -171,7 +171,7 @@ class MessageProcessorImplTest {
                 .put(PROVIDER_ID, "providerId")
                 .put(API, "api")
                 .put(EPOCH_TIME, 5000)
-                .put(ISO_TIME, "isoTime")
+                .put(ISO_TIME, "2000-03-03T21:00:00Z")
                 .put(SIZE, 0)
                 .put(RS_PG_TABLE_NAME, "RS_PG_TABLE_NAME")
                 .put(RS_IMMUDB_TABLE_NAME, "RS_IMMUDB_TABLE_NAME");
