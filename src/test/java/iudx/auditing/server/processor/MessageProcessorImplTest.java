@@ -64,7 +64,7 @@ class MessageProcessorImplTest {
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
         doAnswer(Answer -> Future.succeededFuture()).when(immudbService).executeWriteQuery(any());
 
-        Future<JsonObject> resultJson = messageProcessor.process(message);
+        Future<JsonObject> resultJson = messageProcessor.processAuditEventMessages(message);
         assertEquals(message, resultJson.result());
         vertxTestContext.completeNow();
     }
@@ -88,7 +88,7 @@ class MessageProcessorImplTest {
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
         doAnswer(Answer -> Future.succeededFuture()).when(immudbService).executeWriteQuery(any());
 
-        Future<JsonObject> resultJson = messageProcessor.process(message);
+        Future<JsonObject> resultJson = messageProcessor.processAuditEventMessages(message);
         assertEquals(message, resultJson.result());
         vertxTestContext.completeNow();
     }
@@ -112,7 +112,7 @@ class MessageProcessorImplTest {
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
         doAnswer(Answer -> Future.succeededFuture()).when(immudbService).executeWriteQuery(any());
 
-        Future<JsonObject> resultJson = messageProcessor.process(message);
+        Future<JsonObject> resultJson = messageProcessor.processAuditEventMessages(message);
         assertEquals(message, resultJson.result());
         vertxTestContext.completeNow();
     }
@@ -136,7 +136,7 @@ class MessageProcessorImplTest {
         doAnswer(Answer -> Future.failedFuture("failed")).when(immudbService).executeWriteQuery(any());
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeDeleteQuery(any());
 
-        Future<JsonObject> resultJson = messageProcessor.process(message);
+        Future<JsonObject> resultJson = messageProcessor.processAuditEventMessages(message);
         assertEquals("failed", resultJson.cause().getMessage());
         vertxTestContext.completeNow();
     }
@@ -160,7 +160,7 @@ class MessageProcessorImplTest {
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
         doAnswer(Answer -> Future.failedFuture("failed")).when(immudbService).executeWriteQuery(any());
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeDeleteQuery(any());
-        Future<JsonObject> resultJson = messageProcessor.process(message);
+        Future<JsonObject> resultJson = messageProcessor.processAuditEventMessages(message);
         assertEquals("failed", resultJson.cause().getMessage());
         vertxTestContext.completeNow();
     }
@@ -189,7 +189,7 @@ class MessageProcessorImplTest {
         doAnswer(Answer -> Future.failedFuture("failed")).when(immudbService).executeWriteQuery(any());
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeDeleteQuery(any());
 
-        Future<JsonObject> resultJson = messageProcessor.process(message);
+        Future<JsonObject> resultJson = messageProcessor.processAuditEventMessages(message);
         assertEquals("failed", resultJson.cause().getMessage());
         vertxTestContext.completeNow();
     }

@@ -8,11 +8,16 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import iudx.auditing.server.immudb.ImmudbService;
 import iudx.auditing.server.postgres.PostgresService;
+import iudx.auditing.server.processor.subscription.SubscriptionAuditService;
+import iudx.auditing.server.processor.subscription.SubscriptionAuditServiceImpl;
+import iudx.auditing.server.processor.subscription.SubscriptionConsumer;
+import iudx.auditing.server.processor.subscription.SubscriptionUser;
 import iudx.auditing.server.querystrategy.AuditingServerStrategy;
 import iudx.auditing.server.querystrategy.ServerOrigin;
 import iudx.auditing.server.querystrategy.ServerOriginContextFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import com.hazelcast.core.DistributedObjectEvent.EventType;
 
 public class MessageProcessorImpl implements MessageProcessService {
 
@@ -20,51 +25,46 @@ public class MessageProcessorImpl implements MessageProcessService {
   private final PostgresService postgresService;
   private final ImmudbService immudbService;
   private final JsonObject config;
+  private SubscriptionAuditService subsAuditService;
 
-  public MessageProcessorImpl(
-      PostgresService postgresService, ImmudbService immudbService, JsonObject config) {
+  public MessageProcessorImpl(PostgresService postgresService, ImmudbService immudbService,
+      JsonObject config) {
     this.postgresService = postgresService;
     this.immudbService = immudbService;
     this.config = config;
+    this.subsAuditService = new SubscriptionAuditServiceImpl();
   }
 
   @Override
-  public Future<JsonObject> process(JsonObject message) {
+  public Future<JsonObject> processAuditEventMessages(JsonObject message) {
     LOGGER.info("message processing starts : ");
     JsonObject queries = queryBuilder(message);
     Promise<JsonObject> promise = Promise.promise();
     if (!message.getString(ORIGIN).equals(RS_SERVER_SUBS.getOriginRole())) {
       Future<JsonObject> insertInPostgres = postgresService.executeWriteQuery(queries);
-      insertInPostgres
-          .onSuccess(
-              insertInImmudbHandler -> {
-                Future<JsonObject> insertInImmudb = immudbService.executeWriteQuery(queries);
-                insertInImmudb.onComplete(
-                    immudbHandler -> {
-                      if (insertInImmudb.succeeded()) {
-                        promise.complete(message);
-                      } else {
-                        Future<JsonObject> deleteFromPostgres =
-                            postgresService.executeDeleteQuery(queries);
-                        deleteFromPostgres.onComplete(
-                            postgresHandler -> {
-                              if (deleteFromPostgres.succeeded()) {
-                                LOGGER.error(
-                                    "Rollback : success delete. Message Origin: {}",
-                                    message.getString(ORIGIN));
-                                promise.fail(immudbHandler.cause().getMessage());
-                              } else {
-                                LOGGER.info("Rollback : delete failed");
-                                promise.fail(deleteFromPostgres.cause().getMessage());
-                              }
-                            });
-                      }
-                    });
-              })
-          .onFailure(
-              failureHandler -> {
-                promise.fail("failed to insert in postgres " + failureHandler.getCause());
-              });
+      insertInPostgres.onSuccess(insertInImmudbHandler -> {
+        Future<JsonObject> insertInImmudb = immudbService.executeWriteQuery(queries);
+        insertInImmudb.onComplete(immudbHandler -> {
+          if (insertInImmudb.succeeded()) {
+            promise.complete(message);
+          } else {
+            Future<JsonObject> deleteFromPostgres = postgresService.executeDeleteQuery(queries);
+            deleteFromPostgres.onComplete(postgresHandler -> {
+              if (deleteFromPostgres.succeeded()) {
+                LOGGER
+                    .error("Rollback : success delete. Message Origin: {}",
+                        message.getString(ORIGIN));
+                promise.fail(immudbHandler.cause().getMessage());
+              } else {
+                LOGGER.info("Rollback : delete failed");
+                promise.fail(deleteFromPostgres.cause().getMessage());
+              }
+            });
+          }
+        });
+      }).onFailure(failureHandler -> {
+        promise.fail("failed to insert in postgres " + failureHandler.getCause());
+      });
     } else {
       String eventType = message.getString("eventType");
       if (eventType == null || eventType.isEmpty()) {
@@ -92,17 +92,35 @@ public class MessageProcessorImpl implements MessageProcessService {
     }
   }
 
-  private void executePostgresQuery(
-      Future<JsonObject> postgresService, Promise<JsonObject> promise) {
+  private void process4AuditingSubscription(JsonObject queries, JsonObject message,
+      Promise<JsonObject> promise, String eventType) {
+    LOGGER.debug("inside process4AuditingSubscription");
+
+    if ("SUBS_CREATED".equals(eventType)) {
+      SubscriptionUser subsConsumer = new SubscriptionUser(message.getString("userid"),
+          message.getString("subscriptionID"), message.getString("resource"));
+      executePostgresQuery(postgresService.executeWriteQuery(queries), promise);
+      subsAuditService.addSubsConsumer(subsConsumer);
+    } else if ("SUBS_DELETED".equals(eventType)) {
+      executePostgresQuery(postgresService.executeDeleteQuery(queries), promise);
+      subsAuditService.deleteSubsConsumer(message.getString("subscriptionID"));
+    } else if ("SUBS_APPEND".equals(eventType)) {
+
+    } else {
+      LOGGER.error("Invelid event type [{}] for subscription message", eventType);
+    }
+  }
+
+  private void executePostgresQuery(Future<JsonObject> postgresService,
+      Promise<JsonObject> promise) {
     Future<JsonObject> futureResult = postgresService;
-    futureResult.onComplete(
-        handler -> {
-          if (handler.succeeded()) {
-            promise.tryComplete(handler.result());
-          } else {
-            promise.tryFail(handler.cause().getMessage());
-          }
-        });
+    futureResult.onComplete(handler -> {
+      if (handler.succeeded()) {
+        promise.tryComplete(handler.result());
+      } else {
+        promise.tryFail(handler.cause().getMessage());
+      }
+    });
   }
 
   private JsonObject queryBuilder(JsonObject request) {
@@ -115,8 +133,14 @@ public class MessageProcessorImpl implements MessageProcessService {
     String immudbWriteQuery = serverStrategy.buildImmudbWriteQuery(request);
     return new JsonObject()
         .put(PG_INSERT_QUERY_KEY, postgresWriteQuery)
-        .put(PG_DELETE_QUERY_KEY, postgresDeleteQuery)
-        .put(IMMUDB_WRITE_QUERY, immudbWriteQuery)
-        .put(ORIGIN, origin);
+          .put(PG_DELETE_QUERY_KEY, postgresDeleteQuery)
+          .put(IMMUDB_WRITE_QUERY, immudbWriteQuery)
+          .put(ORIGIN, origin);
+  }
+
+  @Override
+  public Future<Void> processSubscriptionMonitoringMessages(JsonObject message) {
+    subsAuditService.generateAuditLog(message.getString("id"), message);
+    return Future.succeededFuture();
   }
 }
