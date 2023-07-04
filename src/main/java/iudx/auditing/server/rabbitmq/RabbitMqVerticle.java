@@ -8,7 +8,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.rabbitmq.RabbitMQOptions;
 import io.vertx.serviceproxy.ServiceBinder;
-import iudx.auditing.server.common.ConsumerAction;
+import iudx.auditing.server.common.RabitMqConsumer;
 import iudx.auditing.server.common.VirtualHosts;
 import iudx.auditing.server.processor.MessageProcessService;
 import iudx.auditing.server.rabbitmq.consumers.AuditMessageConsumer;
@@ -27,7 +27,7 @@ public class RabbitMqVerticle extends AbstractVerticle {
   private int handshakeTimeout;
   private int requestedChannelMax;
   private int networkRecoveryInterval;
-  private ConsumerAction auditConsumer;
+  private RabitMqConsumer auditConsumer;
   private MessageProcessService messageProcessService;
 
   private WebClientOptions webConfig;
