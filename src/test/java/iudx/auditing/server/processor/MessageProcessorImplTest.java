@@ -6,6 +6,7 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import iudx.auditing.server.immudb.ImmudbService;
 import iudx.auditing.server.postgres.PostgresService;
+import iudx.auditing.server.rabbitmq.RabbitMqService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,12 +34,14 @@ class MessageProcessorImplTest {
     JsonObject config;
     MessageProcessorImpl messageProcessor;
     JsonObject message;
+    RabbitMqService rabbitMqService;
 
 
     @BeforeEach
     public void setUp(VertxTestContext vertxTestContext) {
         config = mock(JsonObject.class);
-        messageProcessor = new MessageProcessorImpl(postgresService, immudbService, config);
+        messageProcessor =
+            new MessageProcessorImpl(postgresService, immudbService, rabbitMqService, config);
         vertxTestContext.completeNow();
     }
 

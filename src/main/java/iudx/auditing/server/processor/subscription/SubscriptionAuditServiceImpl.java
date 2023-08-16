@@ -1,5 +1,12 @@
 package iudx.auditing.server.processor.subscription;
 
+import static iudx.auditing.server.querystrategy.ServerOrigin.RS_SERVER_SUBS;
+
+import io.vertx.core.Future;
+import io.vertx.core.Vertx;
+import iudx.auditing.server.processor.subscription.catService.CatalogueService;
+import iudx.auditing.server.processor.subscription.catService.CatalogueServiceImpl;
+import iudx.auditing.server.rabbitmq.RabbitMqService;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -16,13 +23,21 @@ public class SubscriptionAuditServiceImpl implements SubscriptionAuditService {
 
   Map<String, List<SubscriptionUser>> subscribers;
   Map<String,String> sub2ResourceIdMap;
-  
+
   Supplier<Long> epochSupplier=()->LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
   Supplier<String> isoTimeSupplier=()->ZonedDateTime.now(ZoneId.of(ZoneId.SHORT_IDS.get("IST"))).toString();
+  JsonObject config;
+  CatalogueService catalogueService;
+  RabbitMqService rabbitMqService;
+  Vertx vertx;
 
-  public SubscriptionAuditServiceImpl() {
+  public SubscriptionAuditServiceImpl(JsonObject config, RabbitMqService rabbitMqService) {
     this.subscribers = new ConcurrentHashMap<>();
     this.sub2ResourceIdMap=new ConcurrentHashMap<>();
+    this.config = config;
+    this.rabbitMqService = rabbitMqService;
+    this.catalogueService = new CatalogueServiceImpl(vertx
+        , config);
     //To handle failure pre fill maps above from DB on startup/object creations
   }
 
@@ -48,24 +63,26 @@ public class SubscriptionAuditServiceImpl implements SubscriptionAuditService {
       //calculate size [look in Java Instrumentation class]
       //get provider for resource_id [through cat API]
       //generate message format
-      SubscriptionAuditMessage auditMessage=new SubscriptionAuditMessage.Builder()
-          .atEpoch(epochSupplier.get())
-          .atIsoTime(isoTimeSupplier.get())
-          .forOrigin("rs-server")
-          .forResourceId("resource_id")
-          .forUserId("user_id")
-          .withPrimaryKey("generate pk")
-          .withProviderId("getProviderID")
-          .withResponseSize(123)//calculate message size
-          .build();
-      
-      List<SubscriptionUser> allSubscribersForResourceId=subscribers.get(resourceid);
-      allSubscribersForResourceId.forEach(consumer->consumer.publishAuditLogMessage(auditMessage));
+      Future<JsonObject> catItemFuture = catalogueService.searchCatItem(resourceid);
+      catItemFuture.onSuccess(
+          catItem -> {
+            SubscriptionAuditMessage auditMessage = new SubscriptionAuditMessage.Builder()
+                .atEpoch(epochSupplier.get())
+                .atIsoTime(isoTimeSupplier.get())
+                .forOrigin(RS_SERVER_SUBS.name())//
+                .forResourceId(resourceid)
+                .forUserId(consumedMessage.getString("userid"))
+                .withPrimaryKey("generate pk")
+                .withProviderId(catItem.getString("provider"))
+                .withResponseSize(123)//calculate message size
+                .build();
+
+            List<SubscriptionUser> allSubscribersForResourceId = subscribers.get(resourceid);
+            allSubscribersForResourceId.forEach(
+                consumer -> consumer.publishAuditLogMessage(auditMessage,rabbitMqService));
+
+          });
+
     }
   }
-  
-  
-  
-
-
 }

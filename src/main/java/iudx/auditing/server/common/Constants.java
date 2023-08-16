@@ -14,6 +14,8 @@ public class Constants {
   
   public static final String AUDIT_LATEST_QUEUE = "auditing-messages";
   public static final String SUBS_MONITORING_QUEUE="";
+  public static final String EXCHANGE_NAME="auditing";
+  public static final String ROUTING_KEY="#";
 
   public static final String RS_SERVER = "rs-server";
   public static final String CAT_SERVER = "cat-server";
@@ -26,4 +28,5 @@ public class Constants {
 
   public static final String DI_SERVER = "data-ingestion";
   public static final String ACL_APD_SERVER = "acl-apd-server";
+  public static final String CAT_SEARCH_PATH = "/search";
 }

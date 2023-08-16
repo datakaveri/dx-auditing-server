@@ -8,6 +8,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ServiceBinder;
 import iudx.auditing.server.immudb.ImmudbService;
 import iudx.auditing.server.postgres.PostgresService;
+import iudx.auditing.server.rabbitmq.RabbitMqService;
 
 public class ProcessorVerticle extends AbstractVerticle {
 
@@ -16,14 +17,16 @@ public class ProcessorVerticle extends AbstractVerticle {
   private ImmudbService immudbService;
   private ServiceBinder binder;
   private MessageConsumer<JsonObject> consumer;
+  private RabbitMqService rabbitMqService;
 
   @Override
   public void start() throws Exception {
 
     postgresService = PostgresService.createProxy(vertx, PG_SERVICE_ADDRESS);
     immudbService = ImmudbService.createProxy(vertx, IMMUDB_SERVICE_ADDRESS);
+    rabbitMqService = RabbitMqService.createProxy(vertx,RMQ_SERVICE_ADDRESS);
 
-    processor = new MessageProcessorImpl(postgresService, immudbService, config());
+    processor = new MessageProcessorImpl(postgresService, immudbService, rabbitMqService, config());
 
     binder = new ServiceBinder(vertx);
 

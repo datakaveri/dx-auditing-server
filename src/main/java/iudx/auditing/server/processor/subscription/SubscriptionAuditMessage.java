@@ -55,7 +55,7 @@ public class SubscriptionAuditMessage{
     }
     
     public Builder forUserId(String userId) {
-      this.userid=userid;
+      this.userid=userId;
       return this;
     }
     

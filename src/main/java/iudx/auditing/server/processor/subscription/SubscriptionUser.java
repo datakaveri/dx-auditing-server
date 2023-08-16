@@ -1,6 +1,8 @@
 package iudx.auditing.server.processor.subscription;
 
 
+import iudx.auditing.server.rabbitmq.RabbitMqService;
+
 public class SubscriptionUser implements SubscriptionConsumer{
 
   private final String userId;
@@ -27,8 +29,10 @@ public class SubscriptionUser implements SubscriptionConsumer{
   }
 
   @Override
-  public void publishAuditLogMessage(SubscriptionAuditMessage auditMessage) {
+  public void publishAuditLogMessage(SubscriptionAuditMessage auditMessage, RabbitMqService rabbitMqService) {
+    rabbitMqService.publishMessage(auditMessage.toJson());
     // TODO puch Audit message to RMQ
+
     
   }
 

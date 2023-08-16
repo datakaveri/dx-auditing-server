@@ -15,6 +15,7 @@ import iudx.auditing.server.processor.subscription.SubscriptionUser;
 import iudx.auditing.server.querystrategy.AuditingServerStrategy;
 import iudx.auditing.server.querystrategy.ServerOrigin;
 import iudx.auditing.server.querystrategy.ServerOriginContextFactory;
+import iudx.auditing.server.rabbitmq.RabbitMqService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import com.hazelcast.core.DistributedObjectEvent.EventType;
@@ -24,15 +25,17 @@ public class MessageProcessorImpl implements MessageProcessService {
   private static final Logger LOGGER = LogManager.getLogger(MessageProcessorImpl.class);
   private final PostgresService postgresService;
   private final ImmudbService immudbService;
+  private final RabbitMqService rabbitMqService;
   private final JsonObject config;
   private SubscriptionAuditService subsAuditService;
 
-  public MessageProcessorImpl(PostgresService postgresService, ImmudbService immudbService,
+  public MessageProcessorImpl(PostgresService postgresService, ImmudbService immudbService, RabbitMqService rabbitMqService,
       JsonObject config) {
     this.postgresService = postgresService;
     this.immudbService = immudbService;
     this.config = config;
-    this.subsAuditService = new SubscriptionAuditServiceImpl();
+    this.rabbitMqService = rabbitMqService;
+    this.subsAuditService = new SubscriptionAuditServiceImpl(config,rabbitMqService);
   }
 
   @Override
