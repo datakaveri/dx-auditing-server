@@ -187,4 +187,29 @@ class MessageProcessorImplTest {
         vertxTestContext.completeNow();
     }
 
+    @Test
+    @DisplayName("Testing Success process as origin ogc-server")
+    void testPocess4OgcSuccess(VertxTestContext vertxTestContext) {
+        message = new JsonObject().put(ORIGIN, "ogc-server")
+                .put(USER_ID, "userid")
+                .put(PRIMARY_KEY, "primary_key")
+                .put(ID, "id")
+                .put(PROVIDER_ID, "providerId")
+                .put(API, "api")
+                .put(EPOCH_TIME, 5000)
+                .put(ISO_TIME, "2000-03-03T21:00:00Z")
+                .put(SIZE, 0)
+                .put(OGC_PG_TABLE_NAME, "OGC_PG_TABLE_NAME")
+                .put(OGC_IMMUDB_TABLE_NAME, "OGC_IMMUDB_TABLE_NAME")
+                .put(ITEM_TYPE,"itemType");
+
+        when(config.getString((anyString()))).thenReturn("auditing_ogc");
+        doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
+        doAnswer(Answer -> Future.succeededFuture()).when(immudbService).executeWriteQuery(any());
+
+        Future<JsonObject> resultJson = messageProcessor.process(message);
+        assertEquals(message, resultJson.result());
+        vertxTestContext.completeNow();
+    }
+
 }

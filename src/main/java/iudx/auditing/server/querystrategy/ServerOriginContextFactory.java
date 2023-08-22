@@ -7,12 +7,14 @@ public class ServerOriginContextFactory {
   private final AuditingServerStrategy catalogueServerStrategy;
   private final AuditingServerStrategy authServerStrategy;
   private final AuditingServerStrategy rsSubscriptionStrategy;
+  private final AuditingServerStrategy ogcServerStrategy;
 
   public ServerOriginContextFactory(JsonObject config) {
     this.resourceServerStrategy = new ResourceAuditingStrategy(config);
     this.catalogueServerStrategy = new CatalogueAuditingStrategy(config);
     this.authServerStrategy = new AuthAuditingStrategy(config);
     this.rsSubscriptionStrategy = new RsSubscriptionStrategy(config);
+    this.ogcServerStrategy = new OgcAuditingStrategy(config);
   }
 
   public AuditingServerStrategy create(ServerOrigin serverOrigin) {
@@ -37,6 +39,11 @@ public class ServerOriginContextFactory {
         {
           return rsSubscriptionStrategy;
         }
+      case OGC_SERVER:
+      {
+        //TODO: check once everything is final
+        return ogcServerStrategy;
+      }
       default:
         throw new IllegalArgumentException(serverOrigin + "serverOrigin is not defined");
     }
