@@ -56,6 +56,7 @@ public class ImmudbServiceImpl implements ImmudbService {
       case DI_SERVER:
       case GIS_SERVER:
       case FILE_SERVER:
+      case ACL_APD_SERVER:
         return pgClientForRs;
       case AAA_SERVER:
         return pgClientForAaa;

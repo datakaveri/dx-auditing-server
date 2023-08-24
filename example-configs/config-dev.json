@@ -25,9 +25,11 @@
       "immudbRsTableName": "",
       "immudbCatTableName": "",
       "immudbAuthTableName": "",
+      "immudbApdTableName" : "",
       "postgresRsTableName": "",
       "postgresCatTableName": "",
-      "postgresAuthTableName": ""
+      "postgresAuthTableName": "",
+      "postgersApdTableName": ""
     },
     {
       "id": "iudx.auditing.server.postgres.PostgresVerticle",
