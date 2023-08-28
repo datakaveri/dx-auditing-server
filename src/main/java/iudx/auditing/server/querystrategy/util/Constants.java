@@ -55,6 +55,6 @@ public class Constants {
       "INSERT INTO $0 (id,userid,endpoint,method,body,size,time) VALUES ('$1','$2','$3','$4','$5',$6,'$7')";
   public static final String APD_WRITE_QUERY_IMMUDB =
       "INSERT INTO $0 (id,userid,endpoint,method,body,size,epochtime,isotime)"
-          + " VALUES ('$1','$2','$3','$4','$5','$6','$7','$8')";
+          + " VALUES ('$1','$2','$3','$4','$5',$6,$7,'$8')";
 
 }
