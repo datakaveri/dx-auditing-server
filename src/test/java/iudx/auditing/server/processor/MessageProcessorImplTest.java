@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static iudx.auditing.server.common.Constants.ACL_APD_SERVER;
 import static iudx.auditing.server.common.Constants.ORIGIN;
 import static iudx.auditing.server.querystrategy.util.Constants.*;
 import static javax.xml.transform.OutputKeys.METHOD;
@@ -184,6 +185,29 @@ class MessageProcessorImplTest {
 
         Future<JsonObject> resultJson = messageProcessor.process(message);
         assertEquals("failed", resultJson.cause().getMessage());
+        vertxTestContext.completeNow();
+    }
+    @Test
+    @DisplayName("Testing Success process as origin acl-apd-server")
+    void testPocess4AclApdSuccess(VertxTestContext vertxTestContext) {
+        message = new JsonObject().put(ORIGIN, ACL_APD_SERVER)
+            .put(USER_ID, "49b52be3-bc00-4548-97d7-99cee5bfc8cd")
+            .put(PRIMARY_KEY, "PRIMARY_KEY")
+            .put(API, "api")
+            .put(EPOCH_TIME, 5000)
+            .put(ISO_TIME, "2000-03-03T21:00:00Z")
+            .put(SIZE, 0)
+            .put(HTTP_METHOD,"post")
+            .put(BODY,new JsonObject())
+            .put(APD_WRITE_QUERY_PG, "APD_PG_TABLE_NAME")
+            .put(APD_IMMUDB_TABLE_NAME, "APD_IMMUDB_TABLE_NAME");
+
+        when(config.getString((anyString()))).thenReturn("tablename");
+        doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
+        doAnswer(Answer -> Future.succeededFuture()).when(immudbService).executeWriteQuery(any());
+
+        Future<JsonObject> resultJson = messageProcessor.process(message);
+        assertEquals(message, resultJson.result());
         vertxTestContext.completeNow();
     }
 

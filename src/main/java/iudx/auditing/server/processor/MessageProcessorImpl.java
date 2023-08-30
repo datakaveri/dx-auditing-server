@@ -70,7 +70,7 @@ public class MessageProcessorImpl implements MessageProcessService {
       if (eventType == null || eventType.isEmpty()) {
         promise.tryFail("EventType is null or empty for subscription related processing");
       } else {
-        process4AuditingSubscription(queries, promise, eventType);
+        process4AuditingSubscription(queries, promise);
       }
     }
 
@@ -78,7 +78,7 @@ public class MessageProcessorImpl implements MessageProcessService {
   }
 
   private void process4AuditingSubscription(
-      JsonObject queries, Promise<JsonObject> promise, String eventType) {
+      JsonObject queries, Promise<JsonObject> promise) {
     LOGGER.debug("inside process4AuditingSubscription");
     if (queries.getString("postgresInsertQuery") != null) {
       executePostgresQuery(postgresService.executeWriteQuery(queries), promise);

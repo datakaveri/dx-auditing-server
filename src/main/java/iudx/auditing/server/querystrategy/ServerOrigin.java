@@ -9,7 +9,8 @@ public enum ServerOrigin {
   FILE_SERVER("file-server"),
   GIS_SERVER("gis-server"),
   DI_SERVER("data-ingestion"),
-  RS_SERVER_SUBS("rs-server-subscriptions");
+  RS_SERVER_SUBS("rs-server-subscriptions"),
+  ACL_APD_SERVER("acl-apd-server");
 
   private final String originRole;
 
