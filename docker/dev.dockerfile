@@ -21,8 +21,6 @@ ENV JAR="iudx.auditing.server-dev-${VERSION}-fat.jar"
 
 WORKDIR /usr/share/app
 
-# Copying openapi docs
-COPY docs docs
 COPY iudx-pmd-ruleset.xml iudx-pmd-ruleset.xml
 COPY google_checks.xml google_checks.xml
 
