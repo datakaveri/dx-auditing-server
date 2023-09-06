@@ -55,7 +55,9 @@ class MessageProcessorImplTest {
                 .put(ISO_TIME, "2000-03-03T21:00:00Z")
                 .put(SIZE, 0)
                 .put(RS_PG_TABLE_NAME, "RS_PG_TABLE_NAME")
-                .put(RS_IMMUDB_TABLE_NAME, "RS_IMMUDB_TABLE_NAME");
+                .put(RS_IMMUDB_TABLE_NAME, "RS_IMMUDB_TABLE_NAME")
+                .put(RESOURCE_GROUP, "resourceGroup")
+                .put(TYPE, "type");
 
         when(config.getString((anyString()))).thenReturn("tableName");
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
@@ -175,7 +177,9 @@ class MessageProcessorImplTest {
                 .put(ISO_TIME, "2000-03-03T21:00:00Z")
                 .put(SIZE, 0)
                 .put(RS_PG_TABLE_NAME, "RS_PG_TABLE_NAME")
-                .put(RS_IMMUDB_TABLE_NAME, "RS_IMMUDB_TABLE_NAME");
+                .put(RS_IMMUDB_TABLE_NAME, "RS_IMMUDB_TABLE_NAME")
+                .put(RESOURCE_GROUP, "resourceGroup")
+                .put(TYPE, "type");;
 
         when(config.getString((anyString()))).thenReturn("tableName");
 

@@ -25,6 +25,8 @@ public class ResourceAuditingStrategy implements AuditingServerStrategy {
     String isoTime = request.getString(ISO_TIME);
     long responseSize = request.getLong(SIZE);
     String databaseTableName = config.getString(RS_PG_TABLE_NAME);
+    String itemType = request.getString(TYPE);
+    String resourcegroup = request.getString(RESOURCE_GROUP);
 
     ZonedDateTime zonedDateTime = ZonedDateTime.parse(isoTime);
     zonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.of("UTC"));
@@ -44,7 +46,11 @@ public class ResourceAuditingStrategy implements AuditingServerStrategy {
         .replace("$6", isoTime)
         .replace("$7", providerId)
         .replace("$8", Long.toString(responseSize))
-        .replace("$9", utcTime.toString());
+        .replace("$9", utcTime.toString()
+        .replace("$10",resourcegroup))
+        .replace("$a",resourcegroup)
+        .replace("$b",itemType);
+
   }
 
   @Override
