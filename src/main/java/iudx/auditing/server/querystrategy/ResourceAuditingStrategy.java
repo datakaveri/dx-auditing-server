@@ -46,8 +46,7 @@ public class ResourceAuditingStrategy implements AuditingServerStrategy {
         .replace("$6", isoTime)
         .replace("$7", providerId)
         .replace("$8", Long.toString(responseSize))
-        .replace("$9", utcTime.toString()
-        .replace("$10",resourcegroup))
+        .replace("$9", utcTime.toString())
         .replace("$a",resourcegroup)
         .replace("$b",itemType);
 
