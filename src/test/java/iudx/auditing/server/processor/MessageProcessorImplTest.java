@@ -46,18 +46,19 @@ class MessageProcessorImplTest {
     @DisplayName("Testing Success process as origin rs-server")
     void testPocess4RsSuccess(VertxTestContext vertxTestContext) {
         message = new JsonObject().put(ORIGIN, "rs-server")
-                .put(USER_ID, "userid")
-                .put(PRIMARY_KEY, "prmary_key")
-                .put(ID, "id")
-                .put(PROVIDER_ID, "providerId")
-                .put(API, "api")
-                .put(EPOCH_TIME, 5000)
-                .put(ISO_TIME, "2000-03-03T21:00:00Z")
-                .put(SIZE, 0)
-                .put(RS_PG_TABLE_NAME, "RS_PG_TABLE_NAME")
-                .put(RS_IMMUDB_TABLE_NAME, "RS_IMMUDB_TABLE_NAME")
-                .put(RESOURCE_GROUP, "resourceGroup")
-                .put(TYPE, "type");
+            .put(USER_ID, "userid")
+            .put(PRIMARY_KEY, "prmary_key")
+            .put(ID, "id")
+            .put(PROVIDER_ID, "providerId")
+            .put(API, "api")
+            .put(EPOCH_TIME, 5000)
+            .put(ISO_TIME, "2000-03-03T21:00:00Z")
+            .put(SIZE, 0)
+            .put(RS_PG_TABLE_NAME, "RS_PG_TABLE_NAME")
+            .put(RS_IMMUDB_TABLE_NAME, "RS_IMMUDB_TABLE_NAME")
+            .put(RESOURCE_GROUP, "resourceGroup")
+            .put(TYPE, "type")
+            .put(DELEGATOR_ID, "del");
 
         when(config.getString((anyString()))).thenReturn("tableName");
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
@@ -168,18 +169,19 @@ class MessageProcessorImplTest {
     @DisplayName("Testing Failed process as origin rs-server")
     void testPocess4RsFailure(VertxTestContext vertxTestContext) {
         message = new JsonObject().put(ORIGIN, "rs-server")
-                .put(USER_ID, "userid")
-                .put(PRIMARY_KEY, "prmary_key")
-                .put(ID, "id")
-                .put(PROVIDER_ID, "providerId")
-                .put(API, "api")
-                .put(EPOCH_TIME, 5000)
-                .put(ISO_TIME, "2000-03-03T21:00:00Z")
-                .put(SIZE, 0)
-                .put(RS_PG_TABLE_NAME, "RS_PG_TABLE_NAME")
-                .put(RS_IMMUDB_TABLE_NAME, "RS_IMMUDB_TABLE_NAME")
-                .put(RESOURCE_GROUP, "resourceGroup")
-                .put(TYPE, "type");;
+            .put(USER_ID, "userid")
+            .put(PRIMARY_KEY, "prmary_key")
+            .put(ID, "id")
+            .put(PROVIDER_ID, "providerId")
+            .put(API, "api")
+            .put(EPOCH_TIME, 5000)
+            .put(ISO_TIME, "2000-03-03T21:00:00Z")
+            .put(SIZE, 0)
+            .put(RS_PG_TABLE_NAME, "RS_PG_TABLE_NAME")
+            .put(RS_IMMUDB_TABLE_NAME, "RS_IMMUDB_TABLE_NAME")
+            .put(RESOURCE_GROUP, "resourceGroup")
+            .put(TYPE, "type")
+            .put(DELEGATOR_ID, "delegator");
 
         when(config.getString((anyString()))).thenReturn("tableName");
 
