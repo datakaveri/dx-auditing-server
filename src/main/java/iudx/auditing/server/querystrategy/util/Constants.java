@@ -17,6 +17,7 @@ public class Constants {
   public static final String HTTP_METHOD = "httpMethod";
   public static final String RESOURCE_GROUP = "resourceGroup";
   public static final String TYPE = "type";
+  public static final String DELEGATOR_ID = "delegatorId";
 
   public static final String EPOCH_TIME = "epochTime";
   public static final String API = "api";
@@ -33,8 +34,8 @@ public class Constants {
       "INSERT INTO $0 (id,api,userid,epochtime,resourceid,isotime,providerid,size) "
           + "VALUES ('$1','$2','$3',$4,'$5','$6','$7',$8)";
   public static final String RS_WRITE_QUERY_PG =
-      "INSERT INTO $0 (id,api,userid,epochtime,resourceid,isotime,providerid,size,time,resource_group,item_type)"
-          + " VALUES ('$1','$2','$3',$4,'$5','$6','$7',$8,'$9','$a','$b')";
+      "INSERT INTO $0 (id,api,userid,epochtime,resourceid,isotime,providerid,size,time,resource_group,item_type,delegator_id)"
+          + " VALUES ('$1','$2','$3',$4,'$5','$6','$7',$8,'$9','$a','$b','$c')";
   public static final String CAT_WRITE_QUERY_PG =
       "INSERT INTO $0 (id, userRole, userID, iid, api, method, time, iudxID) "
           + "VALUES ('$1','$2','$3','$4','$5','$6',$7,'$8')";

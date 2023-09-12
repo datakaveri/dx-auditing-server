@@ -27,6 +27,8 @@ public class ResourceAuditingStrategy implements AuditingServerStrategy {
     String databaseTableName = config.getString(RS_PG_TABLE_NAME);
     String itemType = request.getString(TYPE);
     String resourcegroup = request.getString(RESOURCE_GROUP);
+    String delegatorId =
+        request.getString(DELEGATOR_ID) != null ? request.getString(DELEGATOR_ID) : userId;
 
     ZonedDateTime zonedDateTime = ZonedDateTime.parse(isoTime);
     zonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.of("UTC"));
@@ -47,8 +49,9 @@ public class ResourceAuditingStrategy implements AuditingServerStrategy {
         .replace("$7", providerId)
         .replace("$8", Long.toString(responseSize))
         .replace("$9", utcTime.toString())
-        .replace("$a",resourcegroup)
-        .replace("$b",itemType);
+        .replace("$a", resourcegroup)
+        .replace("$b", itemType)
+        .replace("$c", delegatorId);
 
   }
 
