@@ -1,5 +1,6 @@
 package iudx.auditing.server.processor.subscription;
 
+import static iudx.auditing.server.common.Constants.DELIVERY_TAG;
 import static iudx.auditing.server.querystrategy.ServerOrigin.RS_SERVER;
 
 import io.vertx.core.Vertx;
@@ -58,10 +59,12 @@ public class SubscriptionAuditServiceImpl implements SubscriptionAuditService {
   @Override
   public void generateAuditLog(String resourceid, JsonObject consumedMessage) {
     synchronized (this) {
-      long size = consumedMessage.toString().getBytes().length;
+      JsonObject message = consumedMessage.copy();
+      message.remove(DELIVERY_TAG);
+      long size = message.toString().getBytes().length;
       LOGGER.debug("Json_size:{} ", size);
 
-      List<SubscriptionUser> allSubscribersForResourceId = subscribers.get(resourceid);
+      List<SubscriptionUser> allSubscribersForResourceId = subscribers.getOrDefault(resourceid,new ArrayList<>());
       allSubscribersForResourceId.forEach(
           consumer -> {
 

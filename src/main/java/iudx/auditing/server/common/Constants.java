@@ -13,9 +13,9 @@ public class Constants {
   public static final String IMMUDB_WRITE_QUERY = "immudbWriteQuery";
 
   public static final String AUDIT_LATEST_QUEUE = "auditing-messages";
-  public static final String SUBS_MONITORING_QUEUE = "audit";
+  public static final String SUBS_MONITORING_QUEUE = "subscriptions-monitoring";
   public static final String EXCHANGE_NAME = "auditing";
-  public static final String ROUTING_KEY = "###";
+  public static final String ROUTING_KEY = "#";
 
   public static final String RS_SERVER = "rs-server";
   public static final String CAT_SERVER = "cat-server";
