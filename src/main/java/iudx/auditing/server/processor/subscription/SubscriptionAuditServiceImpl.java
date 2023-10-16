@@ -13,6 +13,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -55,6 +56,19 @@ public class SubscriptionAuditServiceImpl implements SubscriptionAuditService {
     List<SubscriptionUser> subsList = subscribers.get(resourceId);
     subsList.removeIf(subsUser -> subsUser.getSubsId().equals(subsId));
   }
+
+
+  @Override
+  public SubscriptionUser getSubsConsumer(String subsId) {
+    String resourceId = sub2ResourceIdMap.get(subsId);
+    List<SubscriptionUser> subsList = subscribers.get(resourceId);
+    Optional<SubscriptionUser> subUser =  subsList.stream().filter(subsUser -> subsUser.getSubsId().equals(subsId)).findAny();
+    if(subUser.isPresent()){
+      return subUser.get();
+    }
+    return null;
+  }
+
 
   @Override
   public void generateAuditLog(String resourceid, JsonObject consumedMessage) {
