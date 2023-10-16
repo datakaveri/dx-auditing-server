@@ -1,43 +1,41 @@
 package iudx.auditing.server.processor.subscription;
 
-import static iudx.auditing.server.querystrategy.ServerOrigin.RS_SERVER_SUBS;
+import static iudx.auditing.server.querystrategy.ServerOrigin.RS_SERVER;
 
-import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import iudx.auditing.server.processor.subscription.catService.CatalogueService;
-import iudx.auditing.server.processor.subscription.catService.CatalogueServiceImpl;
+import io.vertx.core.json.JsonObject;
 import iudx.auditing.server.rabbitmq.RabbitMqService;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
-import io.vertx.core.json.JsonObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class SubscriptionAuditServiceImpl implements SubscriptionAuditService {
-
+  private static final Logger LOGGER = LogManager.getLogger(SubscriptionAuditServiceImpl.class);
   Map<String, List<SubscriptionUser>> subscribers;
-  Map<String,String> sub2ResourceIdMap;
+  Map<String, String> sub2ResourceIdMap;
 
-  Supplier<Long> epochSupplier=()->LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
-  Supplier<String> isoTimeSupplier=()->ZonedDateTime.now(ZoneId.of(ZoneId.SHORT_IDS.get("IST"))).toString();
-  JsonObject config;
-  CatalogueService catalogueService;
+  Supplier<Long> epochSupplier = () -> LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+  Supplier<String> isoTimeSupplier =
+      () -> ZonedDateTime.now(ZoneId.of(ZoneId.SHORT_IDS.get("IST"))).toString();
+  Supplier<String> primaryKeySuppler = () -> UUID.randomUUID().toString().replace("-", "");
+
+
   RabbitMqService rabbitMqService;
   Vertx vertx;
 
-  public SubscriptionAuditServiceImpl(JsonObject config, RabbitMqService rabbitMqService) {
+  public SubscriptionAuditServiceImpl(RabbitMqService rabbitMqService) {
     this.subscribers = new ConcurrentHashMap<>();
-    this.sub2ResourceIdMap=new ConcurrentHashMap<>();
-    this.config = config;
+    this.sub2ResourceIdMap = new ConcurrentHashMap<>();
     this.rabbitMqService = rabbitMqService;
-    this.catalogueService = new CatalogueServiceImpl(vertx
-        , config);
     //To handle failure pre fill maps above from DB on startup/object creations
   }
 
@@ -52,37 +50,36 @@ public class SubscriptionAuditServiceImpl implements SubscriptionAuditService {
 
   @Override
   public void deleteSubsConsumer(String subsId) {
-    String resourceId=sub2ResourceIdMap.get(subsId);
-    List<SubscriptionUser> subsList=subscribers.get(resourceId);
-    subsList.removeIf(subsUser->subsUser.getSubsId().equals(subsId));
+    String resourceId = sub2ResourceIdMap.get(subsId);
+    List<SubscriptionUser> subsList = subscribers.get(resourceId);
+    subsList.removeIf(subsUser -> subsUser.getSubsId().equals(subsId));
   }
 
   @Override
   public void generateAuditLog(String resourceid, JsonObject consumedMessage) {
     synchronized (this) {
-      //calculate size [look in Java Instrumentation class]
-      //get provider for resource_id [through cat API]
-      //generate message format
-      Future<JsonObject> catItemFuture = catalogueService.searchCatItem(resourceid);
-      catItemFuture.onSuccess(
-          catItem -> {
+      long size = consumedMessage.toString().getBytes().length;
+      LOGGER.debug("Json_size:{} ", size);
+
+      List<SubscriptionUser> allSubscribersForResourceId = subscribers.get(resourceid);
+      allSubscribersForResourceId.forEach(
+          consumer -> {
+
             SubscriptionAuditMessage auditMessage = new SubscriptionAuditMessage.Builder()
                 .atEpoch(epochSupplier.get())
                 .atIsoTime(isoTimeSupplier.get())
-                .forOrigin(RS_SERVER_SUBS.name())//
+                .forOrigin(RS_SERVER.getOriginRole())
                 .forResourceId(resourceid)
-                .forUserId(consumedMessage.getString("userid"))
-                .withPrimaryKey("generate pk")
-                .withProviderId(catItem.getString("provider"))
-                .withResponseSize(123)//calculate message size
+                .forUserId(consumer.getUserId())
+                .withPrimaryKey(primaryKeySuppler.get())
+                .withProviderId(consumer.getProviderId())
+                .withResponseSize(size)
+                .forResourceGroup(consumer.getResourceGroup())
+                .forType(consumer.getType())
+                .withDelegatorId(consumer.getDelegatorId())
                 .build();
-
-            List<SubscriptionUser> allSubscribersForResourceId = subscribers.get(resourceid);
-            allSubscribersForResourceId.forEach(
-                consumer -> consumer.publishAuditLogMessage(auditMessage,rabbitMqService));
-
+            consumer.publishAuditLogMessage(auditMessage, rabbitMqService);
           });
-
     }
   }
 }

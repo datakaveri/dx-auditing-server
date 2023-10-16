@@ -12,6 +12,7 @@ import iudx.auditing.server.common.RabitMqConsumer;
 import iudx.auditing.server.common.VirtualHosts;
 import iudx.auditing.server.processor.MessageProcessService;
 import iudx.auditing.server.rabbitmq.consumers.AuditMessageConsumer;
+import iudx.auditing.server.rabbitmq.consumers.SubscriptionMonitoringConsumer;
 
 public class RabbitMqVerticle extends AbstractVerticle {
   private RabbitMqService rabbitMqService;
@@ -28,6 +29,7 @@ public class RabbitMqVerticle extends AbstractVerticle {
   private int requestedChannelMax;
   private int networkRecoveryInterval;
   private RabitMqConsumer auditConsumer;
+  private RabitMqConsumer subsConsumer;
   private MessageProcessService messageProcessService;
 
   private WebClientOptions webConfig;
@@ -80,7 +82,10 @@ public class RabbitMqVerticle extends AbstractVerticle {
     messageProcessService = MessageProcessService.createProxy(vertx, MSG_PROCESS_ADDRESS);
 
     auditConsumer = new AuditMessageConsumer(vertx, internalVhostOptions, messageProcessService);
+    subsConsumer =
+        new SubscriptionMonitoringConsumer(vertx, internalVhostOptions, messageProcessService);
     auditConsumer.start();
+    subsConsumer.start();
     binder = new ServiceBinder(vertx);
 
     consumer =

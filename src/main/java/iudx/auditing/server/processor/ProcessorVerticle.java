@@ -25,7 +25,6 @@ public class ProcessorVerticle extends AbstractVerticle {
     postgresService = PostgresService.createProxy(vertx, PG_SERVICE_ADDRESS);
     immudbService = ImmudbService.createProxy(vertx, IMMUDB_SERVICE_ADDRESS);
     rabbitMqService = RabbitMqService.createProxy(vertx,RMQ_SERVICE_ADDRESS);
-
     processor = new MessageProcessorImpl(postgresService, immudbService, rabbitMqService, config());
 
     binder = new ServiceBinder(vertx);
