@@ -5,19 +5,15 @@ import static iudx.auditing.server.common.Constants.IMMUDB_WRITE_QUERY;
 import static iudx.auditing.server.common.Constants.ORIGIN;
 import static iudx.auditing.server.common.Constants.PG_DELETE_QUERY_KEY;
 import static iudx.auditing.server.common.Constants.PG_INSERT_QUERY_KEY;
-import static iudx.auditing.server.querystrategy.util.Constants.DELEGATOR_ID;
-import static iudx.auditing.server.querystrategy.util.Constants.PROVIDER_ID;
-import static iudx.auditing.server.querystrategy.util.Constants.RESOURCE_GROUP;
-import static iudx.auditing.server.querystrategy.util.Constants.TYPE;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
+import iudx.auditing.server.cache.CacheService;
 import iudx.auditing.server.immudb.ImmudbService;
 import iudx.auditing.server.postgres.PostgresService;
 import iudx.auditing.server.processor.subscription.SubscriptionAuditService;
 import iudx.auditing.server.processor.subscription.SubscriptionAuditServiceImpl;
-import iudx.auditing.server.processor.subscription.SubscriptionUser;
 import iudx.auditing.server.querystrategy.AuditingServerStrategy;
 import iudx.auditing.server.querystrategy.ServerOrigin;
 import iudx.auditing.server.querystrategy.ServerOriginContextFactory;
@@ -30,17 +26,18 @@ public class MessageProcessorImpl implements MessageProcessService {
   private static final Logger LOGGER = LogManager.getLogger(MessageProcessorImpl.class);
   private final PostgresService postgresService;
   private final ImmudbService immudbService;
-  private final RabbitMqService rabbitMqService;
   private final JsonObject config;
+  CacheService cacheService;
   private SubscriptionAuditService subsAuditService;
 
   public MessageProcessorImpl(PostgresService postgresService, ImmudbService immudbService,
-                              RabbitMqService rabbitMqService, JsonObject config) {
+                              RabbitMqService rabbitMqService, CacheService cacheService,
+                              JsonObject config) {
     this.postgresService = postgresService;
     this.immudbService = immudbService;
-    this.rabbitMqService = rabbitMqService;
+    this.cacheService = cacheService;
     this.config = config;
-    this.subsAuditService = new SubscriptionAuditServiceImpl(rabbitMqService);
+    this.subsAuditService = new SubscriptionAuditServiceImpl(rabbitMqService, cacheService);
   }
 
   @Override
@@ -50,83 +47,16 @@ public class MessageProcessorImpl implements MessageProcessService {
     queries.put(DELIVERY_TAG, message.getLong(DELIVERY_TAG));
     queries.put(ORIGIN, message.getString(ORIGIN));
     Promise<JsonObject> promise = Promise.promise();
-    if (!message.containsKey("eventType")) {
-      databaseOperations(queries)
-          .onComplete(dbHandler -> {
-            if (dbHandler.succeeded()) {
-              LOGGER.info(dbHandler.result());
-              promise.complete(dbHandler.result());
-            } else {
-              LOGGER.error(dbHandler.cause());
-              promise.fail(dbHandler.cause());
-            }
-          });
-    } else {
-      String eventType = message.getString("eventType");
-      if (eventType == null || eventType.isEmpty()) {
-        promise.tryFail("EventType is null or empty for subscription related processing");
-      } else {
-        process4AuditingSubscription(queries, message, promise, eventType);
-      }
-    }
-
+    databaseOperations(queries)
+        .onComplete(dbHandler -> {
+          if (dbHandler.succeeded()) {
+            promise.complete(dbHandler.result());
+          } else {
+            LOGGER.error(dbHandler.cause());
+            promise.fail(dbHandler.cause());
+          }
+        });
     return promise.future();
-  }
-
-  private void process4AuditingSubscription(JsonObject queries, JsonObject message,
-                                            Promise<JsonObject> promise, String eventType) {
-    LOGGER.debug("inside process4AuditingSubscription");
-
-    if ("SUBS_CREATED".equals(eventType)) {
-      SubscriptionUser subsConsumer = new SubscriptionUser(message.getString("userid"),
-          message.getString("subscriptionID"), message.getString("id"),
-          message.getString(PROVIDER_ID), message.getString(RESOURCE_GROUP),
-          message.getString(DELEGATOR_ID), message.getString(TYPE));
-      subsAuditService.addSubsConsumer(subsConsumer);
-      databaseOperations(queries)
-          .onComplete(dbHandler -> {
-            if (dbHandler.succeeded()) {
-              promise.complete(dbHandler.result());
-            } else {
-              LOGGER.error(dbHandler.cause());
-            }
-          });
-    } else if ("SUBS_DELETED".equals(eventType)) {
-      subsAuditService.deleteSubsConsumer(message.getString("subscriptionID"));
-      databaseOperations(queries)
-          .onComplete(dbHandler -> {
-            if (dbHandler.succeeded()) {
-              promise.complete(dbHandler.result());
-            } else {
-              LOGGER.error(dbHandler.cause());
-            }
-          });
-
-    } else if ("SUBS_APPEND".equals(eventType)) {
-      databaseOperations(queries)
-          .onComplete(dbHandler -> {
-            if (dbHandler.succeeded()) {
-              promise.complete(dbHandler.result());
-            } else {
-              LOGGER.error(dbHandler.cause());
-            }
-          });
-
-    } else {
-      LOGGER.error("Invelid event type [{}] for subscription message", eventType);
-    }
-  }
-
-  private void executePostgresQuery(Future<JsonObject> postgresService,
-                                    Promise<JsonObject> promise) {
-    Future<JsonObject> futureResult = postgresService;
-    futureResult.onComplete(handler -> {
-      if (handler.succeeded()) {
-        promise.tryComplete(handler.result());
-      } else {
-        promise.tryFail(handler.cause().getMessage());
-      }
-    });
   }
 
   private JsonObject queryBuilder(JsonObject request) {
@@ -146,8 +76,17 @@ public class MessageProcessorImpl implements MessageProcessService {
 
   @Override
   public Future<Void> processSubscriptionMonitoringMessages(JsonObject message) {
-    subsAuditService.generateAuditLog(message.getString("id"), message);
-    return Future.succeededFuture();
+    Promise<Void> promise = Promise.promise();
+    subsAuditService.generateAuditLog(message.getString("id"), message, cacheService).onComplete(
+        logHandler -> {
+          if (logHandler.succeeded()) {
+            promise.complete();
+          } else {
+            promise.fail(logHandler.cause());
+          }
+
+        });
+    return promise.future();
   }
 
   private Future<JsonObject> databaseOperations(JsonObject queries) {

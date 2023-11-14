@@ -8,6 +8,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.rabbitmq.RabbitMQOptions;
 import io.vertx.serviceproxy.ServiceBinder;
+import iudx.auditing.server.cache.CacheService;
 import iudx.auditing.server.common.RabitMqConsumer;
 import iudx.auditing.server.common.VirtualHosts;
 import iudx.auditing.server.processor.MessageProcessService;

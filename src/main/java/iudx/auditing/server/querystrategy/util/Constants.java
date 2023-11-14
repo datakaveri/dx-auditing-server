@@ -1,8 +1,5 @@
 package iudx.auditing.server.querystrategy.util;
 
-import javax.swing.plaf.PanelUI;
-import org.apache.zookeeper.server.admin.Commands;
-
 public class Constants {
   public static final String SIZE = "response_size";
   public static final String ID = "id";
@@ -34,7 +31,9 @@ public class Constants {
       "INSERT INTO $0 (id,api,userid,epochtime,resourceid,isotime,providerid,size) "
           + "VALUES ('$1','$2','$3',$4,'$5','$6','$7',$8)";
   public static final String RS_WRITE_QUERY_PG =
-      "INSERT INTO $0 (id,api,userid,epochtime,resourceid,isotime,providerid,size,time,resource_group,item_type,delegator_id)"
+      "INSERT INTO $0 "
+          +
+          "(id,api,userid,epochtime,resourceid,isotime,providerid,size,time,resource_group,item_type,delegator_id)"
           + " VALUES ('$1','$2','$3',$4,'$5','$6','$7',$8,'$9','$a','$b','$c')";
   public static final String CAT_WRITE_QUERY_PG =
       "INSERT INTO $0 (id, userRole, userID, iid, api, method, time, iudxID) "
@@ -60,5 +59,6 @@ public class Constants {
   public static final String APD_WRITE_QUERY_IMMUDB =
       "INSERT INTO $0 (id,userid,endpoint,method,body,size,epochtime,isotime)"
           + " VALUES ('$1','$2','$3','$4','$5',$6,$7,'$8')";
-
+  public static final String CACHE_QUERY = "select queue_name, entity,user_id,resource_group,"
+      + "delegator_id,item_type,provider_id from subscriptions";
 }

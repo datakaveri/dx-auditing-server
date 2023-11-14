@@ -16,5 +16,5 @@ public interface RabbitMqService {
     return new RabbitMqServiceVertxEBProxy(vertx, address);
   }
 
-  public Future<Void> publishMessage(JsonObject request);
+  Future<Void> publishMessage(JsonObject request);
 }

@@ -33,7 +33,8 @@ public class RabbitMqServiceImpl implements RabbitMqService {
 
   public Future<Void> publishMessage(JsonObject request) {
     Promise<Void> promise = Promise.promise();
-    LOGGER.debug("Sending message to exchange: {}, with routing key: {}", EXCHANGE_NAME, ROUTING_KEY);
+    LOGGER.debug("Sending message to exchange: {}, with routing key: {}", EXCHANGE_NAME,
+        ROUTING_KEY);
     client.basicPublish(EXCHANGE_NAME, ROUTING_KEY, request.toBuffer(),
         asyncResult -> {
           if (asyncResult.succeeded()) {

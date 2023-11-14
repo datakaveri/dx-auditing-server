@@ -48,7 +48,7 @@ public class AuditMessageConsumer implements RabitMqConsumer {
             Future<JsonObject> processResult = msgService.processAuditEventMessages(request);
             processResult.onComplete(handler -> {
               if (handler.succeeded()) {
-                LOGGER.info("Latest message published in databases.");
+                LOGGER.info("Audit message published in databases.");
                 client.basicAck(handler.result().getLong(DELIVERY_TAG), true);
                 mqConsumer.resume();
                 LOGGER.debug("message consumption resumed");

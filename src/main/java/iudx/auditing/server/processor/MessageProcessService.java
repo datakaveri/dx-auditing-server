@@ -17,5 +17,6 @@ public interface MessageProcessService {
   }
 
   Future<JsonObject> processAuditEventMessages(JsonObject message);
+
   Future<Void> processSubscriptionMonitoringMessages(JsonObject message);
 }
