@@ -9,12 +9,12 @@ import io.vertx.rabbitmq.QueueOptions;
 import io.vertx.rabbitmq.RabbitMQClient;
 import io.vertx.rabbitmq.RabbitMQConsumer;
 import io.vertx.rabbitmq.RabbitMQOptions;
-import iudx.auditing.server.common.ConsumerAction;
+import iudx.auditing.server.common.RabitMqConsumer;
 import iudx.auditing.server.processor.MessageProcessService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class AuditMessageConsumer implements ConsumerAction {
+public class AuditMessageConsumer implements RabitMqConsumer {
 
   private static final Logger LOGGER = LogManager.getLogger(AuditMessageConsumer.class);
 
@@ -45,10 +45,10 @@ public class AuditMessageConsumer implements ConsumerAction {
             LOGGER.debug("message consumption paused.");
             long deliveryTag = message.envelope().getDeliveryTag();
             JsonObject request = message.body().toJsonObject().put(DELIVERY_TAG, deliveryTag);
-            Future<JsonObject> processResult = msgService.process(request);
+            Future<JsonObject> processResult = msgService.processAuditEventMessages(request);
             processResult.onComplete(handler -> {
               if (handler.succeeded()) {
-                LOGGER.info("Latest message published in databases.");
+                LOGGER.info("Audit message published in databases.");
                 client.basicAck(handler.result().getLong(DELIVERY_TAG), true);
                 mqConsumer.resume();
                 LOGGER.debug("message consumption resumed");

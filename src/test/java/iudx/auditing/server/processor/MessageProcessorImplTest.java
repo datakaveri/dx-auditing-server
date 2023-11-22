@@ -4,8 +4,12 @@ import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import iudx.auditing.server.cache.CacheService;
 import iudx.auditing.server.immudb.ImmudbService;
 import iudx.auditing.server.postgres.PostgresService;
+import iudx.auditing.server.processor.subscription.SubscriptionAuditService;
+import iudx.auditing.server.processor.subscription.SubscriptionAuditServiceImpl;
+import iudx.auditing.server.rabbitmq.RabbitMqService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,10 +18,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static iudx.auditing.server.common.Constants.ACL_APD_SERVER;
+import static iudx.auditing.server.common.Constants.DELIVERY_TAG;
+import static iudx.auditing.server.common.Constants.IMMUDB_WRITE_QUERY;
 import static iudx.auditing.server.common.Constants.ORIGIN;
+import static iudx.auditing.server.common.Constants.PG_DELETE_QUERY_KEY;
+import static iudx.auditing.server.common.Constants.PG_INSERT_QUERY_KEY;
 import static iudx.auditing.server.querystrategy.util.Constants.*;
 import static javax.xml.transform.OutputKeys.METHOD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -33,12 +42,16 @@ class MessageProcessorImplTest {
     JsonObject config;
     MessageProcessorImpl messageProcessor;
     JsonObject message;
+    RabbitMqService rabbitMqService;
+    CacheService cacheService;
+    SubscriptionAuditService subscriptionAuditService;
 
 
     @BeforeEach
     public void setUp(VertxTestContext vertxTestContext) {
         config = mock(JsonObject.class);
-        messageProcessor = new MessageProcessorImpl(postgresService, immudbService, config);
+        messageProcessor =
+            new MessageProcessorImpl(postgresService, immudbService, subscriptionAuditService, config);
         vertxTestContext.completeNow();
     }
 
@@ -64,8 +77,11 @@ class MessageProcessorImplTest {
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
         doAnswer(Answer -> Future.succeededFuture()).when(immudbService).executeWriteQuery(any());
 
-        Future<JsonObject> resultJson = messageProcessor.process(message);
-        assertEquals(message, resultJson.result());
+        Future<JsonObject> resultJson = messageProcessor.processAuditEventMessages(message);
+        assertTrue(resultJson.result().containsKey(DELIVERY_TAG));
+        assertTrue(resultJson.result().containsKey(PG_INSERT_QUERY_KEY));
+        assertTrue(resultJson.result().containsKey(PG_DELETE_QUERY_KEY));
+        assertTrue(resultJson.result().containsKey(IMMUDB_WRITE_QUERY));
         vertxTestContext.completeNow();
     }
 
@@ -88,8 +104,11 @@ class MessageProcessorImplTest {
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
         doAnswer(Answer -> Future.succeededFuture()).when(immudbService).executeWriteQuery(any());
 
-        Future<JsonObject> resultJson = messageProcessor.process(message);
-        assertEquals(message, resultJson.result());
+        Future<JsonObject> resultJson = messageProcessor.processAuditEventMessages(message);
+        assertTrue(resultJson.result().containsKey(DELIVERY_TAG));
+        assertTrue(resultJson.result().containsKey(PG_INSERT_QUERY_KEY));
+        assertTrue(resultJson.result().containsKey(PG_DELETE_QUERY_KEY));
+        assertTrue(resultJson.result().containsKey(IMMUDB_WRITE_QUERY));
         vertxTestContext.completeNow();
     }
 
@@ -112,8 +131,11 @@ class MessageProcessorImplTest {
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
         doAnswer(Answer -> Future.succeededFuture()).when(immudbService).executeWriteQuery(any());
 
-        Future<JsonObject> resultJson = messageProcessor.process(message);
-        assertEquals(message, resultJson.result());
+        Future<JsonObject> resultJson = messageProcessor.processAuditEventMessages(message);
+        assertTrue(resultJson.result().containsKey(DELIVERY_TAG));
+        assertTrue(resultJson.result().containsKey(PG_INSERT_QUERY_KEY));
+        assertTrue(resultJson.result().containsKey(PG_DELETE_QUERY_KEY));
+        assertTrue(resultJson.result().containsKey(IMMUDB_WRITE_QUERY));
         vertxTestContext.completeNow();
     }
 
@@ -136,7 +158,7 @@ class MessageProcessorImplTest {
         doAnswer(Answer -> Future.failedFuture("failed")).when(immudbService).executeWriteQuery(any());
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeDeleteQuery(any());
 
-        Future<JsonObject> resultJson = messageProcessor.process(message);
+        Future<JsonObject> resultJson = messageProcessor.processAuditEventMessages(message);
         assertEquals("failed", resultJson.cause().getMessage());
         vertxTestContext.completeNow();
     }
@@ -160,7 +182,7 @@ class MessageProcessorImplTest {
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
         doAnswer(Answer -> Future.failedFuture("failed")).when(immudbService).executeWriteQuery(any());
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeDeleteQuery(any());
-        Future<JsonObject> resultJson = messageProcessor.process(message);
+        Future<JsonObject> resultJson = messageProcessor.processAuditEventMessages(message);
         assertEquals("failed", resultJson.cause().getMessage());
         vertxTestContext.completeNow();
     }
@@ -189,7 +211,7 @@ class MessageProcessorImplTest {
         doAnswer(Answer -> Future.failedFuture("failed")).when(immudbService).executeWriteQuery(any());
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeDeleteQuery(any());
 
-        Future<JsonObject> resultJson = messageProcessor.process(message);
+        Future<JsonObject> resultJson = messageProcessor.processAuditEventMessages(message);
         assertEquals("failed", resultJson.cause().getMessage());
         vertxTestContext.completeNow();
     }
@@ -212,9 +234,106 @@ class MessageProcessorImplTest {
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
         doAnswer(Answer -> Future.succeededFuture()).when(immudbService).executeWriteQuery(any());
 
-        Future<JsonObject> resultJson = messageProcessor.process(message);
-        assertEquals(message, resultJson.result());
+        Future<JsonObject> resultJson = messageProcessor.processAuditEventMessages(message);
+        assertTrue(resultJson.result().containsKey(DELIVERY_TAG));
+        assertTrue(resultJson.result().containsKey(PG_INSERT_QUERY_KEY));
+        assertTrue(resultJson.result().containsKey(PG_DELETE_QUERY_KEY));
+        assertTrue(resultJson.result().containsKey(IMMUDB_WRITE_QUERY));
         vertxTestContext.completeNow();
     }
 
+    @Test
+    @DisplayName("Testing Success process as origin rs-server")
+    void testPocess4RsSuccess4Created(VertxTestContext vertxTestContext) {
+        message = new JsonObject().put(ORIGIN, "rs-server")
+            .put(USER_ID, "userid")
+            .put(PRIMARY_KEY, "prmary_key")
+            .put(ID, "id")
+            .put(PROVIDER_ID, "providerId")
+            .put(API, "api")
+            .put(EPOCH_TIME, 5000)
+            .put(ISO_TIME, "2000-03-03T21:00:00Z")
+            .put(SIZE, 0)
+            .put(RS_PG_TABLE_NAME, "RS_PG_TABLE_NAME")
+            .put(RS_IMMUDB_TABLE_NAME, "RS_IMMUDB_TABLE_NAME")
+            .put(RESOURCE_GROUP, "resourceGroup")
+            .put(TYPE, "type")
+            .put(DELEGATOR_ID, "del")
+                .put("eventType","SUBS_CREATED")
+                    .put("subscriptionID","subscriptionID");
+
+        when(config.getString((anyString()))).thenReturn("");
+        doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
+        doAnswer(Answer -> Future.succeededFuture()).when(immudbService).executeWriteQuery(any());
+
+        Future<JsonObject> resultJson = messageProcessor.processAuditEventMessages(message);
+        assertTrue(resultJson.result().containsKey(DELIVERY_TAG));
+        assertTrue(resultJson.result().containsKey(PG_INSERT_QUERY_KEY));
+        assertTrue(resultJson.result().containsKey(PG_DELETE_QUERY_KEY));
+        assertTrue(resultJson.result().containsKey(IMMUDB_WRITE_QUERY));
+        vertxTestContext.completeNow();
+    }
+    @Test
+    @DisplayName("Testing Success process as origin rs-server")
+    void testPocess4RsSuccess4Deleted(VertxTestContext vertxTestContext) {
+        message = new JsonObject().put(ORIGIN, "rs-server")
+            .put(USER_ID, "userid")
+            .put(PRIMARY_KEY, "prmary_key")
+            .put(ID, "id")
+            .put(PROVIDER_ID, "providerId")
+            .put(API, "api")
+            .put(EPOCH_TIME, 5000)
+            .put(ISO_TIME, "2000-03-03T21:00:00Z")
+            .put(SIZE, 0)
+            .put(RS_PG_TABLE_NAME, "RS_PG_TABLE_NAME")
+            .put(RS_IMMUDB_TABLE_NAME, "RS_IMMUDB_TABLE_NAME")
+            .put(RESOURCE_GROUP, "resourceGroup")
+            .put(TYPE, "type")
+            .put(DELEGATOR_ID, "del")
+            .put("eventType","SUBS_DELETED")
+            .put("subscriptionID","SUBSDELETED");
+
+        when(config.getString((anyString()))).thenReturn("tableName");
+        doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
+        doAnswer(Answer -> Future.succeededFuture()).when(immudbService).executeWriteQuery(any());
+
+        Future<JsonObject> resultJson = messageProcessor.processAuditEventMessages(message);
+        assertTrue(resultJson.result().containsKey(DELIVERY_TAG));
+        assertTrue(resultJson.result().containsKey(PG_INSERT_QUERY_KEY));
+        assertTrue(resultJson.result().containsKey(PG_DELETE_QUERY_KEY));
+        assertTrue(resultJson.result().containsKey(IMMUDB_WRITE_QUERY));
+        vertxTestContext.completeNow();
+    }
+
+    @Test
+    @DisplayName("Testing Success process as origin rs-server")
+    void testPocess4RsSuccess4Append(VertxTestContext vertxTestContext) {
+        message = new JsonObject().put(ORIGIN, "rs-server")
+            .put(USER_ID, "userid")
+            .put(PRIMARY_KEY, "prmary_key")
+            .put(ID, "id")
+            .put(PROVIDER_ID, "providerId")
+            .put(API, "api")
+            .put(EPOCH_TIME, 5000)
+            .put(ISO_TIME, "2000-03-03T21:00:00Z")
+            .put(SIZE, 0)
+            .put(RS_PG_TABLE_NAME, "RS_PG_TABLE_NAME")
+            .put(RS_IMMUDB_TABLE_NAME, "RS_IMMUDB_TABLE_NAME")
+            .put(RESOURCE_GROUP, "resourceGroup")
+            .put(TYPE, "type")
+            .put(DELEGATOR_ID, "del")
+            .put("eventType","SUBS_APPEND")
+            .put("subscriptionID","SUBSDELETED");
+
+        when(config.getString((anyString()))).thenReturn("tableName");
+        doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
+        doAnswer(Answer -> Future.succeededFuture()).when(immudbService).executeWriteQuery(any());
+
+        Future<JsonObject> resultJson = messageProcessor.processAuditEventMessages(message);
+        assertTrue(resultJson.result().containsKey(DELIVERY_TAG));
+        assertTrue(resultJson.result().containsKey(PG_INSERT_QUERY_KEY));
+        assertTrue(resultJson.result().containsKey(PG_DELETE_QUERY_KEY));
+        assertTrue(resultJson.result().containsKey(IMMUDB_WRITE_QUERY));
+        vertxTestContext.completeNow();
+    }
 }

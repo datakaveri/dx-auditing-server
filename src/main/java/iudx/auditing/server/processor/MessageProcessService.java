@@ -16,5 +16,7 @@ public interface MessageProcessService {
     return new MessageProcessServiceVertxEBProxy(vertx, address);
   }
 
-  Future<JsonObject> process(JsonObject message);
+  Future<JsonObject> processAuditEventMessages(JsonObject message);
+
+  Future<Void> processSubscriptionMonitoringMessages(JsonObject message);
 }

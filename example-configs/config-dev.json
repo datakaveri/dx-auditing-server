@@ -29,7 +29,9 @@
       "postgresRsTableName": "",
       "postgresCatTableName": "",
       "postgresAuthTableName": "",
-      "postgersApdTableName": ""
+      "postgersApdTableName": "",
+      "catalogueHost": "",
+      "cataloguePort": ""
     },
     {
       "id": "iudx.auditing.server.postgres.PostgresVerticle",

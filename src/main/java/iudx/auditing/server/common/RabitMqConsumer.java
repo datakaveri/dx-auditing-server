@@ -1,5 +1,5 @@
 package iudx.auditing.server.common;
 
-public interface ConsumerAction {
+public interface RabitMqConsumer {
   void start();
 }
