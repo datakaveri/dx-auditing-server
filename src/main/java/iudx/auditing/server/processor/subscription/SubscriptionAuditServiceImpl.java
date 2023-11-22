@@ -5,7 +5,6 @@ import static iudx.auditing.server.querystrategy.ServerOrigin.RS_SERVER;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import iudx.auditing.server.cache.CacheService;
@@ -26,7 +25,6 @@ public class SubscriptionAuditServiceImpl implements SubscriptionAuditService {
   Supplier<String> isoTimeSupplier =
       () -> ZonedDateTime.now(ZoneId.of(ZoneId.SHORT_IDS.get("IST"))).toString();
   Supplier<String> primaryKeySuppler = () -> UUID.randomUUID().toString().replace("-", "");
-  Vertx vertx = Vertx.vertx();
 
 
   RabbitMqService rabbitMqService;
@@ -39,15 +37,15 @@ public class SubscriptionAuditServiceImpl implements SubscriptionAuditService {
   }
 
   @Override
-  public Future<Void> generateAuditLog(String resourceid, JsonObject consumedMessage,
-                                       CacheService cache) {
+  public Future<Void> generateAuditLog(JsonObject consumedMessage) {
     Promise<Void> promise = Promise.promise();
     synchronized (this) {
+      String resourceId = consumedMessage.getString("id");
       JsonObject message = consumedMessage.copy();
       message.remove(DELIVERY_TAG);
       long size = message.toString().getBytes().length;
       LOGGER.debug("Json_size:{} ", size);
-      cache.get(resourceid).onSuccess(
+      cacheService.get(resourceId).onSuccess(
               cacheHandler -> {
                 JsonArray result = cacheHandler.getJsonArray("results");
                 result.forEach(
@@ -58,7 +56,7 @@ public class SubscriptionAuditServiceImpl implements SubscriptionAuditService {
                           .atEpoch(epochSupplier.get())
                           .atIsoTime(isoTimeSupplier.get())
                           .forOrigin(RS_SERVER.getOriginRole())
-                          .forResourceId(resourceid)
+                          .forResourceId(resourceId)
                           .forUserId(subscriptionUser.getUserId())
                           .withPrimaryKey(primaryKeySuppler.get())
                           .withProviderId(subscriptionUser.getProviderId())

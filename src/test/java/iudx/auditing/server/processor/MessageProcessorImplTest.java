@@ -7,6 +7,8 @@ import io.vertx.junit5.VertxTestContext;
 import iudx.auditing.server.cache.CacheService;
 import iudx.auditing.server.immudb.ImmudbService;
 import iudx.auditing.server.postgres.PostgresService;
+import iudx.auditing.server.processor.subscription.SubscriptionAuditService;
+import iudx.auditing.server.processor.subscription.SubscriptionAuditServiceImpl;
 import iudx.auditing.server.rabbitmq.RabbitMqService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -42,13 +44,14 @@ class MessageProcessorImplTest {
     JsonObject message;
     RabbitMqService rabbitMqService;
     CacheService cacheService;
+    SubscriptionAuditService subscriptionAuditService;
 
 
     @BeforeEach
     public void setUp(VertxTestContext vertxTestContext) {
         config = mock(JsonObject.class);
         messageProcessor =
-            new MessageProcessorImpl(postgresService, immudbService, rabbitMqService, cacheService, config);
+            new MessageProcessorImpl(postgresService, immudbService, subscriptionAuditService, config);
         vertxTestContext.completeNow();
     }
 
@@ -259,7 +262,7 @@ class MessageProcessorImplTest {
                 .put("eventType","SUBS_CREATED")
                     .put("subscriptionID","subscriptionID");
 
-        when(config.getString((anyString()))).thenReturn("tableName");
+        when(config.getString((anyString()))).thenReturn("");
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
         doAnswer(Answer -> Future.succeededFuture()).when(immudbService).executeWriteQuery(any());
 

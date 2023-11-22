@@ -9,15 +9,12 @@ import static iudx.auditing.server.common.Constants.PG_INSERT_QUERY_KEY;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
-import iudx.auditing.server.cache.CacheService;
 import iudx.auditing.server.immudb.ImmudbService;
 import iudx.auditing.server.postgres.PostgresService;
 import iudx.auditing.server.processor.subscription.SubscriptionAuditService;
-import iudx.auditing.server.processor.subscription.SubscriptionAuditServiceImpl;
 import iudx.auditing.server.querystrategy.AuditingServerStrategy;
 import iudx.auditing.server.querystrategy.ServerOrigin;
 import iudx.auditing.server.querystrategy.ServerOriginContextFactory;
-import iudx.auditing.server.rabbitmq.RabbitMqService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,17 +24,15 @@ public class MessageProcessorImpl implements MessageProcessService {
   private final PostgresService postgresService;
   private final ImmudbService immudbService;
   private final JsonObject config;
-  CacheService cacheService;
   private SubscriptionAuditService subsAuditService;
 
   public MessageProcessorImpl(PostgresService postgresService, ImmudbService immudbService,
-                              RabbitMqService rabbitMqService, CacheService cacheService,
+                              SubscriptionAuditService subsAuditService,
                               JsonObject config) {
     this.postgresService = postgresService;
     this.immudbService = immudbService;
-    this.cacheService = cacheService;
     this.config = config;
-    this.subsAuditService = new SubscriptionAuditServiceImpl(rabbitMqService, cacheService);
+    this.subsAuditService = subsAuditService;
   }
 
   @Override
@@ -77,7 +72,7 @@ public class MessageProcessorImpl implements MessageProcessService {
   @Override
   public Future<Void> processSubscriptionMonitoringMessages(JsonObject message) {
     Promise<Void> promise = Promise.promise();
-    subsAuditService.generateAuditLog(message.getString("id"), message, cacheService).onComplete(
+    subsAuditService.generateAuditLog(message).onComplete(
         logHandler -> {
           if (logHandler.succeeded()) {
             promise.complete();

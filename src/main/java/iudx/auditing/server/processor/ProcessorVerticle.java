@@ -13,6 +13,7 @@ import io.vertx.serviceproxy.ServiceBinder;
 import iudx.auditing.server.cache.CacheService;
 import iudx.auditing.server.immudb.ImmudbService;
 import iudx.auditing.server.postgres.PostgresService;
+import iudx.auditing.server.processor.subscription.SubscriptionAuditServiceImpl;
 import iudx.auditing.server.rabbitmq.RabbitMqService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,6 +28,7 @@ public class ProcessorVerticle extends AbstractVerticle {
   private MessageConsumer<JsonObject> consumer;
   private RabbitMqService rabbitMqService;
   private CacheService cacheService;
+  private SubscriptionAuditServiceImpl subscriptionAuditService;
 
   @Override
   public void start() throws Exception {
@@ -34,8 +36,9 @@ public class ProcessorVerticle extends AbstractVerticle {
     immudbService = ImmudbService.createProxy(vertx, IMMUDB_SERVICE_ADDRESS);
     rabbitMqService = RabbitMqService.createProxy(vertx, RMQ_SERVICE_ADDRESS);
     cacheService = CacheService.createProxy(vertx, CACHE_SERVICE_ADDRESS);
+    subscriptionAuditService = new SubscriptionAuditServiceImpl(rabbitMqService, cacheService);
     processor =
-        new MessageProcessorImpl(postgresService, immudbService, rabbitMqService, cacheService,
+        new MessageProcessorImpl(postgresService, immudbService, subscriptionAuditService,
             config());
     binder = new ServiceBinder(vertx);
 
