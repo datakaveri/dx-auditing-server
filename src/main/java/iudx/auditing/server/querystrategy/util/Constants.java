@@ -27,13 +27,22 @@ public class Constants {
   public static final String CAT_IMMUDB_TABLE_NAME = "immudbCatTableName";
   public static final String APD_PG_TABLE_NAME = "postgersApdTableName";
   public static final String APD_IMMUDB_TABLE_NAME = "immudbApdTableName";
+  public static final String CONSENT_LOG_PG_TABLE_NAME = "postgresConsentLogTableName";
+  public static final String CONSENT_LOG_IMMUDB_TABLE_NAME = "immudbConsentLogTableName";
+  public static final String ITEM_ID = "item_id";
+  public static final String EVENT_TYPE = "event";
+  public static final String AIU_ID = "aiu_id";
+  public static final String AIP_ID = "aip_id";
+  public static final String DP_ID = "dp_id";
+  public static final String ARTIFACT_ID = "artifact";
+  public static final String LOG_SIGN = "log";
+  public static final String ITEM_TYPE = "item_type";
   public static final String RS_WRITE_QUERY_IMMUDB =
       "INSERT INTO $0 (id,api,userid,epochtime,resourceid,isotime,providerid,size) "
           + "VALUES ('$1','$2','$3',$4,'$5','$6','$7',$8)";
   public static final String RS_WRITE_QUERY_PG =
       "INSERT INTO $0 "
-          +
-          "(id,api,userid,epochtime,resourceid,isotime,providerid,size,time,resource_group,item_type,delegator_id)"
+          + "(id,api,userid,epochtime,resourceid,isotime,providerid,size,time,resource_group,item_type,delegator_id)"
           + " VALUES ('$1','$2','$3',$4,'$5','$6','$7',$8,'$9','$a','$b','$c')";
   public static final String CAT_WRITE_QUERY_PG =
       "INSERT INTO $0 (id, userRole, userID, iid, api, method, time, iudxID) "
@@ -59,6 +68,17 @@ public class Constants {
   public static final String APD_WRITE_QUERY_IMMUDB =
       "INSERT INTO $0 (id,userid,endpoint,method,body,size,epochtime,isotime)"
           + " VALUES ('$1','$2','$3','$4','$5',$6,$7,'$8')";
-  public static final String CACHE_QUERY = "select queue_name, entity,user_id,resource_group,"
-      + "delegator_id,item_type,provider_id from subscriptions";
+  public static final String CACHE_QUERY =
+      "select queue_name, entity,user_id,resource_group,"
+          + "delegator_id,item_type,provider_id from subscriptions";
+
+  public static final String CONSENT_LOG_WRITE_QUERY_PG =
+      "INSERT INTO $0 "
+          + "(_id,item_id,item_type,event,aiu_id,aip_id,dp_id,artifact,created_at,log)"
+          + " VALUES ('$1','$2','$3','$4','$5','$6','$7','$8','$9','$a')";
+
+  public static final String CONSENT_LOG_WRITE_QUERY_IMMUDB =
+      "INSERT INTO $0 "
+          + "(_id,item_id,item_type,event,aiu_id,aip_id,dp_id,artifact,isotime,log)"
+          + " VALUES ('$1','$2','$3','$4','$5','$6','$7','$8','$9','$a')";
 }

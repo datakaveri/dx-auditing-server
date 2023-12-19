@@ -27,7 +27,9 @@
       "immudbAuthTableName": "",
       "postgresRsTableName": "",
       "postgresCatTableName": "",
-      "postgresAuthTableName": ""
+      "postgresAuthTableName": "",
+      "postgresConsentLogTableName": "",
+      "immudbConsentLogTableName": ""
     },
     {
       "id": "iudx.auditing.server.postgres.PostgresVerticle",

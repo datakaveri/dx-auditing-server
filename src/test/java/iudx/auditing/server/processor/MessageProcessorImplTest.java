@@ -17,12 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static iudx.auditing.server.common.Constants.ACL_APD_SERVER;
-import static iudx.auditing.server.common.Constants.DELIVERY_TAG;
-import static iudx.auditing.server.common.Constants.IMMUDB_WRITE_QUERY;
-import static iudx.auditing.server.common.Constants.ORIGIN;
-import static iudx.auditing.server.common.Constants.PG_DELETE_QUERY_KEY;
-import static iudx.auditing.server.common.Constants.PG_INSERT_QUERY_KEY;
+import static iudx.auditing.server.common.Constants.*;
 import static iudx.auditing.server.querystrategy.util.Constants.*;
 import static javax.xml.transform.OutputKeys.METHOD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -326,6 +321,36 @@ class MessageProcessorImplTest {
             .put("subscriptionID","SUBSDELETED");
 
         when(config.getString((anyString()))).thenReturn("tableName");
+        doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
+        doAnswer(Answer -> Future.succeededFuture()).when(immudbService).executeWriteQuery(any());
+
+        Future<JsonObject> resultJson = messageProcessor.processAuditEventMessages(message);
+        assertTrue(resultJson.result().containsKey(DELIVERY_TAG));
+        assertTrue(resultJson.result().containsKey(PG_INSERT_QUERY_KEY));
+        assertTrue(resultJson.result().containsKey(PG_DELETE_QUERY_KEY));
+        assertTrue(resultJson.result().containsKey(IMMUDB_WRITE_QUERY));
+        vertxTestContext.completeNow();
+    }
+
+    @Test
+    @DisplayName("Testing Success process as origin consent-log")
+    void testPocess4ConsentSuccess(VertxTestContext vertxTestContext) {
+        message = new JsonObject().put(ORIGIN, CONSENT_LOG_ADEX)
+                .put(ITEM_ID, "49b52be3-bc00-4548-97d7-99cee5bfc8cd")
+                .put(PRIMARY_KEY, "PRIMARY_KEY")
+                .put(AIU_ID, "aiuid")
+                .put(AIP_ID, "aipid")
+                .put(ISO_TIME, "2000-03-03T21:00:00Z")
+                .put(EVENT_TYPE, "DATA_SENT")
+                .put(DP_ID,"dpid")
+                .put(ARTIFACT_ID, "Artifactid")
+                .put(ITEM_TYPE,"resource")
+                .put(LOG_SIGN,"logsign")
+                .put(BODY,new JsonObject())
+                .put(CONSENT_LOG_PG_TABLE_NAME, "CONSENT_PG_TABLE_NAME")
+                .put(CONSENT_LOG_IMMUDB_TABLE_NAME, "CONSENT_IMMUDB_TABLE_NAME");
+
+        when(config.getString((anyString()))).thenReturn("tablename");
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
         doAnswer(Answer -> Future.succeededFuture()).when(immudbService).executeWriteQuery(any());
 

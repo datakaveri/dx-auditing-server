@@ -8,6 +8,7 @@ public class ServerOriginContextFactory {
   private final AuditingServerStrategy authServerStrategy;
   private final AuditingServerStrategy rsSubscriptionStrategy;
   private final AuditingServerStrategy aclApdServerStrategy;
+  private final AuditingServerStrategy consentLogStrategy;
 
   public ServerOriginContextFactory(JsonObject config) {
     this.resourceServerStrategy = new ResourceAuditingStrategy(config);
@@ -15,8 +16,7 @@ public class ServerOriginContextFactory {
     this.authServerStrategy = new AuthAuditingStrategy(config);
     this.rsSubscriptionStrategy = new RsSubscriptionStrategy(config);
     this.aclApdServerStrategy = new AclApdAuditingStrategy(config);
-
-
+    this.consentLogStrategy = new ConsentLogAuditingStrategy(config);
   }
 
   public AuditingServerStrategy create(ServerOrigin serverOrigin) {
@@ -25,21 +25,30 @@ public class ServerOriginContextFactory {
       case RS_SERVER:
       case DI_SERVER:
       case GIS_SERVER:
-      case FILE_SERVER: {
-        return resourceServerStrategy;
-      }
-      case CAT_SERVER: {
-        return catalogueServerStrategy;
-      }
-      case AAA_SERVER: {
-        return authServerStrategy;
-      }
-      case RS_SERVER_SUBS: {
-        return rsSubscriptionStrategy;
-      }
-      case ACL_APD_SERVER: {
-        return aclApdServerStrategy;
-      }
+      case FILE_SERVER:
+        {
+          return resourceServerStrategy;
+        }
+      case CAT_SERVER:
+        {
+          return catalogueServerStrategy;
+        }
+      case AAA_SERVER:
+        {
+          return authServerStrategy;
+        }
+      case RS_SERVER_SUBS:
+        {
+          return rsSubscriptionStrategy;
+        }
+      case ACL_APD_SERVER:
+        {
+          return aclApdServerStrategy;
+        }
+      case CONSENT_LOG_ADEX:
+        {
+          return consentLogStrategy;
+        }
       default:
         throw new IllegalArgumentException(serverOrigin + "serverOrigin is not defined");
     }
