@@ -12,8 +12,7 @@ public class Constants {
   public static final String PG_INSERT_QUERY_KEY = "postgresInsertQuery";
   public static final String PG_DELETE_QUERY_KEY = "postgresDeleteQuery";
   public static final String IMMUDB_WRITE_QUERY = "immudbWriteQuery";
-
-  public static final String AUDIT_LATEST_QUEUE = "test-auditing";
+  public static final String AUDIT_LATEST_QUEUE = "auditing-messages";
   public static final String SUBSCRIPTION_MONITORING_QUEUE = "subscriptions-monitoring";
 
   public static final String EXCHANGE_NAME = "auditing";
