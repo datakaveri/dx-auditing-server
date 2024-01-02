@@ -2,7 +2,9 @@ package iudx.auditing.server.querystrategy;
 
 import static iudx.auditing.server.querystrategy.util.Constants.*;
 
+import com.google.common.hash.Hashing;
 import io.vertx.core.json.JsonObject;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -53,7 +55,7 @@ public class ConsentLogAuditingStrategy implements AuditingServerStrategy {
     String databaseTableName = config.getString(CONSENT_LOG_PG_TABLE_NAME);
     String primaryKey = request.getString(PRIMARY_KEY);
 
-    return DELETE_QUERY.replace("$0", databaseTableName).replace("$1", primaryKey);
+    return DELETE_QUERY_CONSENT.replace("$0", databaseTableName).replace("$1", primaryKey);
   }
 
   @Override
@@ -68,13 +70,8 @@ public class ConsentLogAuditingStrategy implements AuditingServerStrategy {
     String artifactid = request.getString(ARTIFACT_ID);
     String isoTime = request.getString(ISO_TIME);
     String itemType = request.getString(ITEM_TYPE);
-
-    /*ZonedDateTime zonedDateTime = ZonedDateTime.parse(isoTime);
-    zonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.of("UTC"));
-
-    LocalDateTime utcTime = zonedDateTime.toLocalDateTime();*/
     String logSign = request.getString(LOG_SIGN);
-    // TODO: Decide query whether we need to store log in immudb as we can't store big string in
+    String shaLog = Hashing.sha256().hashString(logSign, StandardCharsets.UTF_8).toString();
     // immudb
     return CONSENT_LOG_WRITE_QUERY_IMMUDB
         .replace("$0", databaseTableName)
@@ -87,6 +84,6 @@ public class ConsentLogAuditingStrategy implements AuditingServerStrategy {
         .replace("$7", dpId)
         .replace("$8", artifactid)
         .replace("$9", isoTime)
-        .replace("$a", logSign);
+        .replace("$a", shaLog);
   }
 }

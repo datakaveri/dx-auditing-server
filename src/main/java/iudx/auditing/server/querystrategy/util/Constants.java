@@ -15,7 +15,6 @@ public class Constants {
   public static final String RESOURCE_GROUP = "resourceGroup";
   public static final String TYPE = "type";
   public static final String DELEGATOR_ID = "delegatorId";
-
   public static final String EPOCH_TIME = "epochTime";
   public static final String API = "api";
   public static final String RS_PG_TABLE_NAME = "postgresRsTableName";
@@ -79,6 +78,7 @@ public class Constants {
 
   public static final String CONSENT_LOG_WRITE_QUERY_IMMUDB =
       "INSERT INTO $0 "
-          + "(_id,item_id,item_type,event,aiu_id,aip_id,dp_id,artifact,isotime,log)"
+          + "(_id,item_id,item_type,event,aiu_id,aip_id,dp_id,artifact,isotime,shalog)"
           + " VALUES ('$1','$2','$3','$4','$5','$6','$7','$8','$9','$a')";
+  public static final String DELETE_QUERY_CONSENT = "DELETE FROM $0 WHERE _id = '$1';";
 }
