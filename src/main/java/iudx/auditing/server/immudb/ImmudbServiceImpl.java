@@ -57,13 +57,14 @@ public class ImmudbServiceImpl implements ImmudbService {
       case GIS_SERVER:
       case FILE_SERVER:
       case ACL_APD_SERVER:
+      case CONSENT_LOG_ADEX:
         return pgClientForRs;
       case AAA_SERVER:
         return pgClientForAaa;
       case CAT_SERVER:
         return pgClientForCat;
       default:
-        throw new IllegalArgumentException(originServer + "serverOrigin is not defined");
+        throw new IllegalArgumentException(originServer + " serverOrigin is not defined");
     }
   }
 }
