@@ -46,7 +46,7 @@ class MessageProcessorImplTest {
     public void setUp(VertxTestContext vertxTestContext) {
         config = mock(JsonObject.class);
         messageProcessor =
-            new MessageProcessorImpl(postgresService, immudbService, subscriptionAuditService, config);
+            new MessageProcessorImpl(postgresService, immudbService, subscriptionAuditService, config,cacheService);
         vertxTestContext.completeNow();
     }
 

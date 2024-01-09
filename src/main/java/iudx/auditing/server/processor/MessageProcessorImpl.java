@@ -1,14 +1,11 @@
 package iudx.auditing.server.processor;
 
-import static iudx.auditing.server.common.Constants.DELIVERY_TAG;
-import static iudx.auditing.server.common.Constants.IMMUDB_WRITE_QUERY;
-import static iudx.auditing.server.common.Constants.ORIGIN;
-import static iudx.auditing.server.common.Constants.PG_DELETE_QUERY_KEY;
-import static iudx.auditing.server.common.Constants.PG_INSERT_QUERY_KEY;
+import static iudx.auditing.server.common.Constants.*;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
+import iudx.auditing.server.cache.CacheService;
 import iudx.auditing.server.immudb.ImmudbService;
 import iudx.auditing.server.postgres.PostgresService;
 import iudx.auditing.server.processor.subscription.SubscriptionAuditService;
@@ -24,15 +21,20 @@ public class MessageProcessorImpl implements MessageProcessService {
   private final PostgresService postgresService;
   private final ImmudbService immudbService;
   private final JsonObject config;
+  private final CacheService cacheService;
   private SubscriptionAuditService subsAuditService;
 
-  public MessageProcessorImpl(PostgresService postgresService, ImmudbService immudbService,
-                              SubscriptionAuditService subsAuditService,
-                              JsonObject config) {
+  public MessageProcessorImpl(
+      PostgresService postgresService,
+      ImmudbService immudbService,
+      SubscriptionAuditService subsAuditService,
+      JsonObject config,
+      CacheService cacheService) {
     this.postgresService = postgresService;
     this.immudbService = immudbService;
     this.config = config;
     this.subsAuditService = subsAuditService;
+    this.cacheService = cacheService;
   }
 
   @Override
@@ -42,15 +44,19 @@ public class MessageProcessorImpl implements MessageProcessService {
     queries.put(DELIVERY_TAG, message.getLong(DELIVERY_TAG));
     queries.put(ORIGIN, message.getString(ORIGIN));
     Promise<JsonObject> promise = Promise.promise();
+    if (message.containsKey(EVENT)) {
+      cacheService.refreshCache();
+    }
     databaseOperations(queries)
-        .onComplete(dbHandler -> {
-          if (dbHandler.succeeded()) {
-            promise.complete(dbHandler.result());
-          } else {
-            LOGGER.error(dbHandler.cause());
-            promise.fail(dbHandler.cause());
-          }
-        });
+        .onComplete(
+            dbHandler -> {
+              if (dbHandler.succeeded()) {
+                promise.complete(dbHandler.result());
+              } else {
+                LOGGER.error(dbHandler.cause());
+                promise.fail(dbHandler.cause());
+              }
+            });
     return promise.future();
   }
 
@@ -72,44 +78,52 @@ public class MessageProcessorImpl implements MessageProcessService {
   @Override
   public Future<Void> processSubscriptionMonitoringMessages(JsonObject message) {
     Promise<Void> promise = Promise.promise();
-    subsAuditService.generateAuditLog(message).onComplete(
-        logHandler -> {
-          if (logHandler.succeeded()) {
-            promise.complete();
-          } else {
-            promise.fail(logHandler.cause());
-          }
-
-        });
+    subsAuditService
+        .generateAuditLog(message)
+        .onComplete(
+            logHandler -> {
+              if (logHandler.succeeded()) {
+                promise.complete();
+              } else {
+                promise.fail(logHandler.cause());
+              }
+            });
     return promise.future();
   }
 
   private Future<JsonObject> databaseOperations(JsonObject queries) {
     Promise<JsonObject> promise = Promise.promise();
     Future<JsonObject> insertInPostgres = postgresService.executeWriteQuery(queries);
-    insertInPostgres.onSuccess(insertInImmudbHandler -> {
-      Future<JsonObject> insertInImmudb = immudbService.executeWriteQuery(queries);
-      insertInImmudb.onComplete(immudbHandler -> {
-        if (insertInImmudb.succeeded()) {
-          promise.complete(queries);
-        } else {
-          Future<JsonObject> deleteFromPostgres = postgresService.executeDeleteQuery(queries);
-          deleteFromPostgres.onComplete(postgresHandler -> {
-            if (deleteFromPostgres.succeeded()) {
-              LOGGER
-                  .error("Rollback : success delete. Message Origin: {}",
-                      queries.getString(ORIGIN));
-              promise.fail(immudbHandler.cause().getMessage());
-            } else {
-              LOGGER.info("Rollback : delete failed");
-              promise.fail(deleteFromPostgres.cause().getMessage());
-            }
-          });
-        }
-      });
-    }).onFailure(failureHandler -> {
-      promise.fail("failed to insert in postgres " + failureHandler.getCause());
-    });
+    insertInPostgres
+        .onSuccess(
+            insertInImmudbHandler -> {
+              Future<JsonObject> insertInImmudb = immudbService.executeWriteQuery(queries);
+              insertInImmudb.onComplete(
+                  immudbHandler -> {
+                    if (insertInImmudb.succeeded()) {
+                      promise.complete(queries);
+                    } else {
+                      Future<JsonObject> deleteFromPostgres =
+                          postgresService.executeDeleteQuery(queries);
+                      deleteFromPostgres.onComplete(
+                          postgresHandler -> {
+                            if (deleteFromPostgres.succeeded()) {
+                              LOGGER.error(
+                                  "Rollback : success delete. Message Origin: {}",
+                                  queries.getString(ORIGIN));
+                              promise.fail(immudbHandler.cause().getMessage());
+                            } else {
+                              LOGGER.info("Rollback : delete failed");
+                              promise.fail(deleteFromPostgres.cause().getMessage());
+                            }
+                          });
+                    }
+                  });
+            })
+        .onFailure(
+            failureHandler -> {
+              promise.fail("failed to insert in postgres " + failureHandler.getCause());
+            });
 
     return promise.future();
   }
