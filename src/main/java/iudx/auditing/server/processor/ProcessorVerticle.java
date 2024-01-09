@@ -38,14 +38,13 @@ public class ProcessorVerticle extends AbstractVerticle {
     cacheService = CacheService.createProxy(vertx, CACHE_SERVICE_ADDRESS);
     subscriptionAuditService = new SubscriptionAuditServiceImpl(rabbitMqService, cacheService);
     processor =
-        new MessageProcessorImpl(postgresService, immudbService, subscriptionAuditService,
-            config());
+        new MessageProcessorImpl(
+            postgresService, immudbService, subscriptionAuditService, config(), cacheService);
     binder = new ServiceBinder(vertx);
 
     consumer =
         binder.setAddress(MSG_PROCESS_ADDRESS).register(MessageProcessService.class, processor);
     LOGGER.info("Processor Verticle deployed.");
-
   }
 
   @Override

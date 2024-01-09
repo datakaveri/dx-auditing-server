@@ -22,7 +22,6 @@ public class CacheServiceImpl implements CacheService {
   private final Cache<String, List<SubscriptionUser>> cache =
       CacheBuilder.newBuilder().maximumSize(5000).expireAfterWrite(1L, TimeUnit.DAYS).build();
 
-
   private PostgresService pgService;
 
   public CacheServiceImpl(Vertx vertx, PostgresService pgService) {
@@ -31,11 +30,10 @@ public class CacheServiceImpl implements CacheService {
     refreshCache();
 
     vertx.setPeriodic(
-        TimeUnit.MINUTES.toMillis(10),
+        TimeUnit.DAYS.toMillis(1),
         handler -> {
           refreshCache();
         });
-
   }
 
   public static <T> List<T> listOf(JsonArray arr) {
@@ -55,18 +53,18 @@ public class CacheServiceImpl implements CacheService {
       JsonArray jsonArray = new JsonArray();
       subscriptionUsers.forEach(
           user -> {
-            JsonObject jsonObject = new JsonObject()
-                .put("user_id", user.getUserId())
-                .put("queue_name", user.getSubsId())
-                .put("entity", user.getResourceId())
-                .put("provider_id", user.getProviderId())
-                .put("resource_group", user.getResourceGroup())
-                .put("provider_id", user.getProviderId())
-                .put("delegator_id", user.getDelegatorId())
-                .put("item_type", user.getType());
+            JsonObject jsonObject =
+                new JsonObject()
+                    .put("user_id", user.getUserId())
+                    .put("queue_name", user.getSubsId())
+                    .put("entity", user.getResourceId())
+                    .put("provider_id", user.getProviderId())
+                    .put("resource_group", user.getResourceGroup())
+                    .put("provider_id", user.getProviderId())
+                    .put("delegator_id", user.getDelegatorId())
+                    .put("item_type", user.getType());
             jsonArray.add(jsonObject);
-          }
-      );
+          });
       JsonObject resultJson = new JsonObject().put("results", jsonArray);
       promise.complete(resultJson);
 
@@ -96,33 +94,32 @@ public class CacheServiceImpl implements CacheService {
   public Future<Void> refreshCache() {
     LOGGER.trace("refreshCache() called");
     Promise<Void> promise = Promise.promise();
-    pgService.executeReadQuery(CACHE_QUERY)
-        .onSuccess(result -> {
-          cache.invalidateAll();
-          //List<SubscriptionUser> list = listOf(result);
-          result.forEach(
-              json -> {
-                JsonObject jsonObject = new JsonObject(json.toString());
-                SubscriptionUser subConsumer = jsonObject.mapTo(SubscriptionUser.class);
-                String resourceId = subConsumer.getResourceId();
-                if (cache.getIfPresent(resourceId) == null) {
-                  List<SubscriptionUser> subscriptionUsers = new ArrayList<>();
-                  subscriptionUsers.add(subConsumer);
-                  cache.put(resourceId, subscriptionUsers);
-                } else {
-                  List<SubscriptionUser> subscriptionUsers = cache.getIfPresent(resourceId);
-                  subscriptionUsers.add(subConsumer);
-
-                }
-              });
-          promise.complete();
-
-        })
-        .onFailure(failure -> {
-          LOGGER.error("Fail to fetch database : {} ", failure.getMessage());
-          promise.fail(failure.getMessage());
-        });
+    pgService
+        .executeReadQuery(CACHE_QUERY)
+        .onSuccess(
+            result -> {
+              cache.invalidateAll();
+              result.forEach(
+                  json -> {
+                    JsonObject jsonObject = new JsonObject(json.toString());
+                    SubscriptionUser subConsumer = jsonObject.mapTo(SubscriptionUser.class);
+                    String resourceId = subConsumer.getResourceId();
+                    if (cache.getIfPresent(resourceId) == null) {
+                      List<SubscriptionUser> subscriptionUsers = new ArrayList<>();
+                      subscriptionUsers.add(subConsumer);
+                      cache.put(resourceId, subscriptionUsers);
+                    } else {
+                      List<SubscriptionUser> subscriptionUsers = cache.getIfPresent(resourceId);
+                      subscriptionUsers.add(subConsumer);
+                    }
+                  });
+              promise.complete();
+            })
+        .onFailure(
+            failure -> {
+              LOGGER.error("Fail to fetch database : {} ", failure.getMessage());
+              promise.fail(failure.getMessage());
+            });
     return promise.future();
   }
-
 }
