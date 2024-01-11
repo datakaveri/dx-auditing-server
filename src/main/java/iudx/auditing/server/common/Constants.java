@@ -30,5 +30,6 @@ public class Constants {
 
   public static final String DI_SERVER = "data-ingestion";
   public static final String ACL_APD_SERVER = "acl-apd-server";
+  public static final String DMP_APD_SERVER = "dmp-apd-server";
   public static final String EVENT = "event";
 }

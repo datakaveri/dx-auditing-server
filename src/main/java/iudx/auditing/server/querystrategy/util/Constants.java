@@ -12,6 +12,7 @@ public class Constants {
   public static final String IID = "iid";
   public static final String USER_ROLE = "userRole";
   public static final String HTTP_METHOD = "httpMethod";
+  public static final String INFORMATION = "info";
   public static final String RESOURCE_GROUP = "resourceGroup";
   public static final String TYPE = "type";
   public static final String DELEGATOR_ID = "delegatorId";
@@ -25,6 +26,8 @@ public class Constants {
   public static final String CAT_PG_TABLE_NAME = "postgresCatTableName";
   public static final String CAT_IMMUDB_TABLE_NAME = "immudbCatTableName";
   public static final String APD_PG_TABLE_NAME = "postgersApdTableName";
+  public static final String DMP_APD_PG_TABLE_NAME = "postgresDmpApdTableName";
+  public static final String DMP_APD_IMMUDB_TABLE_NAME = "immudbDmpApdTableName";
   public static final String APD_IMMUDB_TABLE_NAME = "immudbApdTableName";
   public static final String CONSENT_LOG_PG_TABLE_NAME = "postgresConsentLogTableName";
   public static final String CONSENT_LOG_IMMUDB_TABLE_NAME = "immudbConsentLogTableName";
@@ -64,6 +67,10 @@ public class Constants {
       "UPDATE $0 SET event_type = '$1' WHERE subscription_id = '$2'";
   public static final String APD_WRITE_QUERY_PG =
       "INSERT INTO $0 (id,userid,endpoint,method,body,size,time) VALUES ('$1','$2','$3','$4','$5',$6,'$7')";
+  public static final String DMP_APD_WRITE_QUERY_POSTGRES =
+          "INSERT INTO $0 (_id, user_id, api, method, info, time) VALUES ('$1', '$2', '$3', '$4', '$5', '$6');";
+  public static final String DMP_APD_WRITE_QUERY_IMMUDB =
+          "INSERT INTO $0 (_id, user_id, api, method, info, epoch_time, iso_time) VALUES ('$1','$2','$3','$4','$5','$6','$7')";
   public static final String APD_WRITE_QUERY_IMMUDB =
       "INSERT INTO $0 (id,userid,endpoint,method,body,size,epochtime,isotime)"
           + " VALUES ('$1','$2','$3','$4','$5',$6,$7,'$8')";

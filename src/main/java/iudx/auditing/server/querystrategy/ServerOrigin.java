@@ -11,6 +11,7 @@ public enum ServerOrigin {
   DI_SERVER("data-ingestion"),
   RS_SERVER_SUBS("rs-server-subscriptions"),
   ACL_APD_SERVER("acl-apd-server"),
+  DMP_APD_SERVER("dmp-apd-server"),
   CONSENT_LOG_ADEX("consent-log");
 
   private final String originRole;
