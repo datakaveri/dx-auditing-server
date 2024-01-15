@@ -8,6 +8,7 @@ public class ServerOriginContextFactory {
   private final AuditingServerStrategy authServerStrategy;
   private final AuditingServerStrategy rsSubscriptionStrategy;
   private final AuditingServerStrategy aclApdServerStrategy;
+  private final AuditingServerStrategy dmpApdServerStrategy;
   private final AuditingServerStrategy consentLogStrategy;
 
   public ServerOriginContextFactory(JsonObject config) {
@@ -17,6 +18,7 @@ public class ServerOriginContextFactory {
     this.rsSubscriptionStrategy = new RsSubscriptionStrategy(config);
     this.aclApdServerStrategy = new AclApdAuditingStrategy(config);
     this.consentLogStrategy = new ConsentLogAuditingStrategy(config);
+    this.dmpApdServerStrategy = new DmpApdAuditingStrategy(config);
   }
 
   public AuditingServerStrategy create(ServerOrigin serverOrigin) {
@@ -37,6 +39,8 @@ public class ServerOriginContextFactory {
         return aclApdServerStrategy;
       case CONSENT_LOG_ADEX:
         return consentLogStrategy;
+      case DMP_APD_SERVER:
+        return dmpApdServerStrategy;
       default:
         throw new IllegalArgumentException(serverOrigin + "serverOrigin is not defined");
     }

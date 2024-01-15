@@ -31,7 +31,9 @@
       "postgresAuthTableName": "",
       "postgersApdTableName": "",
       "catalogueHost": "",
-      "cataloguePort": ""
+      "cataloguePort": "",
+      "postgresDmpApdTableName": "",
+      "immudbDmpApdTableName": ""
     },
     {
       "id": "iudx.auditing.server.postgres.PostgresVerticle",
