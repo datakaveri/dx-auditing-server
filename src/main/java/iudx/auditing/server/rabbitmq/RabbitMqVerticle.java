@@ -74,17 +74,18 @@ public class RabbitMqVerticle extends AbstractVerticle {
 
     RabbitMQOptions internalVhostOptions = new RabbitMQOptions(config);
     String internalCommVhost = config().getString(VirtualHosts.IUDX_INTERNAL.value);
-    internalVhostOptions.setVirtualHost(internalCommVhost);
-    rabbitMqService = new RabbitMqServiceImpl(vertx, internalVhostOptions);
 
     RabbitMQOptions prodOptions = new RabbitMQOptions(config);
     String prodVhost = config().getString(VirtualHosts.IUDX_PROD.value);
     prodOptions.setVirtualHost(prodVhost);
+    internalVhostOptions.setVirtualHost(internalCommVhost);
+    rabbitMqService = new RabbitMqServiceImpl(vertx, internalVhostOptions);
+
     messageProcessService = MessageProcessService.createProxy(vertx, MSG_PROCESS_ADDRESS);
 
     auditConsumer = new AuditMessageConsumer(vertx, internalVhostOptions, messageProcessService);
     subsConsumer =
-        new SubscriptionMonitoringConsumer(vertx, internalVhostOptions, messageProcessService);
+        new SubscriptionMonitoringConsumer(vertx, prodOptions, messageProcessService);
     auditConsumer.start();
     subsConsumer.start();
     binder = new ServiceBinder(vertx);
