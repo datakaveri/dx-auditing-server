@@ -4,7 +4,7 @@ networks:
     driver: bridge
 services:
   test:
-    image: ghcr.io/datakaveri/audit-test:latest
+    image: ghcr.io/datakaveri/auditing-server-test:latest
     environment:
       - LOG_LEVEL=INFO
     volumes:
@@ -20,21 +20,6 @@ services:
       - ./google_checks.xml:/usr/share/app/google_checks.xml
     command: bash -c "docker/runTests.sh"
     network_mode: host
-
-  integTest:
-    image: ghcr.io/datakaveri/audit-depl:latest
-    environment:
-      - LOG_LEVEL=INFO
-    volumes:
-      - /home/ubuntu/configs/audit-config-test.json:/usr/share/app/secrets/configs/config.json
-      - /home/ubuntu/configs/keystore-file.jks:/usr/share/app/secrets/keystore-file.jks
-    command: bash -c "exec java $$AUDIT_JAVA_OPTS  -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory -jar ./fatjar.jar  --host $$(hostname) -c secrets/configs/config.json"
-    ports:
-      - "8443:8443"
-    networks:
-      - audit-net
-    depends_on:
-      - "zookeeper"
 
   zookeeper:
     image: zookeeper:latest
