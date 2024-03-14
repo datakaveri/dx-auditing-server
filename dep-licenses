@@ -49,4 +49,9 @@ SNo     Software Name     License Information                                   
 
 Internal Servers:
 SNo     Software Name            License Information    Modification Description
-
+1       IUDX Catalogue Server    Apache 2.0             None
+2       IUDX Resource Server     Apache 2.0             None
+3       IUDX AAA Server          Apache 2.0             None
+4       IUDX ACL APD Server      Apache 2.0             None
+5       IUDX DMP APD Server      Apache 2.0             None
+6       IUDX RS Proxy Server     Apache 2.0             None
