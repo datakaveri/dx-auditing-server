@@ -17,6 +17,7 @@ public class ImmudbVerticle extends AbstractVerticle {
   PgConnectOptions connectOptionsForRs;
   PgConnectOptions connectOptionsForAaa;
   PgConnectOptions connectOptionsForCat;
+  PgConnectOptions connectOptionsForOgc;
   PoolOptions poolOptions;
   PgPool poolForRs;
   PgPool poolForAaa;
@@ -30,14 +31,14 @@ public class ImmudbVerticle extends AbstractVerticle {
   private String databasePasswordRs;
 
   private String databaseNameAaa;
-
   private String databaseUserNameAaa;
   private String databasePasswordAaa;
-
   private String databaseNameCat;
-
   private String databaseUserNameCat;
   private String databasePasswordCat;
+  private String databasePasswordOgc;
+  private String databaseNameOgc;
+  private String databaseUserNameOgc;
 
   private int poolSize;
   private ServiceBinder binder;
@@ -62,6 +63,10 @@ public class ImmudbVerticle extends AbstractVerticle {
     databaseNameCat = config().getString("meteringCATDatabaseName");
     databaseUserNameCat = config().getString("meteringCATDatabaseUserName");
     databasePasswordCat = config().getString("meteringCATDatabasePassword");
+
+    databaseNameOgc = config().getString("meteringOgcDatabaseName");
+    databaseUserNameOgc = config().getString("meteringOgcDatabaseUserName");
+    databasePasswordOgc = config().getString("meteringOgcDatabasePassword");
 
     this.connectOptionsForRs =
         new PgConnectOptions()
@@ -93,10 +98,21 @@ public class ImmudbVerticle extends AbstractVerticle {
             .setReconnectAttempts(2)
             .setReconnectInterval(1000);
 
+    this.connectOptionsForOgc =
+        new PgConnectOptions()
+            .setPort(databasePort)
+            .setHost(databaseIp)
+            .setDatabase(databaseNameOgc)
+            .setUser(databaseUserNameOgc)
+            .setPassword(databasePasswordOgc)
+            .setReconnectAttempts(2)
+            .setReconnectInterval(1000);
+
     this.poolOptions = new PoolOptions().setMaxSize(poolSize);
     this.poolForRs = PgPool.pool(vertx, connectOptionsForRs, poolOptions);
     this.poolForAaa = PgPool.pool(vertx, connectOptionsForAaa, poolOptions);
     this.poolForCat = PgPool.pool(vertx, connectOptionsForCat, poolOptions);
+    this.poolForOgc = PgPool.pool(vertx, connectOptionsForOgc, poolOptions);
     binder = new ServiceBinder(vertx);
     immuDbService = new ImmudbServiceImpl(poolForRs, poolForAaa, poolForCat, poolForOgc);
     consumer =

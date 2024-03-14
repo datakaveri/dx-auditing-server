@@ -490,6 +490,7 @@ class MessageProcessorImplTest {
         vertxTestContext.completeNow();
     }
 
+
     @Test
     public void testProcessSubscriptionMonitoringMessages(VertxTestContext vertxTestContext) {
         JsonObject message = new JsonObject();
@@ -516,6 +517,7 @@ class MessageProcessorImplTest {
         verify(subscriptionAuditService, times(1)).generateAuditLog(any(JsonObject.class));
         vertxTestContext.completeNow();
     }
+
 
     @Test
     @DisplayName("Testing Success process as origin rs-subs-server (subs_updated)")
@@ -624,13 +626,15 @@ class MessageProcessorImplTest {
                         .put(PRIMARY_KEY, "primary_key")
                         .put(ID, "id")
                         .put(PROVIDER_ID, "providerId")
+                        .put(RESOURCE_GROUP,"respourceGroup")
                         .put(API, "api")
                         .put(EPOCH_TIME, 5000)
                         .put(ISO_TIME, "2000-03-03T21:00:00Z")
                         .put(SIZE, 0)
                         .put(OGC_PG_TABLE_NAME, "OGC_PG_TABLE_NAME")
                         .put(OGC_IMMUDB_TABLE_NAME, "OGC_IMMUDB_TABLE_NAME")
-                        .put(ITEM_TYPE, "itemType");
+                        .put(ITEM_TYPE, "itemType")
+                        .put(REQUEST_JSON,new JsonObject());
 
         when(config.getString((anyString()))).thenReturn("auditing_ogc");
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
