@@ -55,3 +55,7 @@ SNo     Software Name            License Information    Modification Description
 4       IUDX ACL APD Server      Apache 2.0             None
 5       IUDX DMP APD Server      Apache 2.0             None
 6       IUDX RS Proxy Server     Apache 2.0             None
+7       IUDX File Server         Apache 2.0             None
+8       IUDX GIS Server          Apache 2.0             None
+9       IUDX OGC Resource Server Apache 2.0             None
+
