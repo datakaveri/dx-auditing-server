@@ -3,7 +3,6 @@ pipeline {
   environment {
     devRegistry = 'ghcr.io/datakaveri/auditing-server-dev'
     deplRegistry = 'ghcr.io/datakaveri/auditing-server-depl'
-    testRegistry = 'ghcr.io/datakaveri/auditing-server-test:latest'
     registryUri = 'https://ghcr.io'
     registryCredential = 'datakaveri-ghcr'
     GIT_HASH = GIT_COMMIT.take(7)
