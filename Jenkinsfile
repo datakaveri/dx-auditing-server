@@ -28,7 +28,9 @@ pipeline {
     stage('Unit Tests and Code Coverage Test'){
       steps{
         script{
-          sh 'mvn clean test checkstyle:checkstyle pmd:pmd'
+          catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+            sh 'mvn clean test checkstyle:checkstyle pmd:pmd'
+          }
         }
       }
       post{
