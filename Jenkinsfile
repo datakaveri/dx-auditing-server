@@ -39,7 +39,7 @@ pipeline {
             thresholds: [ skipped(failureThreshold: '0'), failed(failureThreshold: '0') ],
             tools: [ JUnit(pattern: 'target/surefire-reports/*.xml') ]
           )
-          jacoco classPattern: 'target/classes', execPattern: 'target/jacoco.exec', sourcePattern: 'src/main/java', exclusionPattern:''
+          jacoco classPattern: 'target/classes', execPattern: 'target/jacoco.exec', sourcePattern: 'src/main/java', exclusionPattern:'**/*VertxEBProxy.class,**/Constants.class,**/*VertxProxyHandler.class,**/*Verticle.class,iudx/auditing/server/deploy/*.class,iudx/auditing/server/rabbitmq/RabbitMqService.class,iudx/auditing/server/querystrategy/AuditingServerStrategy.class,iudx/auditing/server/processor/MessageProcessService.class,iudx/auditing/server/postgres/PostgresService.class,iudx/auditing/server/immudb/ImmudbService.class,iudx/auditing/server/common/RabitMqConsumer.class,iudx/auditing/server/cache/*.class,iudx/auditing/server/rabbitmq/consumers/*.class,iudx/auditing/server/rabbitmq/RabbitMqServiceImpl.class'
           recordIssues(
             enabledForFailure: true,
             blameDisabled: true,
