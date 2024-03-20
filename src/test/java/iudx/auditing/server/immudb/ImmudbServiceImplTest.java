@@ -105,4 +105,59 @@ class ImmudbServiceImplTest {
         assertEquals(resultJosn.result().getString(RESULT), "Table Updated Successfully");
         vertxTestContext.completeNow();
     }
+    @Test
+    void testExecuteWriteQuery4Sucess2(VertxTestContext vertxTestContext) {
+
+        JsonObject query = new JsonObject()
+                .put(ORIGIN,CONSENT_LOG_ADEX)
+                .put(IMMUDB_WRITE_QUERY,"dummy-query");
+
+        Future future = mock(Future.class);
+        SqlClient sqlClient = mock(SqlClient.class);
+        AsyncResult<?> asyncruslt = mock(AsyncResult.class);
+        SqlConnection connection = mock(SqlConnection.class);
+
+        when(pgClient.withConnection(any())).thenReturn(future);
+        when(asyncruslt.succeeded()).thenReturn(true);
+
+        doAnswer(new Answer<AsyncResult<?>>() {
+            @Override
+            public AsyncResult<?> answer(InvocationOnMock arg0) throws Throwable {
+                ((Handler<AsyncResult<?>>) arg0.getArgument(0)).handle(asyncruslt);
+                return null;
+            }
+        }).when(future).onComplete(any());
+
+        Future<JsonObject> resultJosn = immudbService.executeWriteQuery(query);
+        assertEquals(resultJosn.result().getString(RESULT), "Table Updated Successfully");
+        vertxTestContext.completeNow();
+    }
+
+    @Test
+    void testExecuteWriteQuery4Sucess3(VertxTestContext vertxTestContext) {
+
+        JsonObject query = new JsonObject()
+                .put(ORIGIN,AAA_SERVER)
+                .put(IMMUDB_WRITE_QUERY,"dummy-query");
+
+        Future future = mock(Future.class);
+        SqlClient sqlClient = mock(SqlClient.class);
+        AsyncResult<?> asyncruslt = mock(AsyncResult.class);
+        SqlConnection connection = mock(SqlConnection.class);
+
+        when(pgClient.withConnection(any())).thenReturn(future);
+        when(asyncruslt.succeeded()).thenReturn(true);
+
+        doAnswer(new Answer<AsyncResult<?>>() {
+            @Override
+            public AsyncResult<?> answer(InvocationOnMock arg0) throws Throwable {
+                ((Handler<AsyncResult<?>>) arg0.getArgument(0)).handle(asyncruslt);
+                return null;
+            }
+        }).when(future).onComplete(any());
+
+        Future<JsonObject> resultJosn = immudbService.executeWriteQuery(query);
+        assertEquals(resultJosn.result().getString(RESULT), "Table Updated Successfully");
+        vertxTestContext.completeNow();
+    }
 }
