@@ -216,7 +216,22 @@
                     <systemPropertyVariables>
                         <jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
                     </systemPropertyVariables>
-                    <excludes></excludes>
+                    <excludes>
+                        <exclude>**/*VertxEBProxy.class</exclude>
+                        <exclude>**/Constants.class</exclude>
+                        <exclude>**/*VertxProxyHandler.class</exclude>
+                        <exclude>**/*Verticle.class</exclude>
+                        <exclude>iudx/auditing/server/deploy/*.class</exclude>
+                        <exclude>iudx/auditing/server/rabbitmq/RabbitMqService.class</exclude>
+                        <exclude>iudx/auditing/server/querystrategy/AuditingServerStrategy.class</exclude>
+                        <exclude>iudx/auditing/server/processor/MessageProcessService.class</exclude>
+                        <exclude>iudx/auditing/server/postgres/PostgresService.class</exclude>
+                        <exclude>iudx/auditing/server/immudb/ImmudbService.class</exclude>
+                        <exclude>iudx/auditing/server/common/RabitMqConsumer.class</exclude>
+                        <exclude>iudx/auditing/server/cache/*.class</exclude>
+                        <exclude>iudx/auditing/server/rabbitmq/consumers/*.class</exclude>
+                        <exclude>iudx/auditing/server/rabbitmq/RabbitMqServiceImpl.class</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>

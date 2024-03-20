@@ -24,7 +24,7 @@ public class SubscriptionUser {
   @JsonProperty("item_type")
   private String type;
 
-  private SubscriptionUser() {
+  public SubscriptionUser() {
     super();
   }
 
