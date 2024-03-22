@@ -68,15 +68,15 @@ public class Constants {
   public static final String APD_WRITE_QUERY_PG =
       "INSERT INTO $0 (id,userid,endpoint,method,body,size,time) VALUES ('$1','$2','$3','$4','$5',$6,'$7')";
   public static final String DMP_APD_WRITE_QUERY_POSTGRES =
-          "INSERT INTO $0 (_id, user_id, api, method, info, time) VALUES ('$1', '$2', '$3', '$4', '$5', '$6');";
+      "INSERT INTO $0 (_id, user_id, api, method, info, time) VALUES ('$1', '$2', '$3', '$4', '$5', '$6');";
   public static final String DMP_APD_WRITE_QUERY_IMMUDB =
-          "INSERT INTO $0 (_id, user_id, api, method, info, epoch_time, iso_time) VALUES ('$1','$2','$3','$4','$5','$6','$7')";
+      "INSERT INTO $0 (_id, user_id, api, method, info, epoch_time, iso_time) VALUES ('$1','$2','$3','$4','$5','$6','$7')";
   public static final String APD_WRITE_QUERY_IMMUDB =
       "INSERT INTO $0 (id,userid,endpoint,method,body,size,epochtime,isotime)"
           + " VALUES ('$1','$2','$3','$4','$5',$6,$7,'$8')";
   public static final String CACHE_QUERY =
       "select queue_name, entity,user_id,resource_group,"
-          + "delegator_id,item_type,provider_id from subscriptions";
+          + "delegator_id,item_type,provider_id from subscriptions where expiry > now()";
 
   public static final String CONSENT_LOG_WRITE_QUERY_PG =
       "INSERT INTO $0 "
