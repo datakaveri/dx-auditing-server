@@ -626,7 +626,7 @@ class MessageProcessorImplTest {
                         .put(PRIMARY_KEY, "primary_key")
                         .put(ID, "id")
                         .put(PROVIDER_ID, "providerId")
-                        .put(RESOURCE_GROUP,"respourceGroup")
+                        .put(RESOURCE_GROUP, "respourceGroup")
                         .put(API, "api")
                         .put(EPOCH_TIME, 5000)
                         .put(ISO_TIME, "2000-03-03T21:00:00Z")
@@ -634,7 +634,7 @@ class MessageProcessorImplTest {
                         .put(OGC_PG_TABLE_NAME, "OGC_PG_TABLE_NAME")
                         .put(OGC_IMMUDB_TABLE_NAME, "OGC_IMMUDB_TABLE_NAME")
                         .put(ITEM_TYPE, "itemType")
-                        .put(REQUEST_JSON,new JsonObject());
+                        .put(REQUEST_JSON, new JsonObject());
 
         when(config.getString((anyString()))).thenReturn("auditing_ogc");
         doAnswer(Answer -> Future.succeededFuture()).when(postgresService).executeWriteQuery(any());
