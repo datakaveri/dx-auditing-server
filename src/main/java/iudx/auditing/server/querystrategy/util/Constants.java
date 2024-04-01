@@ -31,6 +31,8 @@ public class Constants {
   public static final String APD_IMMUDB_TABLE_NAME = "immudbApdTableName";
   public static final String CONSENT_LOG_PG_TABLE_NAME = "postgresConsentLogTableName";
   public static final String CONSENT_LOG_IMMUDB_TABLE_NAME = "immudbConsentLogTableName";
+  public static final String OGC_IMMUDB_TABLE_NAME = "immudbOgcTableName";
+  public static final String OGC_PG_TABLE_NAME = "postgresOgcTableName";
   public static final String ITEM_ID = "item_id";
   public static final String EVENT_TYPE = "event";
   public static final String AIU_ID = "aiu_id";
@@ -88,4 +90,11 @@ public class Constants {
           + "(_id,item_id,item_type,event,aiu_id,aip_id,dp_id,artifact,isotime,shalog)"
           + " VALUES ('$1','$2','$3','$4','$5','$6','$7','$8','$9','$a')";
   public static final String DELETE_QUERY_CONSENT = "DELETE FROM $0 WHERE _id = '$1';";
+
+  public static final String OGC_WRITE_QUERY_IMMUDB =
+      "INSERT INTO $0 (id,api,userid,epochtime,resourceid,isotime,providerid,size,itemType) "
+          + "VALUES ('$1','$2','$3',$4,'$5','$6','$7',$8,'$9')";
+  public static final String OGC_WRITE_QUERY_PG =
+      "INSERT INTO $0 (id,api,userid,epochtime,resourceid,providerid,itemType,size,time)"
+          + " VALUES ('$1','$2','$3',$4,'$5','$6','$7',$8,'$9')";
 }

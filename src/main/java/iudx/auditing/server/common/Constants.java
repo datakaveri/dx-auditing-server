@@ -27,6 +27,7 @@ public class Constants {
   public static final String FILE_SERVER = "file-server";
 
   public static final String GIS_SERVER = "gis-server";
+  public static final String OGC_SERVER = "ogc-server";
 
   public static final String DI_SERVER = "data-ingestion";
   public static final String ACL_APD_SERVER = "acl-apd-server";

@@ -21,6 +21,7 @@ public class ImmudbVerticle extends AbstractVerticle {
   PgPool poolForRs;
   PgPool poolForAaa;
   PgPool poolForCat;
+  PgPool poolForOgc;
   private String databaseIp;
   private int databasePort;
   private String databaseNameRs;
@@ -97,7 +98,7 @@ public class ImmudbVerticle extends AbstractVerticle {
     this.poolForAaa = PgPool.pool(vertx, connectOptionsForAaa, poolOptions);
     this.poolForCat = PgPool.pool(vertx, connectOptionsForCat, poolOptions);
     binder = new ServiceBinder(vertx);
-    immuDbService = new ImmudbServiceImpl(poolForRs, poolForAaa, poolForCat);
+    immuDbService = new ImmudbServiceImpl(poolForRs, poolForAaa, poolForCat, poolForOgc);
     consumer =
         binder.setAddress(IMMUDB_SERVICE_ADDRESS).register(ImmudbService.class, immuDbService);
     LOGGER.info("ImmudbVerticle Verticle Started");
