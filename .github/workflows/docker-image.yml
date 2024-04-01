@@ -1,5 +1,5 @@
-# This github workflow will automatically update docker image tags of fs-depl in the datakaveri/iudx-deployment repository files, whenever docker image is pushed to ghcr.io/datakaveri/fs-depl .Based on tag it will update the master/latest branch (if its 5.5.1-alpha-) or 5.5.0 stable branch (if its 5.5.0-)
-name: Update FS docker image tags
+# This github workflow will automatically update docker image tags of auditing-server-depl in the datakaveri/iudx-deployment repository files, whenever docker image is pushed to ghcr.io/datakaveri/auditing-server-depl .Based on tag it will update the master/latest branch (if its 5.5.1-alpha-) or 5.5.0 stable branch (if its 5.5.0-)
+name: Update Auditing server docker image tags
 
 # This trigger will run the workflow whenever a new package is published to the registry
 on:
@@ -23,14 +23,14 @@ jobs:
        token: "${{ secrets.JENKINS_UPDATE }}"
        fetch-depth: 0
 
-     # This step updates the FS Server docker image tags   
-    - name: Update FS docker image tags
+     # This step updates the Auditing Server docker image tags   
+    - name: Update Auditing server docker image tags
       env: 
         GH_TOKEN: ${{ secrets.JENKINS_UPDATE}}
       run: | 
         # Get the latest version of 5.5.0 and 5.5.1-alpha tags from the container registry using GitHub API
-        export newtag5_5_0=`(head -n 1 <(curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/orgs/datakaveri/packages/container/fs-depl/versions | jq ' .[].metadata.container.tags[0]'  | grep 5.5.0 | grep -v alpha | sed -e 's/^"//' -e 's/"$//'))`
-        export newtag5_5_1=`(head -n 1 <(curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/orgs/datakaveri/packages/container/fs-depl/versions | jq ' .[].metadata.container.tags[0]'  | grep 5.5.1-alpha | sed -e 's/^"//' -e 's/"$//'))`
+        export newtag5_5_0=`(head -n 1 <(curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/orgs/datakaveri/packages/container/auditing-server-depl/versions | jq ' .[].metadata.container.tags[0]'  | grep 5.5.0 | grep -v alpha | sed -e 's/^"//' -e 's/"$//'))`
+        export newtag5_5_1=`(head -n 1 <(curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/orgs/datakaveri/packages/container/auditing-server-depl/versions | jq ' .[].metadata.container.tags[0]'  | grep 5.5.1-alpha | sed -e 's/^"//' -e 's/"$//'))`
         
         # Get the old tags from the YAML files
         export oldtag5_5_1=`yq -r .services.auditing.image Docker-Swarm-deployment/single-node/auditing-server/auditing-stack.yaml | cut -d : -f 2`
@@ -45,7 +45,7 @@ jobs:
         # Update the YAML files and create a new branch for each tag update
         if [ "$newtag5_5_0" != "$oldtag5_5_0" ]
         then
-         git checkout -b fs-5.5.0-automatic-updates/$newtag5_5_0
+         git checkout -b auditing-server-5.5.0-automatic-updates/$newtag5_5_0
 
           # Uses sed to find and replace $oldtag5_5_0 with $newtag5_5_0 in Docker-Swarm-deployment/single-node/auditing-server/auditing-stack.yaml file
          sed -i s/$oldtag5_5_0/$newtag5_5_0/g Docker-Swarm-deployment/single-node/auditing-server/auditing-stack.yaml
@@ -60,8 +60,8 @@ jobs:
          sed -i s/$oldappversion/$newappversion/g K8s-deployment/Charts/auditing-server/Chart.yaml
          sed -i s/$oldtag5_5_0/$newtag5_5_0/g K8s-deployment/Charts/auditing-server/values.yaml
          git add Docker-Swarm-deployment/single-node/auditing-server/auditing-stack.yaml K8s-deployment/Charts/auditing-server/values.yaml K8s-deployment/Charts/auditing-server/Chart.yaml
-         git commit --allow-empty -m "updated FS docker image tag to $newtag5_5_0"
-         git push --set-upstream origin fs-5.5.0-automatic-updates/$newtag5_5_0
+         git commit --allow-empty -m "updated Auditing server docker image tag to $newtag5_5_0"
+         git push --set-upstream origin auditing-server-5.5.0-automatic-updates/$newtag5_5_0
 
          # Creates a new pull request on the datakaveri/iudx-deployment repository with the base branch 5.5.0
          gh pr create -R datakaveri/iudx-deployment --base 5.5.0 --fill 
@@ -70,7 +70,7 @@ jobs:
         if [ "$newtag5_5_1" != "$oldtag5_5_1" ]
         then
          git checkout master
-         git checkout -b fs-automatic-updates/$newtag5_5_1
+         git checkout -b auditing-server-automatic-updates/$newtag5_5_1
 
          # Uses sed to find and replace $oldtag5_5_1 with $newtag5_5_1 in Docker-Swarm-deployment/single-node/auditing-server/auditing-stack.yaml file
          sed -i s/$oldtag5_5_1/$newtag5_5_1/g Docker-Swarm-deployment/single-node/auditing-server/auditing-stack.yaml
@@ -85,8 +85,8 @@ jobs:
          sed -i s/$oldappversion/$newappversion/g K8s-deployment/Charts/auditing-server/Chart.yaml
          sed -i s/$oldtag5_5_1/$newtag5_5_1/g K8s-deployment/Charts/auditing-server/values.yaml
          git add Docker-Swarm-deployment/single-node/auditing-server/auditing-stack.yaml K8s-deployment/Charts/auditing-server/values.yaml K8s-deployment/Charts/auditing-server/Chart.yaml
-         git commit --allow-empty -m "updated FS docker image tag to $newtag5_5_1"
-         git push --set-upstream origin fs-automatic-updates/$newtag5_5_1
+         git commit --allow-empty -m "updated Auditing server docker image tag to $newtag5_5_1"
+         git push --set-upstream origin auditing-server-automatic-updates/$newtag5_5_1
          
          # Creates a new pull request on the datakaveri/iudx-deployment repository with the base branch master
          gh pr create -R datakaveri/iudx-deployment --base master --fill 
