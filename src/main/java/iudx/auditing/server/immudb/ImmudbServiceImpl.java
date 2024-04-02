@@ -14,11 +14,13 @@ public class ImmudbServiceImpl implements ImmudbService {
   private final PgPool pgClientForRs;
   private final PgPool pgClientForAaa;
   private final PgPool pgClientForCat;
+  private final PgPool pgClientForOgc;
 
-  public ImmudbServiceImpl(PgPool pgClientForRs, PgPool pgClientForAaa, PgPool pgClientForCat) {
+  public ImmudbServiceImpl(PgPool pgClientForRs, PgPool pgClientForAaa, PgPool pgClientForCat, PgPool pgClientForOgc) {
     this.pgClientForRs = pgClientForRs;
     this.pgClientForAaa = pgClientForAaa;
     this.pgClientForCat = pgClientForCat;
+    this.pgClientForOgc = pgClientForOgc;
   }
 
   @Override
@@ -64,6 +66,8 @@ public class ImmudbServiceImpl implements ImmudbService {
         return pgClientForAaa;
       case CAT_SERVER:
         return pgClientForCat;
+      case OGC_SERVER:
+        return pgClientForOgc;
       default:
         throw new IllegalArgumentException(originServer + " serverOrigin is not defined");
     }

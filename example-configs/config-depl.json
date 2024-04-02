@@ -58,6 +58,9 @@
       "meteringCATDatabaseName": "cat-db-name",
       "meteringCATDatabaseUserName": "cat-db-userName",
       "meteringCATDatabasePassword": "cat-db-password",
+      "meteringOgcDatabaseName": "ogc-db-name",
+      "meteringOgcDatabaseUserName": "ogc-db-userName",
+      "meteringOgcDatabasePassword": "ogc-db-password",
       "meteringPoolSize": 25
     }
   ]

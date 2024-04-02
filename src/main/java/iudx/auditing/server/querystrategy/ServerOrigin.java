@@ -12,8 +12,8 @@ public enum ServerOrigin {
   RS_SERVER_SUBS("rs-server-subscriptions"),
   ACL_APD_SERVER("acl-apd-server"),
   DMP_APD_SERVER("dmp-apd-server"),
-  CONSENT_LOG_ADEX("consent-log");
-
+  CONSENT_LOG_ADEX("consent-log"),
+  OGC_SERVER("ogc-server");
   private final String originRole;
 
   ServerOrigin(String originRole) {

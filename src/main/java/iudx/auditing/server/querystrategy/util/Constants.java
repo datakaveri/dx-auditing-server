@@ -1,6 +1,7 @@
 package iudx.auditing.server.querystrategy.util;
 
 public class Constants {
+  public static final String REQUEST_JSON = "request_json";
   public static final String SIZE = "response_size";
   public static final String ID = "id";
   public static final String USER_ID = "userid";
@@ -31,6 +32,8 @@ public class Constants {
   public static final String APD_IMMUDB_TABLE_NAME = "immudbApdTableName";
   public static final String CONSENT_LOG_PG_TABLE_NAME = "postgresConsentLogTableName";
   public static final String CONSENT_LOG_IMMUDB_TABLE_NAME = "immudbConsentLogTableName";
+  public static final String OGC_IMMUDB_TABLE_NAME = "immudbOgcTableName";
+  public static final String OGC_PG_TABLE_NAME = "postgresOgcTableName";
   public static final String ITEM_ID = "item_id";
   public static final String EVENT_TYPE = "event";
   public static final String AIU_ID = "aiu_id";
@@ -70,7 +73,8 @@ public class Constants {
   public static final String DMP_APD_WRITE_QUERY_POSTGRES =
       "INSERT INTO $0 (_id, user_id, api, method, info, time) VALUES ('$1', '$2', '$3', '$4', '$5', '$6');";
   public static final String DMP_APD_WRITE_QUERY_IMMUDB =
-      "INSERT INTO $0 (_id, user_id, api, method, info, epoch_time, iso_time) VALUES ('$1','$2','$3','$4','$5','$6','$7')";
+      "INSERT INTO $0 (_id, user_id, api, method, info, epoch_time, iso_time)"
+          + " VALUES ('$1','$2','$3','$4','$5','$6','$7')";
   public static final String APD_WRITE_QUERY_IMMUDB =
       "INSERT INTO $0 (id,userid,endpoint,method,body,size,epochtime,isotime)"
           + " VALUES ('$1','$2','$3','$4','$5',$6,$7,'$8')";
@@ -88,4 +92,12 @@ public class Constants {
           + "(_id,item_id,item_type,event,aiu_id,aip_id,dp_id,artifact,isotime,shalog)"
           + " VALUES ('$1','$2','$3','$4','$5','$6','$7','$8','$9','$a')";
   public static final String DELETE_QUERY_CONSENT = "DELETE FROM $0 WHERE _id = '$1';";
+
+  public static final String OGC_WRITE_QUERY_IMMUDB =
+      "INSERT INTO $0 (id,api,userid,epochtime,resourceid,isotime,providerid,size,resource_group,request_json) "
+          + "VALUES ('$1','$2','$3',$4,'$5','$6','$7',$8,'$9','$a')";
+  public static final String OGC_WRITE_QUERY_PG =
+      "INSERT INTO $0 "
+          + "(id,userid,api,request_json,size,resourceid,providerid,resource_group,epochtime,time,isotime,delegator_id)"
+          + " VALUES ('$1','$2','$3','$4',$5,'$6','$7','$8','$9','$a','$b','$c')";
 }

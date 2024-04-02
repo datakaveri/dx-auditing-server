@@ -32,7 +32,7 @@ class ImmudbServiceImplTest {
     @BeforeAll
     static void setup(VertxTestContext vertxTestContext) {
         pgClient = mock(PgPool.class);
-        immudbService = new ImmudbServiceImpl(pgClient,pgClient,pgClient);
+    immudbService = new ImmudbServiceImpl(pgClient, pgClient, pgClient, pgClient);
         vertxTestContext.completeNow();
     }
 

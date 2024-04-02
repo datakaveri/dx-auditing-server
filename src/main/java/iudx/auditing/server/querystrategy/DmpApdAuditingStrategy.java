@@ -1,15 +1,13 @@
 package iudx.auditing.server.querystrategy;
 
-import io.vertx.core.json.JsonObject;
-import iudx.auditing.server.rabbitmq.consumers.AuditMessageConsumer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import static iudx.auditing.server.querystrategy.util.Constants.*;
 
+import io.vertx.core.json.JsonObject;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-
-import static iudx.auditing.server.querystrategy.util.Constants.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DmpApdAuditingStrategy implements AuditingServerStrategy {
   private static final Logger LOGGER = LogManager.getLogger(DmpApdAuditingStrategy.class);
@@ -42,7 +40,6 @@ public class DmpApdAuditingStrategy implements AuditingServerStrategy {
         .replace("$4", method)
         .replace("$5", information)
         .replace("$6", utcTime.toString());
-
   }
 
   @Override
@@ -65,7 +62,7 @@ public class DmpApdAuditingStrategy implements AuditingServerStrategy {
     String isoTime = request.getString(ISO_TIME);
     String databaseTableName = config.getString(DMP_APD_IMMUDB_TABLE_NAME);
 
-    return  DMP_APD_WRITE_QUERY_IMMUDB
+    return DMP_APD_WRITE_QUERY_IMMUDB
         .replace("$0", databaseTableName)
         .replace("$1", primaryKey)
         .replace("$2", userId)
