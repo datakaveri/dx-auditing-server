@@ -1,6 +1,6 @@
-[![Jenkins Build](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.iudx.io%2Fjob%2Fiudx%2520auditing-server%2520(master)%2520pipeline%2F)](https://jenkins.iudx.io/job/iudx%20auditing-server%20(master)%20pipeline/lastBuild/)
-[![Jenkins Tests](https://img.shields.io/jenkins/tests?jobUrl=https%3A%2F%2Fjenkins.iudx.io%2Fjob%2Fiudx%2520auditing-server%2520(master)%2520pipeline%2F)](https://jenkins.iudx.io/job/iudx%20auditing-server%20(master)%20pipeline/lastBuild/testReport/)
-[![Jenkins Coverage](https://img.shields.io/jenkins/coverage/jacoco?jobUrl=https%3A%2F%2Fjenkins.iudx.io%2Fjob%2Fiudx%2520auditing-server%2520(master)%2520pipeline%2F)](https://jenkins.iudx.io/job/iudx%20auditing-server%20(master)%20pipeline/lastBuild/jacoco/)
+[![Jenkins Build](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.iudx.io%2Fjob%2Fiudx%2520auditing-server%2520(v5.5.0)%2520pipeline%2F)](https://jenkins.iudx.io/job/iudx%20auditing-server%20(v5.5.0)%20pipeline/lastBuild/)
+[![Jenkins Tests](https://img.shields.io/jenkins/tests?jobUrl=https%3A%2F%2Fjenkins.iudx.io%2Fjob%2Fiudx%2520auditing-server%2520(v5.5.0)%2520pipeline%2F)](https://jenkins.iudx.io/job/iudx%20auditing-server%20(v5.5.0)%20pipeline/lastBuild/testReport/)
+[![Jenkins Coverage](https://img.shields.io/jenkins/coverage/jacoco?jobUrl=https%3A%2F%2Fjenkins.iudx.io%2Fjob%2Fiudx%2520auditing-server%2520(v5.5.0)%2520pipeline%2F)](https://jenkins.iudx.io/job/iudx%20auditing-server%20(v5.5.0)%20pipeline/lastBuild/jacoco/)
 
 # iudx-auditing-server
 The Auditing Server is is [IUDX's](https://iudx.org.in) data access logging server. It logs API access information from various DX components. Additionally it logs the count and size of data consumed on every API call. This enables data providers to figure out who is consuming which resource of theirs. It also allows consumers to track how many times and how much they have consumed data of a certain resource.
