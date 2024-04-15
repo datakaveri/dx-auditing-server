@@ -12,8 +12,7 @@
 ---
 --- auditing_consent
 ---
- create table auditing_consent (_id varchar[128] not null,item_id varchar not null,item_type varchar not null,event varchar not null,aiu_id varchar not null,aip_id varchar not null,dp_id varchar not null,isotime varchar not null,artifact varchar not null,shalog varchar not null,primary key _id);
-
+create table auditing_consent (_id varchar[128] not null,item_id varchar[256] not null,item_type varchar[128] not null,event varchar[256] not null,aiu_id varchar[128] not null,aip_id varchar[256] not null,dp_id varchar[128] not null,isotime varchar[128] not null,artifact varchar[128] not null,shalog varchar[2046] not null,primary key _id);
 ---
 --- auditing_acl_apd
 -- This is not the current schema used in Dev instance of immudb, to create
@@ -24,12 +23,12 @@
 ---
 --- rsaudit
 ---
- CREATE TABLE rsaudit (id VARCHAR(128) PRIMARY KEY, api VARCHAR(128) NOT NULL, userid VARCHAR(128) NOT NULL, epochtime INTEGER NOT NULL, resourceid VARCHAR(256) NOT NULL, isotime VARCHAR(64) NOT NULL, providerid VARCHAR(128) NOT NULL, size INTEGER);
+ CREATE TABLE rsaudit (id VARCHAR[128] PRIMARY KEY, api VARCHAR[128] NOT NULL, userid VARCHAR[128] NOT NULL, epochtime INTEGER NOT NULL, resourceid VARCHAR[256] NOT NULL, isotime VARCHAR[64] NOT NULL, providerid VARCHAR[128] NOT NULL, size INTEGER);
 
 ---
 --- auditingtable
 ---
- CREATE TABLE auditingtable (id VARCHAR(128) PRIMARY KEY, userrole VARCHAR(64) NOT NULL, userid VARCHAR(128) NOT NULL, iid VARCHAR(250) NOT NULL, api VARCHAR(128) NOT NULL, method VARCHAR(32) NOT NULL, time INTEGER NOT NULL, iudxid VARCHAR(256) NOT NULL);
+ CREATE TABLE auditingtable (id VARCHAR[128] PRIMARY KEY, userrole VARCHAR[64] NOT NULL, userid VARCHAR[128] NOT NULL, iid VARCHAR[250] NOT NULL, api VARCHAR[128] NOT NULL, method VARCHAR[32] NOT NULL, time INTEGER NOT NULL, iudxid VARCHAR[256] NOT NULL);
 
 
 ---
@@ -57,3 +56,7 @@ CREATE INDEX IF NOT EXISTS index_name ON rsaudit(userid, providerid);
 ---
 CREATE INDEX IF NOT EXISTS index_name ON auditingtable(userid, api);
 
+---
+--- auditing_consent
+---
+CREATE INDEX IF NOT EXISTS ON auditing_consent(item_id, aiu_id, dp_id);
