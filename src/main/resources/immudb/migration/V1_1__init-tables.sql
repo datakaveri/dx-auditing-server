@@ -31,6 +31,12 @@ create table auditing_consent (_id varchar[128] not null,item_id varchar[256] no
 
 
 ---
+--- ogcaudit
+---
+
+CREATE TABLE ogcaudit (id VARCHAR[128] NOT NULL, userid VARCHAR[128] NOT NULL, api VARCHAR[128] NOT NULL, resourceid VARCHAR[128] NOT NULL, providerid VARCHAR[128] NOT NULL, resource_group VARCHAR[128] NOT NULL, epochtime VARCHAR[256] NOT NULL, isotime VARCHAR NOT NULL, size VARCHAR NOT NULL, PRIMARY KEY (id));
+
+---
 --- creating index for the tables
 ---
 
@@ -58,4 +64,9 @@ CREATE INDEX IF NOT EXISTS auditingtable ON auditingtable(userID, iudxID, time);
 ---
 --- auditing_consent
 ---
-CREATE INDEX IF NOT EXISTS ON auditing_consent(item_id, aiu_id, dp_id);
+CREATE INDEX IF NOT EXISTS auditing_consent ON auditing_consent(item_id, aiu_id, dp_id);
+
+---
+--- ogcaudit
+---
+CREATE INDEX IF NOT EXISTS ogcaudit ON ogcaudit (userid, resourceid, providerid);
