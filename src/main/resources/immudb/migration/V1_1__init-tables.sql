@@ -15,20 +15,19 @@
 create table auditing_consent (_id varchar[128] not null,item_id varchar[256] not null,item_type varchar[128] not null,event varchar[256] not null,aiu_id varchar[128] not null,aip_id varchar[256] not null,dp_id varchar[128] not null,isotime varchar[128] not null,artifact varchar[128] not null,shalog varchar[2046] not null,primary key _id);
 ---
 --- auditing_acl_apd
--- This is not the current schema used in Dev instance of immudb, to create
--- this schema, data from the old table could be migrated here
 ---
- CREATE TABLE auditing_acl_apd(id VARCHAR[256] NOT NULL, userid VARCHAR[128] NOT NULL,endpoint VARCHAR[128] NOT NULL,method VARCHAR[128] NOT NULL,body VARCHAR[2048] NOT NULL,size INTEGER NOT NULL,isotime VARCHAR[128] NOT NULL,epochtime INTEGER NOT NULL,PRIMARY KEY id);
+
+ CREATE TABLE auditing_acl_apd( id VARCHAR[128] NOT NULL, userid VARCHAR[128] NOT NULL, endpoint VARCHAR[128] NOT NULL, method VARCHAR[128] NOT NULL, body VARCHAR[128] NOT NULL,size INTEGER NOT NULL,isotime VARCHAR[128] NOT NULL, epochtime INTEGER NOT NULL, PRIMARY KEY id);
 
 ---
 --- rsaudit
 ---
- CREATE TABLE rsaudit (id VARCHAR[128] PRIMARY KEY, api VARCHAR[128] NOT NULL, userid VARCHAR[128] NOT NULL, epochtime INTEGER NOT NULL, resourceid VARCHAR[256] NOT NULL, isotime VARCHAR[64] NOT NULL, providerid VARCHAR[128] NOT NULL, size INTEGER);
+ CREATE TABLE rsaudit (id VARCHAR[128] NOT NULL,api VARCHAR[128] NOT NULL,userid VARCHAR[128] NOT NULL,epochtime INTEGER NOT NULL,resourceid VARCHAR[256] NOT NULL,isotime VARCHAR[64] NOT NULL,providerid VARCHAR[128] NOT NULL,size INTEGER, PRIMARY KEY id);
 
 ---
 --- auditingtable
 ---
- CREATE TABLE auditingtable (id VARCHAR[128] PRIMARY KEY, userrole VARCHAR[64] NOT NULL, userid VARCHAR[128] NOT NULL, iid VARCHAR[250] NOT NULL, api VARCHAR[128] NOT NULL, method VARCHAR[32] NOT NULL, time INTEGER NOT NULL, iudxid VARCHAR[256] NOT NULL);
+ CREATE TABLE auditingtable (id VARCHAR[128] NOT NULL, userRole VARCHAR[64] NOT NULL,userID VARCHAR[128] NOT NULL,iid VARCHAR[250] NOT NULL,api VARCHAR[128] NOT NULL,method VARCHAR[32] NOT NULL,time INTEGER NOT NULL,iudxID VARCHAR[256] NOT NULL,PRIMARY KEY id);
 
 
 ---
@@ -43,18 +42,18 @@ create table auditing_consent (_id varchar[128] not null,item_id varchar[256] no
 ---
 --- auditing_acl_apd
 ---
- CREATE INDEX IF NOT EXISTS ON auditing_acl(endpoint, method, userid, epochtime);
+ CREATE INDEX IF NOT EXISTS ON auditing_acl_apd(userid,endpoint,epochtime);
 
 ---
 --- rsaudit
 ---
-CREATE INDEX IF NOT EXISTS index_name ON rsaudit(userid, providerid);
+CREATE INDEX IF NOT EXISTS rsaudit ON rsaudit(userid, epochtime, providerid);
 
 
 ---
 --- auditingtable
 ---
-CREATE INDEX IF NOT EXISTS index_name ON auditingtable(userid, api);
+CREATE INDEX IF NOT EXISTS auditingtable ON auditingtable(userID, iudxID, time);
 
 ---
 --- auditing_consent
