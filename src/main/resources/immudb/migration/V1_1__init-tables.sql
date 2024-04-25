@@ -53,20 +53,20 @@ CREATE TABLE ogcaudit (id VARCHAR[128] NOT NULL, userid VARCHAR[128] NOT NULL, a
 ---
 --- rsaudit
 ---
-CREATE INDEX IF NOT EXISTS rsaudit ON rsaudit(userid, epochtime, providerid);
+CREATE INDEX IF NOT EXISTS ON rsaudit(userid, epochtime, providerid);
 
 
 ---
 --- auditingtable
 ---
-CREATE INDEX IF NOT EXISTS auditingtable ON auditingtable(userID, iudxID, time);
+CREATE INDEX IF NOT EXISTS ON auditingtable(userID, iudxID, time);
 
 ---
 --- auditing_consent
 ---
-CREATE INDEX IF NOT EXISTS auditing_consent ON auditing_consent(item_id, aiu_id, dp_id);
+CREATE INDEX IF NOT EXISTS ON auditing_consent(item_id, aiu_id, dp_id);
 
 ---
 --- ogcaudit
 ---
-CREATE INDEX IF NOT EXISTS ogcaudit ON ogcaudit (userid, resourceid, providerid);
+CREATE INDEX IF NOT EXISTS ON ogcaudit (userid, resourceid, providerid);
