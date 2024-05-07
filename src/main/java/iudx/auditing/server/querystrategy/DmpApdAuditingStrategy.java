@@ -65,6 +65,7 @@ public class DmpApdAuditingStrategy implements AuditingServerStrategy {
 
     long epochTime = request.getLong(EPOCH_TIME);
     String isoTime = request.getString(ISO_TIME);
+    LOGGER.debug("table name is : {}", config.getString(DMP_APD_IMMUDB_TABLE_NAME));
     String databaseTableName = config.getString(DMP_APD_IMMUDB_TABLE_NAME);
 
     return DMP_APD_WRITE_QUERY_IMMUDB
