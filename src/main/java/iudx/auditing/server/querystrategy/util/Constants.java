@@ -59,7 +59,7 @@ public class Constants {
       "INSERT INTO $0 (id,body,endpoint,method,time,userid) VALUES ('$1','$2','$3','$4','$5','$6')";
   public static final String AUTH_WRITE_QUERY_IMMUDB =
       "INSERT INTO $0 (id,body,endpoint,method,time,userid) VALUES ('$1','$2','$3','$4','$5','$6')";
-  public static final String DELETE_QUERY = "DELETE FROM $0 WHERE id = '$1';";
+  public static final String DELETE_QUERY = "DELETE FROM $0 WHERE _id = '$1';";
   public static final String DELETE_SUBSCRIPTION_QUERY =
       "DELETE FROM $0 WHERE subscription_id = '$1';";
 
