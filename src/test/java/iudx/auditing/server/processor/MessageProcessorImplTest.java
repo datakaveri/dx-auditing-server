@@ -198,7 +198,7 @@ class MessageProcessorImplTest {
 
         String primaryKey = UUID.randomUUID().toString().replace("-", "");
         String userId = UUID.randomUUID().toString();
-        String information = new JsonObject().put("policyId", UUID.randomUUID().toString()).put("createdAt", isoTime).put("policyStatus", "ACTIVE").encode();
+        JsonObject information = new JsonObject().put("policyId", UUID.randomUUID().toString()).put("createdAt", isoTime).put("policyStatus", "ACTIVE");
         LOGGER.info("primary key is : {}", primaryKey);
         when(config.getString(DMP_APD_PG_TABLE_NAME)).thenReturn("DMP_APD_PG_TABLE_NAME");
         when(config.getString(DMP_APD_IMMUDB_TABLE_NAME)).thenReturn("DMP_APD_IMMUDB_TABLE_NAME");
