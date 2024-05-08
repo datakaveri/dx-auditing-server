@@ -103,7 +103,9 @@ public class MessageProcessorImpl implements MessageProcessService {
                     if (insertInImmudb.succeeded()) {
                       promise.complete(queries);
                     } else {
-                      Future<JsonObject> deleteFromPostgres =
+                        LOGGER.error("Failed: unable to update immudb table for server origin" +
+                                " {}",queries.getString(ORIGIN));
+                        Future<JsonObject> deleteFromPostgres =
                           postgresService.executeDeleteQuery(queries);
                       deleteFromPostgres.onComplete(
                           postgresHandler -> {
@@ -122,8 +124,14 @@ public class MessageProcessorImpl implements MessageProcessService {
             })
         .onFailure(
             failureHandler -> {
-              promise.fail("failed to insert in postgres " + failureHandler.getCause());
+                String serverOrigin = queries.getString(ORIGIN);
+                promise.fail(
+                        "failed to insert in postgres for server origin["
+                                + serverOrigin
+                                + "]"
+                                + failureHandler.getCause());
             });
+
 
     return promise.future();
   }
