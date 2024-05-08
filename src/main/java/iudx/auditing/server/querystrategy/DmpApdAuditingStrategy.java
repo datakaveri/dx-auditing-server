@@ -26,7 +26,7 @@ public class DmpApdAuditingStrategy implements AuditingServerStrategy {
     String userId = request.getString(USER_ID);
     String api = request.getString(API);
     String method = request.getString(HTTP_METHOD);
-    String information = request.getString(INFORMATION);
+    JsonObject information = request.getJsonObject(INFORMATION);
     String isoTime = request.getString(ISO_TIME);
     String databaseTableName = config.getString(DMP_APD_PG_TABLE_NAME);
 
@@ -40,7 +40,7 @@ public class DmpApdAuditingStrategy implements AuditingServerStrategy {
         .replace("$2", userId)
         .replace("$3", api)
         .replace("$4", method)
-        .replace("$5", information)
+        .replace("$5", information.encode())
         .replace("$6", utcTime.toString());
   }
 
