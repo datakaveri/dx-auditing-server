@@ -21,7 +21,7 @@ public class DmpApdAuditingStrategy implements AuditingServerStrategy {
   @Override
   public String buildPostgresWriteQuery(JsonObject request) {
     LOGGER.debug("inside buildPostgresWriteQuery");
-    LOGGER.debug("request : {}", request.encodePrettily() );
+    LOGGER.debug("request : {}", request.encode() );
     String primaryKey = request.getString(PRIMARY_KEY);
     String userId = request.getString(USER_ID);
     String api = request.getString(API);
@@ -34,7 +34,7 @@ public class DmpApdAuditingStrategy implements AuditingServerStrategy {
     zonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.of("UTC"));
     LocalDateTime utcTime = zonedDateTime.toLocalDateTime();
 
-    return DMP_APD_WRITE_QUERY_POSTGRES
+    String query = DMP_APD_WRITE_QUERY_POSTGRES
         .replace("$0", databaseTableName)
         .replace("$1", primaryKey)
         .replace("$2", userId)
@@ -42,21 +42,25 @@ public class DmpApdAuditingStrategy implements AuditingServerStrategy {
         .replace("$4", method)
         .replace("$5", information)
         .replace("$6", utcTime.toString());
+    LOGGER.debug("Query to insert : {}", query);
+    return query;
   }
 
   @Override
   public String buildPostgresDeleteQuery(JsonObject request) {
     LOGGER.info("inside buildPostgresDeleteQuery");
-    LOGGER.debug("request : {}", request.encodePrettily() );
+    LOGGER.debug("request : {}", request.encode() );
     String databaseTableName = config.getString(DMP_APD_PG_TABLE_NAME);
     String primaryKey = request.getString(PRIMARY_KEY);
-    return DELETE_QUERY_FOR_DMP.replace("$0", databaseTableName).replace("$1", primaryKey);
+    String query =  DELETE_QUERY_FOR_DMP.replace("$0", databaseTableName).replace("$1", primaryKey);
+    LOGGER.debug("Query to delete : {}", query);
+    return query;
   }
 
   @Override
   public String buildImmudbWriteQuery(JsonObject request) {
     LOGGER.debug("inside buildImmudbWriteQuery");
-    LOGGER.debug("request : {}", request.encodePrettily() );
+    LOGGER.debug("request : {}", request.encode() );
     String primaryKey = request.getString(PRIMARY_KEY);
     String userId = request.getString(USER_ID);
     String api = request.getString(API);
@@ -68,7 +72,7 @@ public class DmpApdAuditingStrategy implements AuditingServerStrategy {
     LOGGER.debug("table name is : {}", config.getString(DMP_APD_IMMUDB_TABLE_NAME));
     String databaseTableName = config.getString(DMP_APD_IMMUDB_TABLE_NAME);
 
-    return DMP_APD_WRITE_QUERY_IMMUDB
+    String query = DMP_APD_WRITE_QUERY_IMMUDB
         .replace("$0", databaseTableName)
         .replace("$1", primaryKey)
         .replace("$2", userId)
@@ -77,5 +81,7 @@ public class DmpApdAuditingStrategy implements AuditingServerStrategy {
         .replace("$5", info)
         .replace("$6", Long.toString(epochTime))
         .replace("$7", isoTime);
+    LOGGER.debug("Immudb query : {}", query);
+    return query;
   }
 }
