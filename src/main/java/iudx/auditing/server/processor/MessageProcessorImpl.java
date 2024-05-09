@@ -61,6 +61,7 @@ public class MessageProcessorImpl implements MessageProcessService {
   }
 
   private JsonObject queryBuilder(JsonObject request) {
+    LOGGER.trace("queryBuilder started");
     String origin = request.getString(ORIGIN);
     ServerOrigin serverOrigin = ServerOrigin.fromRole(origin);
     ServerOriginContextFactory serverOriginContextFactory = new ServerOriginContextFactory(config);
@@ -77,6 +78,7 @@ public class MessageProcessorImpl implements MessageProcessService {
 
   @Override
   public Future<Void> processSubscriptionMonitoringMessages(JsonObject message) {
+    LOGGER.trace("processSubscriptionMonitoringMessages started");
     Promise<Void> promise = Promise.promise();
     subsAuditService
         .generateAuditLog(message)
@@ -92,6 +94,7 @@ public class MessageProcessorImpl implements MessageProcessService {
   }
 
   private Future<JsonObject> databaseOperations(JsonObject queries) {
+    LOGGER.trace("databaseOperations started");
     Promise<JsonObject> promise = Promise.promise();
     Future<JsonObject> insertInPostgres = postgresService.executeWriteQuery(queries);
     insertInPostgres
@@ -103,9 +106,10 @@ public class MessageProcessorImpl implements MessageProcessService {
                     if (insertInImmudb.succeeded()) {
                       promise.complete(queries);
                     } else {
-                        LOGGER.error("Failed: unable to update immudb table for server origin" +
-                                " {}",queries.getString(ORIGIN));
-                        Future<JsonObject> deleteFromPostgres =
+                      LOGGER.error(
+                          "Failed: unable to update immudb table for server origin" + " {}",
+                          queries.getString(ORIGIN));
+                      Future<JsonObject> deleteFromPostgres =
                           postgresService.executeDeleteQuery(queries);
                       deleteFromPostgres.onComplete(
                           postgresHandler -> {
@@ -124,14 +128,13 @@ public class MessageProcessorImpl implements MessageProcessService {
             })
         .onFailure(
             failureHandler -> {
-                String serverOrigin = queries.getString(ORIGIN);
-                promise.fail(
-                        "failed to insert in postgres for server origin["
-                                + serverOrigin
-                                + "]"
-                                + failureHandler.getCause());
+              String serverOrigin = queries.getString(ORIGIN);
+              promise.fail(
+                  "failed to insert in postgres for server origin["
+                      + serverOrigin
+                      + "]"
+                      + failureHandler.getCause());
             });
-
 
     return promise.future();
   }
