@@ -625,7 +625,7 @@ class MessageProcessorImplTest {
                         .put(USER_ID, "userid")
                         .put(PRIMARY_KEY, "primary_key")
                         .put(ID, "id")
-                        .put(PROVIDER_ID, "providerId")
+                        .put(PROVIDER_Id, "providerId")
                         .put(RESOURCE_GROUP, "respourceGroup")
                         .put(API, "api")
                         .put(EPOCH_TIME, 5000)

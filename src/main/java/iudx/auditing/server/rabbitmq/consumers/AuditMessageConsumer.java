@@ -45,6 +45,7 @@ public class AuditMessageConsumer implements RabitMqConsumer {
             LOGGER.debug("message consumption paused.");
             long deliveryTag = message.envelope().getDeliveryTag();
             JsonObject request = message.body().toJsonObject().put(DELIVERY_TAG, deliveryTag);
+            LOGGER.info("message received from {}",request.getString(ORIGIN));
             Future<JsonObject> processResult = msgService.processAuditEventMessages(request);
             processResult.onComplete(handler -> {
               if (handler.succeeded()) {
