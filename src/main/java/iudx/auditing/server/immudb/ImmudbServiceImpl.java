@@ -61,13 +61,12 @@ public class ImmudbServiceImpl implements ImmudbService {
       case ACL_APD_SERVER:
       case DMP_APD_SERVER:
       case CONSENT_LOG_ADEX:
+      case OGC_SERVER:
         return pgClientForRs;
       case AAA_SERVER:
         return pgClientForAaa;
       case CAT_SERVER:
         return pgClientForCat;
-      case OGC_SERVER:
-        return pgClientForOgc;
       default:
         throw new IllegalArgumentException(originServer + " serverOrigin is not defined");
     }

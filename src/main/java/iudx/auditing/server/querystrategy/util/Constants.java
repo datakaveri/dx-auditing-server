@@ -6,7 +6,7 @@ public class Constants {
   public static final String ID = "id";
   public static final String USER_ID = "userid";
   public static final String PRIMARY_KEY = "primaryKey";
-  public static final String PROVIDER_ID = "providerID";
+  public static final String PROVIDER_ID = "providerId";
   public static final String ISO_TIME = "isoTime";
   public static final String BODY = "body";
   public static final String IUDX_ID = "iudxID";
@@ -95,8 +95,8 @@ public class Constants {
   public static final String DELETE_QUERY_CONSENT = "DELETE FROM $0 WHERE _id = '$1';";
 
   public static final String OGC_WRITE_QUERY_IMMUDB =
-      "INSERT INTO $0 (id,api,userid,epochtime,resourceid,isotime,providerid,size,resource_group,request_json) "
-          + "VALUES ('$1','$2','$3',$4,'$5','$6','$7',$8,'$9','$a')";
+      "INSERT INTO $0 (id,api,userid,epochtime,resourceid,isotime,providerid,size,resource_group) "
+          + "VALUES ('$1','$2','$3',$4,'$5','$6','$7',$8,'$9')";
   public static final String OGC_WRITE_QUERY_PG =
       "INSERT INTO $0 "
           + "(id,userid,api,request_json,size,resourceid,providerid,resource_group,epochtime,time,isotime,delegator_id)"

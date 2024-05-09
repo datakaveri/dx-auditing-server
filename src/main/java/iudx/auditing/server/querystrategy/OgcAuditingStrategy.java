@@ -77,7 +77,6 @@ public class OgcAuditingStrategy implements AuditingServerStrategy {
     String isoTime = request.getString(ISO_TIME);
     long responseSize = request.getLong(SIZE);
     String resourceGroup = request.getString(RESOURCE_GROUP);
-    JsonObject requestJson = request.getJsonObject(REQUEST_JSON);
     String databaseTableName = config.getString(OGC_IMMUDB_TABLE_NAME);
     return OGC_WRITE_QUERY_IMMUDB
         .replace("$0", databaseTableName)
@@ -89,8 +88,7 @@ public class OgcAuditingStrategy implements AuditingServerStrategy {
         .replace("$6", isoTime)
         .replace("$7", providerId)
         .replace("$8", Long.toString(responseSize))
-        .replace("$9", resourceGroup)
-        .replace("$a", requestJson.toString());
+        .replace("$9", resourceGroup);
   }
 
 }
