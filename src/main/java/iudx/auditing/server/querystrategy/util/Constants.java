@@ -6,7 +6,8 @@ public class Constants {
   public static final String ID = "id";
   public static final String USER_ID = "userid";
   public static final String PRIMARY_KEY = "primaryKey";
-  public static final String PROVIDER_ID = "providerId";
+  public static final String PROVIDER_ID = "providerID";
+  public static final String PROVIDER_Id = "providerId";
   public static final String ISO_TIME = "isoTime";
   public static final String BODY = "body";
   public static final String IUDX_ID = "iudxID";
