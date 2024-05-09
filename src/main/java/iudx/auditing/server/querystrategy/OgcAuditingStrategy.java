@@ -20,7 +20,7 @@ public class OgcAuditingStrategy implements AuditingServerStrategy {
     String userId = request.getString(USER_ID);
     String primaryKey = request.getString(PRIMARY_KEY);
     String resourceId = request.getString(ID);
-    String providerId = request.getString(PROVIDER_ID);
+    String providerId = request.getString(PROVIDER_Id);
     String resourcegroup = request.getString(RESOURCE_GROUP);
     String api = request.getString(API);
     long time = request.getLong(EPOCH_TIME);
@@ -71,13 +71,12 @@ public class OgcAuditingStrategy implements AuditingServerStrategy {
     String userId = request.getString(USER_ID);
     String primaryKey = request.getString(PRIMARY_KEY);
     String resourceId = request.getString(ID);
-    String providerId = request.getString(PROVIDER_ID);
+    String providerId = request.getString(PROVIDER_Id);
     String api = request.getString(API);
     long time = request.getLong(EPOCH_TIME);
     String isoTime = request.getString(ISO_TIME);
     long responseSize = request.getLong(SIZE);
     String resourceGroup = request.getString(RESOURCE_GROUP);
-    JsonObject requestJson = request.getJsonObject(REQUEST_JSON);
     String databaseTableName = config.getString(OGC_IMMUDB_TABLE_NAME);
     return OGC_WRITE_QUERY_IMMUDB
         .replace("$0", databaseTableName)
@@ -89,8 +88,7 @@ public class OgcAuditingStrategy implements AuditingServerStrategy {
         .replace("$6", isoTime)
         .replace("$7", providerId)
         .replace("$8", Long.toString(responseSize))
-        .replace("$9", resourceGroup)
-        .replace("$a", requestJson.toString());
+        .replace("$9", resourceGroup);
   }
 
 }
