@@ -20,7 +20,7 @@ public class DmpApdAuditingStrategy implements AuditingServerStrategy {
 
   @Override
   public String buildPostgresWriteQuery(JsonObject request) {
-    LOGGER.info("buildPostgresWriteQuery() started");
+    LOGGER.debug("inside buildPostgresWriteQuery");
     String primaryKey = request.getString(PRIMARY_KEY);
     String userId = request.getString(USER_ID);
     String api = request.getString(API);
@@ -47,7 +47,7 @@ public class DmpApdAuditingStrategy implements AuditingServerStrategy {
 
   @Override
   public String buildPostgresDeleteQuery(JsonObject request) {
-    LOGGER.info("buildPostgresDeleteQuery() started");
+    LOGGER.info("inside buildPostgresDeleteQuery");
     String databaseTableName = config.getString(DMP_APD_PG_TABLE_NAME);
     String primaryKey = request.getString(PRIMARY_KEY);
     String query =  DELETE_QUERY_FOR_DMP.replace("$0", databaseTableName).replace("$1", primaryKey);
@@ -57,7 +57,7 @@ public class DmpApdAuditingStrategy implements AuditingServerStrategy {
 
   @Override
   public String buildImmudbWriteQuery(JsonObject request) {
-    LOGGER.info("buildImmudbWriteQuery() started");
+    LOGGER.debug("inside buildImmudbWriteQuery");
     String primaryKey = request.getString(PRIMARY_KEY);
     String userId = request.getString(USER_ID);
     String api = request.getString(API);
