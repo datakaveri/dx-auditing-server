@@ -47,7 +47,7 @@ public class DmpApdAuditingStrategy implements AuditingServerStrategy {
 
   @Override
   public String buildPostgresDeleteQuery(JsonObject request) {
-    LOGGER.info("inside buildPostgresDeleteQuery");
+    LOGGER.debug("inside buildPostgresDeleteQuery");
     String databaseTableName = config.getString(DMP_APD_PG_TABLE_NAME);
     String primaryKey = request.getString(PRIMARY_KEY);
     String query =  DELETE_QUERY_FOR_DMP.replace("$0", databaseTableName).replace("$1", primaryKey);
