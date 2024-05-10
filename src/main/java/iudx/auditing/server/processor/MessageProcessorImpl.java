@@ -96,6 +96,7 @@ public class MessageProcessorImpl implements MessageProcessService {
   private Future<JsonObject> databaseOperations(JsonObject queries) {
     LOGGER.trace("databaseOperations started");
     Promise<JsonObject> promise = Promise.promise();
+    LOGGER.debug("Queries are : {}", queries.encode());
     Future<JsonObject> insertInPostgres = postgresService.executeWriteQuery(queries);
     insertInPostgres
         .onSuccess(
