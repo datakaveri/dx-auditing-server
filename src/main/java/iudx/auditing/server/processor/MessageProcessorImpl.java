@@ -63,6 +63,9 @@ public class MessageProcessorImpl implements MessageProcessService {
               })
           .onFailure(
               failureHandler -> {
+                  LOGGER.error(
+                          "Failed: unable to update immudb table for server origin" + " {}",
+                          queries.getString(ORIGIN));
                 promise.fail("failed to insert in postgres " + failureHandler.getCause());
               });
     } else {
