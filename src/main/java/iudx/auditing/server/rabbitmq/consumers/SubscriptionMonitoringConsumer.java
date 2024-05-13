@@ -60,13 +60,13 @@ public class SubscriptionMonitoringConsumer implements RabitMqConsumer {
                     json -> {
                       Future.future(e -> messagePush((JsonObject) json));
                     });
-                client.basicAck(deliveryTag, true);
+                client.basicAck(deliveryTag, false);
                 mqConsumer.resume();
               } else {
                 messagePush(new JsonObject(body)).onSuccess(
                         successResult -> {
                           LOGGER.info("Latest message published in databases.");
-                          client.basicAck(deliveryTag, true);
+                          client.basicAck(deliveryTag, false);
                           mqConsumer.resume();
                           LOGGER.debug("message consumption resumed");
                         })

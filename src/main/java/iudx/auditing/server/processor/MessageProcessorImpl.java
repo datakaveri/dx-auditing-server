@@ -41,6 +41,7 @@ public class MessageProcessorImpl implements MessageProcessService {
   public Future<JsonObject> processAuditEventMessages(JsonObject message) {
     LOGGER.info("message processing starts : ");
     JsonObject queries = queryBuilder(message);
+    LOGGER.debug("message processing {}", queries);
     queries.put(DELIVERY_TAG, message.getLong(DELIVERY_TAG));
     queries.put(ORIGIN, message.getString(ORIGIN));
     Promise<JsonObject> promise = Promise.promise();
@@ -51,6 +52,7 @@ public class MessageProcessorImpl implements MessageProcessService {
         .onComplete(
             dbHandler -> {
               if (dbHandler.succeeded()) {
+                LOGGER.info("Inserted successfully for the Origin {}", message.getString(ORIGIN));
                 promise.complete(dbHandler.result());
               } else {
                 LOGGER.error(dbHandler.cause());
