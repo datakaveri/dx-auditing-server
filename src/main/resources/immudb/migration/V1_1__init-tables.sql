@@ -17,7 +17,7 @@ create table auditing_consent (_id varchar[128] not null,item_id varchar[256] no
 --- auditing_acl_apd
 ---
 
- CREATE TABLE auditing_acl_apd( id VARCHAR[128] NOT NULL, userid VARCHAR[128] NOT NULL, endpoint VARCHAR[128] NOT NULL, method VARCHAR[128] NOT NULL, body VARCHAR[128] NOT NULL,size INTEGER NOT NULL,isotime VARCHAR[128] NOT NULL, epochtime INTEGER NOT NULL, PRIMARY KEY id);
+ CREATE TABLE auditing_acl_apd( id VARCHAR[128] NOT NULL, userid VARCHAR[128] NOT NULL, endpoint VARCHAR[128] NOT NULL, method VARCHAR[128] NOT NULL, body VARCHAR[2048] NOT NULL,size INTEGER NOT NULL,isotime VARCHAR[128] NOT NULL, epochtime INTEGER NOT NULL, PRIMARY KEY id);
 
 ---
 --- rsaudit
@@ -31,11 +31,10 @@ create table auditing_consent (_id varchar[128] not null,item_id varchar[256] no
 
 
 ---
---- ogcaudit
+--- auditing_ogc
 ---
 
-CREATE TABLE ogcaudit (id VARCHAR[128] NOT NULL, userid VARCHAR[128] NOT NULL, api VARCHAR[128] NOT NULL, resourceid VARCHAR[128] NOT NULL, providerid VARCHAR[128] NOT NULL, resource_group VARCHAR[128] NOT NULL, epochtime VARCHAR[256] NOT NULL, isotime VARCHAR NOT NULL, size VARCHAR NOT NULL, PRIMARY KEY (id));
-
+CREATE TABLE auditing_ogc (id varchar[128] not null,userid varchar[128] not null,api varchar not null,resourceid varchar[128] not null,providerid varchar[128] not null, resource_group varchar not null,epochtime Integer not null,isotime varchar not null,size Integer not null, PRIMARY KEY id);
 ---
 --- creating index for the tables
 ---
@@ -67,6 +66,6 @@ CREATE INDEX IF NOT EXISTS ON auditingtable(userID, iudxID, time);
 CREATE INDEX IF NOT EXISTS ON auditing_consent(item_id, aiu_id, dp_id);
 
 ---
---- ogcaudit
+--- auditing_ogc
 ---
-CREATE INDEX IF NOT EXISTS ON ogcaudit (userid, resourceid, providerid);
+CREATE INDEX IF NOT EXISTS ON auditing_ogc (userid, providerid, resourceid, epochtime);
