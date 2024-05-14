@@ -15,7 +15,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class AuditMessageConsumer implements ConsumerAction {
-
   private static final Logger LOGGER = LogManager.getLogger(AuditMessageConsumer.class);
 
   private final RabbitMQClient client;
@@ -36,34 +35,56 @@ public class AuditMessageConsumer implements ConsumerAction {
   }
 
   private void consume() {
-    client.start().onSuccess(successHandler -> {
-      client.basicConsumer(AUDIT_LATEST_QUEUE, options, receiveResultHandler -> {
-        if (receiveResultHandler.succeeded()) {
-          RabbitMQConsumer mqConsumer = receiveResultHandler.result();
-          mqConsumer.handler(message -> {
-            mqConsumer.pause();
-            LOGGER.debug("message consumption paused.");
-            long deliveryTag = message.envelope().getDeliveryTag();
-            JsonObject request = message.body().toJsonObject().put(DELIVERY_TAG, deliveryTag);
-            LOGGER.info("message received from {}",request.getString(ORIGIN));
-            Future<JsonObject> processResult = msgService.process(request);
-            processResult.onComplete(handler -> {
-              if (handler.succeeded()) {
-                LOGGER.info("Latest message published in databases.");
-                client.basicAck(handler.result().getLong(DELIVERY_TAG), true);
-                mqConsumer.resume();
-                LOGGER.debug("message consumption resumed");
-              } else {
-                LOGGER.error("Error while publishing messages for processing " + handler.cause().getMessage());
-                mqConsumer.resume();
-                LOGGER.debug("message consumption resumed");
-              }
+    client
+        .start()
+        .onSuccess(
+            successHandler -> {
+              client.basicConsumer(
+                  AUDIT_LATEST_QUEUE,
+                  options,
+                  receiveResultHandler -> {
+                    if (receiveResultHandler.succeeded()) {
+                      RabbitMQConsumer mqConsumer = receiveResultHandler.result();
+                      mqConsumer.handler(
+                          message -> {
+                            mqConsumer.pause();
+                            LOGGER.debug("message consumption paused.");
+                            JsonObject request = new JsonObject();
+                            try {
+                              long deliveryTag = message.envelope().getDeliveryTag();
+                              request =
+                                  message.body().toJsonObject().put(DELIVERY_TAG, deliveryTag);
+                              LOGGER.info("message received from {}", request.getString(ORIGIN));
+                              Future<JsonObject> processResult =
+                                  msgService.process(request);
+                              processResult.onComplete(
+                                  handler -> {
+                                    if (handler.succeeded()) {
+                                      LOGGER.info("Audit message published in databases.");
+                                      client.basicAck(
+                                          handler.result().getLong(DELIVERY_TAG), false);
+                                      mqConsumer.resume();
+                                      LOGGER.debug("message consumption resumed");
+                                    } else {
+                                      LOGGER.error(
+                                          "Error while publishing messages for processing "
+                                              + handler.cause().getMessage());
+                                      mqConsumer.resume();
+                                      LOGGER.debug("message consumption resumed");
+                                    }
+                                  });
+                            } catch (Exception e) {
+                              LOGGER.error("Error while decoding the message");
+                              mqConsumer.resume();
+                              LOGGER.debug("message consumption resumed");
+                            }
+                          });
+                    }
+                  });
+            })
+        .onFailure(
+            failureHandler -> {
+              LOGGER.fatal("Rabbit client startup failed for Latest message Q consumer.");
             });
-          });
-        }
-      });
-    }).onFailure(failureHandler -> {
-      LOGGER.fatal("Rabbit client startup failed for Latest message Q consumer.");
-    });
   }
 }

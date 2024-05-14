@@ -32,6 +32,7 @@ public class MessageProcessorImpl implements MessageProcessService {
   public Future<JsonObject> process(JsonObject message) {
     LOGGER.info("message processing starts : ");
     JsonObject queries = queryBuilder(message);
+    LOGGER.debug("queries: "+queries);
     Promise<JsonObject> promise = Promise.promise();
     if (!message.getString(ORIGIN).equals(RS_SERVER_SUBS.getOriginRole())) {
       Future<JsonObject> insertInPostgres = postgresService.executeWriteQuery(queries);
