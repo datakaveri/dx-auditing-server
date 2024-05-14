@@ -34,7 +34,7 @@ create table auditing_consent (_id varchar[128] not null,item_id varchar[256] no
 --- auditing_ogc
 ---
 
-CREATE TABLE auditing_ogc (id varchar[128] not null,userid varchar[128] not null,api varchar not null,resourceid varchar[128] not null,providerid varchar[128] not null, resource_group varchar not null,epochtime Integer not null,isotime varchar not null,size Integer not null, PRIMARY KEY id);
+CREATE TABLE auditing_ogc (id varchar[128] not null,userid varchar[128] not null,api varchar[512] not null,resourceid varchar[128] not null,providerid varchar[128] not null, resource_group varchar[128] not null,epochtime Integer not null,isotime varchar[128] not null,size Integer not null, PRIMARY KEY id);
 ---
 --- creating index for the tables
 ---
