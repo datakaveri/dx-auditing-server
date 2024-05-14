@@ -32,6 +32,7 @@ public class MessageProcessorImpl implements MessageProcessService {
   public Future<JsonObject> process(JsonObject message) {
     LOGGER.info("message processing starts : ");
     JsonObject queries = queryBuilder(message);
+    LOGGER.debug("queries: "+queries);
     Promise<JsonObject> promise = Promise.promise();
     if (!message.getString(ORIGIN).equals(RS_SERVER_SUBS.getOriginRole())) {
       Future<JsonObject> insertInPostgres = postgresService.executeWriteQuery(queries);
@@ -63,6 +64,9 @@ public class MessageProcessorImpl implements MessageProcessService {
               })
           .onFailure(
               failureHandler -> {
+                  LOGGER.error(
+                          "Failed: unable to update immudb table for server origin" + " {}",
+                          queries.getString(ORIGIN));
                 promise.fail("failed to insert in postgres " + failureHandler.getCause());
               });
     } else {
