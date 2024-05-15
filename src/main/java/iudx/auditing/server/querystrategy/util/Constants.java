@@ -27,7 +27,7 @@ public class Constants {
   public static final String AUTH_IMMUDB_TABLE_NAME = "immudbAuthTableName";
   public static final String CAT_PG_TABLE_NAME = "postgresCatTableName";
   public static final String CAT_IMMUDB_TABLE_NAME = "immudbCatTableName";
-  public static final String APD_PG_TABLE_NAME = "postgersApdTableName";
+  public static final String APD_PG_TABLE_NAME = "postgresAclApdTableName";
   public static final String DMP_APD_PG_TABLE_NAME = "postgresDmpApdTableName";
   public static final String DMP_APD_IMMUDB_TABLE_NAME = "immudbDmpApdTableName";
   public static final String APD_IMMUDB_TABLE_NAME = "immudbApdTableName";
