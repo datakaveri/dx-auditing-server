@@ -34,57 +34,66 @@ public class SubscriptionMonitoringConsumer implements RabitMqConsumer {
     this.msgService = msgService;
   }
 
-
   @Override
   public void start() {
     this.consume();
   }
 
   private void consume() {
-    client.start().onSuccess(successHandler -> {
-      client.basicConsumer(SUBSCRIPTION_MONITORING_QUEUE, options, receiveResultHandler -> {
-        if (receiveResultHandler.succeeded()) {
-          RabbitMQConsumer mqConsumer = receiveResultHandler.result();
-          mqConsumer.handler(message -> {
-            mqConsumer.pause();
-            LOGGER.debug("message consumption paused.");
-            long deliveryTag = message.envelope().getDeliveryTag();
-            Buffer body = message.body();
-            if (body != null) {
-              LOGGER.info("Subscription message received");
-              boolean isArrayReceived = isJsonArray(body);
-              LOGGER.debug("is message array received : {}", isArrayReceived);
-              if (isArrayReceived) {
-                JsonArray jsonArrayBody = body.toJsonArray();
-                jsonArrayBody.forEach(
-                    json -> {
-                      Future.future(e -> messagePush((JsonObject) json));
-                    });
-                client.basicAck(deliveryTag, false);
-                mqConsumer.resume();
-              } else {
-                messagePush(new JsonObject(body)).onSuccess(
-                        successResult -> {
-                          LOGGER.info("Latest message published in databases.");
-                          client.basicAck(deliveryTag, false);
-                          mqConsumer.resume();
-                          LOGGER.debug("message consumption resumed");
-                        })
-                    .onFailure(
-                        failureHandler -> {
-                          LOGGER.error("Error while publishing messages for processing "
-                              + failureHandler.getMessage());
-                          mqConsumer.resume();
-                          LOGGER.debug("message consumption resumed");
-                        });
-              }
-            }
-          });
-        }
-      });
-    }).onFailure(failureHandler -> {
-      LOGGER.fatal("Rabbit client startup failed for Latest message Q consumer.");
-    });
+    client
+        .start()
+        .onSuccess(
+            successHandler -> {
+              client.basicConsumer(
+                  SUBSCRIPTION_MONITORING_QUEUE,
+                  options,
+                  receiveResultHandler -> {
+                    if (receiveResultHandler.succeeded()) {
+                      RabbitMQConsumer mqConsumer = receiveResultHandler.result();
+                      mqConsumer.handler(
+                          message -> {
+                            long deliveryTag = message.envelope().getDeliveryTag();
+                            Buffer body = message.body();
+                            if (body != null) {
+                              LOGGER.info("Subscription message received");
+                              boolean isArrayReceived = isJsonArray(body);
+                              LOGGER.debug("is message array received : {}", isArrayReceived);
+                              if (isArrayReceived) {
+                                JsonArray jsonArrayBody = body.toJsonArray();
+                                jsonArrayBody.forEach(
+                                    json -> {
+                                      Future.future(e -> messagePush((JsonObject) json));
+                                    });
+                                client.basicAck(deliveryTag, false);
+                              } else {
+                                messagePush(new JsonObject(body))
+                                    .onSuccess(
+                                        successResult -> {
+                                          LOGGER.info("Latest message published in RMQ.");
+                                          client.basicAck(deliveryTag, false);
+                                        })
+                                    .onFailure(
+                                        failureHandler -> {
+                                          LOGGER.error(
+                                              "Error while publishing messages for processing "
+                                                  + failureHandler.getMessage());
+                                          if (failureHandler
+                                              .getMessage()
+                                              .matches(
+                                                  "(.*)Subscriber doesn't exist/expired(.*)")) {
+                                            client.basicAck(deliveryTag, false);
+                                          }
+                                        });
+                              }
+                            }
+                          });
+                    }
+                  });
+            })
+        .onFailure(
+            failureHandler -> {
+              LOGGER.fatal("Rabbit client startup failed for subscription message Q consumer.");
+            });
   }
 
   public boolean isJsonArray(Buffer jsonObjectBuffer) {
@@ -102,15 +111,18 @@ public class SubscriptionMonitoringConsumer implements RabitMqConsumer {
 
   public Future<Void> messagePush(JsonObject json) {
     Promise<Void> promise = Promise.promise();
-    msgService.processSubscriptionMonitoringMessages(json)
-        .onSuccess(processResult -> {
-          LOGGER.debug("Subscription message published for processing");
-          promise.complete();
-        })
-        .onFailure(processFailure -> {
-          LOGGER.error("Error while publishing message for processing");
-          promise.fail("Failed to send mesasge to processer service");
-        });
+    msgService
+        .processSubscriptionMonitoringMessages(json)
+        .onSuccess(
+            processResult -> {
+              LOGGER.debug("Subscription message published for processing");
+              promise.complete();
+            })
+        .onFailure(
+            processFailure -> {
+              LOGGER.error(processFailure.getMessage());
+              promise.fail(processFailure.getMessage());
+            });
     return promise.future();
   }
 }
