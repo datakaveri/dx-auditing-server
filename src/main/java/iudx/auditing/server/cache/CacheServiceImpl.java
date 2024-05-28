@@ -78,13 +78,13 @@ public class CacheServiceImpl implements CacheService {
                   JsonObject resultJson = new JsonObject().put("results", jsonArray);
                   promise.complete(resultJson);
                 } else {
-                  LOGGER.info("key :{} : not found in cache/database server", key);
-                  promise.fail("key not found");
+                  LOGGER.info("Subscriber :{} : not found in cache/database server", key);
+                  promise.fail("Subscriber doesn't exist/expired");
                 }
               })
           .onFailure(
               failureHandler -> {
-                promise.fail("key not found");
+                promise.fail("Subscriber doesn't exist/expired");
               });
     }
     return promise.future();
