@@ -29,7 +29,7 @@
       "postgresRsTableName": "",
       "postgresCatTableName": "",
       "postgresAuthTableName": "",
-      "postgersApdTableName": "",
+      "postgresAclApdTableName": "",
       "catalogueHost": "",
       "cataloguePort": "",
       "postgresDmpApdTableName": "",
