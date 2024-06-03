@@ -97,7 +97,8 @@ public class MessageProcessorImpl implements MessageProcessService {
     Promise<JsonObject> promise = Promise.promise();
     LOGGER.debug("Queries are : {}", queries.encode());
     Future<JsonObject> insertInPostgres = postgresService.executeWriteQuery(queries);
-    LOGGER.debug("Queries from origin is {} , Query : {}", queries.getString(ORIGIN), queries.encode());
+    LOGGER.debug(
+        "Queries from origin is {} , Query : {}", queries.getString(ORIGIN), queries.encode());
     insertInPostgres
         .onSuccess(
             insertInImmudbHandler -> {
@@ -107,9 +108,10 @@ public class MessageProcessorImpl implements MessageProcessService {
                     if (insertInImmudb.succeeded()) {
                       promise.complete(queries);
                     } else {
-                        LOGGER.error("Failed: unable to update immudb table for server origin" +
-                                " {}",queries.getString(ORIGIN));
-                        Future<JsonObject> deleteFromPostgres =
+                      LOGGER.error(
+                          "Failed: unable to update immudb table for server origin" + " {}",
+                          queries.getString(ORIGIN));
+                      Future<JsonObject> deleteFromPostgres =
                           postgresService.executeDeleteQuery(queries);
                       deleteFromPostgres.onComplete(
                           postgresHandler -> {
@@ -128,14 +130,13 @@ public class MessageProcessorImpl implements MessageProcessService {
             })
         .onFailure(
             failureHandler -> {
-                String serverOrigin = queries.getString(ORIGIN);
-                promise.fail(
-                        "failed to insert in postgres for server origin["
-                                + serverOrigin
-                                + "]"
-                                + failureHandler.getCause());
+              String serverOrigin = queries.getString(ORIGIN);
+              promise.fail(
+                  "failed to insert in postgres for server origin["
+                      + serverOrigin
+                      + "]"
+                      + failureHandler.getCause());
             });
-
 
     return promise.future();
   }
