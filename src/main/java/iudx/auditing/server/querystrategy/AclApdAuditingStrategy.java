@@ -74,7 +74,10 @@ public class AclApdAuditingStrategy implements AuditingServerStrategy {
     String api = request.getString(API);
     String method = request.getString(HTTP_METHOD);
     String body = request.getString(BODY);
+    JsonObject body1 = request.getJsonObject(BODY);
     LOGGER.debug("body --> " + body);
+    LOGGER.debug("body1 --> " + body1);
+
     long responseSize = request.getLong(SIZE);
     long epochTime = request.getLong(EPOCH_TIME);
     String isoTime = request.getString(ISO_TIME);
@@ -85,7 +88,7 @@ public class AclApdAuditingStrategy implements AuditingServerStrategy {
             .replace("$2", userId)
             .replace("$3", api)
             .replace("$4", method)
-            .replace("$5", body)
+            .replace("$5", body1.encode())
             .replace("$6", Long.toString(responseSize))
             .replace("$7", Long.toString(epochTime))
             .replace("$8", isoTime));
