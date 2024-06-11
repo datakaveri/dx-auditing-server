@@ -68,7 +68,7 @@ public class AclApdAuditingStrategy implements AuditingServerStrategy {
 
   @Override
   public String buildImmudbWriteQuery(JsonObject request) {
-
+    LOGGER.debug("requeust == " + request);
     String primaryKey = request.getString(PRIMARY_KEY);
     String userId = request.getString(USER_ID);
     String api = request.getString(API);
