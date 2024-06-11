@@ -37,7 +37,6 @@ public class AclApdAuditingStrategy implements AuditingServerStrategy {
     String isoTime = request.getString(ISO_TIME);
     String databaseTableName = config.getString(APD_PG_TABLE_NAME);
 
-
     ZonedDateTime zonedDateTime = ZonedDateTime.parse(isoTime);
     zonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.of("UTC"));
 
@@ -67,7 +66,8 @@ public class AclApdAuditingStrategy implements AuditingServerStrategy {
     String userId = request.getString(USER_ID);
     String api = request.getString(API);
     String method = request.getString(HTTP_METHOD);
-    String body = request.getString(BODY);
+    JsonObject body = request.getJsonObject(BODY);
+
     long responseSize = request.getLong(SIZE);
     long epochTime = request.getLong(EPOCH_TIME);
     String isoTime = request.getString(ISO_TIME);
@@ -79,11 +79,9 @@ public class AclApdAuditingStrategy implements AuditingServerStrategy {
         .replace("$2", userId)
         .replace("$3", api)
         .replace("$4", method)
-        .replace("$5", body)
+        .replace("$5", body.encode())
         .replace("$6", Long.toString(responseSize))
         .replace("$7", Long.toString(epochTime))
         .replace("$8", isoTime);
   }
-
 }
-

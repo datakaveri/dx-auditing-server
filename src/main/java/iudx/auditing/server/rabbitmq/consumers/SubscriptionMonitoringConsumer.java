@@ -74,7 +74,7 @@ public class SubscriptionMonitoringConsumer implements RabitMqConsumer {
                                         })
                                     .onFailure(
                                         failureHandler -> {
-                                          LOGGER.error(
+                                          LOGGER.warn(
                                               "Error while publishing messages for processing "
                                                   + failureHandler.getMessage());
                                           if (failureHandler
