@@ -48,15 +48,17 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                       RabbitMQConsumer mqConsumer = receiveResultHandler.result();
                       mqConsumer.handler(
                           message -> {
-                            mqConsumer.pause();
-                            LOGGER.debug("message consumption paused.");
+                           /* mqConsumer.pause();
+                            LOGGER.debug("message consumption paused.");*/
                             JsonObject request = new JsonObject();
                             try {
                               long deliveryTag = message.envelope().getDeliveryTag();
                               request =
                                   message.body().toJsonObject().put(DELIVERY_TAG, deliveryTag);
                               LOGGER.info("message received from {}", request.getString(ORIGIN));
-                              Future<JsonObject> processResult =
+                              client.basicAck(deliveryTag, false);
+
+                             /* Future<JsonObject> processResult =
                                   msgService.processAuditEventMessages(request);
                               processResult.onComplete(
                                   handler -> {
@@ -64,19 +66,19 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                                       LOGGER.info("Audit message published in databases.");
                                       client.basicAck(
                                           handler.result().getLong(DELIVERY_TAG), false);
-                                      mqConsumer.resume();
+                                      // mqConsumer.resume();
                                       LOGGER.debug("message consumption resumed");
                                     } else {
                                       LOGGER.error(
                                           "Error while publishing messages for processing "
                                               + handler.cause().getMessage());
-                                      mqConsumer.resume();
+                                      //  mqConsumer.resume();
                                       LOGGER.debug("message consumption resumed");
                                     }
-                                  });
+                                  });*/
                             } catch (Exception e) {
                               LOGGER.error("Error while decoding the message");
-                              mqConsumer.resume();
+                              // mqConsumer.resume();
                               LOGGER.debug("message consumption resumed");
                             }
                           });
