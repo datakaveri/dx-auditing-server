@@ -21,8 +21,7 @@ public class AuditMessageConsumer implements RabitMqConsumer {
   private final RabbitMQClient client;
   private final MessageProcessService msgService;
 
-  private final QueueOptions options =
-      new QueueOptions().setKeepMostRecent(true).setMaxInternalQueueSize(1000).setAutoAck(false);
+  private final QueueOptions options = new QueueOptions().setKeepMostRecent(true).setAutoAck(false);
 
   public AuditMessageConsumer(
       Vertx vertx, RabbitMQOptions options, MessageProcessService msgService) {
@@ -48,8 +47,6 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                       RabbitMQConsumer mqConsumer = receiveResultHandler.result();
                       mqConsumer.handler(
                           message -> {
-                            mqConsumer.pause();
-                            LOGGER.debug("message consumption paused.");
                             JsonObject request = new JsonObject();
                             try {
                               long deliveryTag = message.envelope().getDeliveryTag();
@@ -70,22 +67,22 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                                       LOGGER.error(
                                           "Error while publishing messages for processing "
                                               + handler.cause().getMessage());
-                                      mqConsumer.resume();
-                                      LOGGER.debug("message consumption resumed");
                                     }
                                   });
                             } catch (Exception e) {
                               LOGGER.error("Error while decoding the message");
-                              mqConsumer.resume();
-                              LOGGER.debug("message consumption resumed");
                             }
                           });
+                    } else {
+                      LOGGER.error(
+                          "failed to consume message from auditing-messages Q : {}",
+                          receiveResultHandler.cause().getMessage());
                     }
                   });
             })
         .onFailure(
             failureHandler -> {
-              LOGGER.fatal("Rabbit client startup failed for Latest message Q consumer.");
+              LOGGER.fatal("Rabbit client startup failed for auditing-messages Q consumer.");
             });
   }
 }
