@@ -41,6 +41,7 @@ public class MessageProcessorImpl implements MessageProcessService {
   public Future<JsonObject> processAuditEventMessages(JsonObject message) {
     LOGGER.info("message processing starts : ");
     JsonObject queries = queryBuilder(message);
+    LOGGER.debug("message processing {}", queries);
     queries.put(DELIVERY_TAG, message.getLong(DELIVERY_TAG));
     queries.put(ORIGIN, message.getString(ORIGIN));
     Promise<JsonObject> promise = Promise.promise();
@@ -97,9 +98,10 @@ public class MessageProcessorImpl implements MessageProcessService {
   private Future<JsonObject> databaseOperations(JsonObject queries) {
     LOGGER.trace("databaseOperations started");
     Promise<JsonObject> promise = Promise.promise();
+    LOGGER.debug("Queries are : {}", queries.encode());
     Future<JsonObject> insertInPostgres = postgresService.executeWriteQuery(queries);
-   LOGGER.debug(
-        "Queries from origin: {} ", queries.getString(ORIGIN));
+    LOGGER.debug(
+        "Queries from origin is {} , Query : {}", queries.getString(ORIGIN), queries.encode());
     insertInPostgres
         .onSuccess(
             insertInImmudbHandler -> {
