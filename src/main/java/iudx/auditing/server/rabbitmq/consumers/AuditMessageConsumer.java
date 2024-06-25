@@ -21,7 +21,7 @@ public class AuditMessageConsumer implements RabitMqConsumer {
   private final RabbitMQClient client;
   private final MessageProcessService msgService;
 
-  private final QueueOptions options = new QueueOptions().setKeepMostRecent(true).setAutoAck(false);
+  private final QueueOptions options = new QueueOptions().setMaxInternalQueueSize(10000).setKeepMostRecent(true).setAutoAck(false);
 
   public AuditMessageConsumer(
       Vertx vertx, RabbitMQOptions options, MessageProcessService msgService) {
