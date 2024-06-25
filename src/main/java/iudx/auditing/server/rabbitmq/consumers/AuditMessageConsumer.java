@@ -61,8 +61,6 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                                       LOGGER.info("Audit message published in databases.");
                                       client.basicAck(
                                           handler.result().getLong(DELIVERY_TAG), false);
-                                      mqConsumer.resume();
-                                      LOGGER.debug("message consumption resumed");
                                     } else {
                                       LOGGER.error(
                                           "Error while publishing messages for processing "
