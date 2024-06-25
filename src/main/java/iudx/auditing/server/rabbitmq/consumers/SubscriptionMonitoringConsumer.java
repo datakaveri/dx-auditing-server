@@ -26,7 +26,7 @@ public class SubscriptionMonitoringConsumer implements RabitMqConsumer {
   private final MessageProcessService msgService;
 
   private final QueueOptions options =
-      new QueueOptions().setKeepMostRecent(true).setMaxInternalQueueSize(1000).setAutoAck(false);
+      new QueueOptions().setKeepMostRecent(true).setAutoAck(false);
 
   public SubscriptionMonitoringConsumer(
       Vertx vertx, RabbitMQOptions options, MessageProcessService msgService) {
@@ -87,12 +87,17 @@ public class SubscriptionMonitoringConsumer implements RabitMqConsumer {
                               }
                             }
                           });
+                    } else {
+                      LOGGER.error(
+                          "failed to consume message from subscription-monitoring Q : {}",
+                          receiveResultHandler.cause().getMessage());
                     }
                   });
             })
         .onFailure(
             failureHandler -> {
-              LOGGER.fatal("Rabbit client startup failed for subscription message Q consumer.");
+              LOGGER.fatal(
+                  "Rabbit client startup failed for subscription-monitoring message Q consumer.");
             });
   }
 
