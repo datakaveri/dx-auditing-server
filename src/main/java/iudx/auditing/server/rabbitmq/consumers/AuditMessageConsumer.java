@@ -2,7 +2,6 @@ package iudx.auditing.server.rabbitmq.consumers;
 
 import static iudx.auditing.server.common.Constants.*;
 
-import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.rabbitmq.QueueOptions;
@@ -48,17 +47,20 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                       RabbitMQConsumer mqConsumer = receiveResultHandler.result();
                       mqConsumer.handler(
                           message -> {
-                           /* mqConsumer.pause();
-                            LOGGER.debug("message consumption paused.");*/
+                            mqConsumer.pause();
+                            LOGGER.debug("message consumption paused.");
                             JsonObject request = new JsonObject();
                             try {
                               long deliveryTag = message.envelope().getDeliveryTag();
                               request =
                                   message.body().toJsonObject().put(DELIVERY_TAG, deliveryTag);
                               LOGGER.info("message received from {}", request.getString(ORIGIN));
+                              Thread.sleep(5000);
                               client.basicAck(deliveryTag, false);
+                              mqConsumer.resume();
+                              LOGGER.debug("message consumption resumed");
 
-                             /* Future<JsonObject> processResult =
+                              /* Future<JsonObject> processResult =
                                   msgService.processAuditEventMessages(request);
                               processResult.onComplete(
                                   handler -> {
