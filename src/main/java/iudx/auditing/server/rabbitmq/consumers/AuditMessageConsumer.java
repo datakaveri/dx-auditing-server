@@ -19,9 +19,10 @@ public class AuditMessageConsumer implements RabitMqConsumer {
 
   private final RabbitMQClient client;
   private final MessageProcessService msgService;
+  public static long count;
 
   private final QueueOptions options =
-      new QueueOptions().setMaxInternalQueueSize(10000).setKeepMostRecent(true).setAutoAck(false);
+      new QueueOptions().setMaxInternalQueueSize(100).setKeepMostRecent(true).setAutoAck(false);
 
   public AuditMessageConsumer(
       Vertx vertx, RabbitMQOptions options, MessageProcessService msgService) {
@@ -59,6 +60,8 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                               client.basicAck(deliveryTag, false);
                               mqConsumer.resume();
                               LOGGER.debug("message consumption resumed");
+                              count++;
+                              LOGGER.info("count == " + count);
 
                               /* Future<JsonObject> processResult =
                                   msgService.processAuditEventMessages(request);
