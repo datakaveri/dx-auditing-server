@@ -56,7 +56,7 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                               request =
                                   message.body().toJsonObject().put(DELIVERY_TAG, deliveryTag);
                               LOGGER.info("message received from {}", request.getString(ORIGIN));
-                              Thread.sleep(5000);
+                              Thread.sleep(10000);
                               client.basicAck(deliveryTag, false);
                               mqConsumer.resume();
                               LOGGER.debug("message consumption resumed");
