@@ -136,7 +136,7 @@ public class MessageProcessorImpl implements MessageProcessService {
                   "failed to insert in postgres for server origin["
                       + serverOrigin
                       + "]"
-                      + failureHandler.getCause());
+                      + failureHandler.getMessage());
             });
 
     return promise.future();

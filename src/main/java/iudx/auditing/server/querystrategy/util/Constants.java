@@ -102,4 +102,6 @@ public class Constants {
       "INSERT INTO $0 "
           + "(id,userid,api,request_json,size,resourceid,providerid,resource_group,epochtime,time,isotime,delegator_id)"
           + " VALUES ('$1','$2','$3','$4',$5,'$6','$7','$8','$9','$a','$b','$c')";
+
+  public static final String ERROR_UNIQUE_KEY = "(.*)duplicate key value violates unique constraint(.*)";
 }
