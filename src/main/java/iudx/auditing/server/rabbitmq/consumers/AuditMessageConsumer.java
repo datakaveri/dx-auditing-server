@@ -1,6 +1,7 @@
 package iudx.auditing.server.rabbitmq.consumers;
 
 import static iudx.auditing.server.common.Constants.*;
+import static iudx.auditing.server.querystrategy.util.Constants.ERROR_UNIQUE_KEY;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -81,6 +82,12 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                                                 LOGGER.error(
                                                     "Error while publishing messages for processing "
                                                         + handler.cause().getMessage());
+                                                if (handler
+                                                    .cause()
+                                                    .getMessage()
+                                                    .matches(ERROR_UNIQUE_KEY)) {
+                                                  client.basicAck(deliveryTag, false);
+                                                }
                                                 mqConsumer.resume();
                                                 LOGGER.debug("message consumption resumed");
                                               }
@@ -90,6 +97,8 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                                         mqConsumer.resume();
                                         LOGGER.debug("message consumption resumed");
                                       }
+                                      totalCount++;
+                                      LOGGER.info(" total count == " + totalCount);
                                     });
                               } else {
                                 LOGGER.error(
@@ -102,8 +111,6 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                       qosFailure -> {
                         LOGGER.error("Failed to set QoS (prefetch count) :", qosFailure);
                       });
-              totalCount++;
-              LOGGER.info(" total count == " + totalCount);
             })
         .onFailure(
             failureHandler -> {
