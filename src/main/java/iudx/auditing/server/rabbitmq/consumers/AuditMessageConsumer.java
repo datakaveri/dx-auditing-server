@@ -42,7 +42,7 @@ public class AuditMessageConsumer implements RabitMqConsumer {
         .onSuccess(
             successHandler -> {
               client
-                  .basicQos(5)
+                  .basicQos(0)
                   .onSuccess(
                       qosHandler -> {
                         client.basicConsumer(
@@ -53,11 +53,12 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                                 RabbitMQConsumer mqConsumer = receiveResultHandler.result();
                                 mqConsumer.handler(
                                     message -> {
+                                      long startTime = System.currentTimeMillis();
                                       mqConsumer.pause();
                                       LOGGER.debug("message consumption paused.");
                                       JsonObject request = new JsonObject();
+                                      long deliveryTag = message.envelope().getDeliveryTag();
                                       try {
-                                        long deliveryTag = message.envelope().getDeliveryTag();
                                         request =
                                             message
                                                 .body()
@@ -70,8 +71,14 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                                         processResult.onComplete(
                                             handler -> {
                                               if (handler.succeeded()) {
+                                                long endTime =
+                                                    System.currentTimeMillis(); // End time
+                                                long duration =
+                                                    endTime - startTime; // Time difference
                                                 LOGGER.info(
-                                                    "Audit message published in databases.");
+                                                    "Audit message published in databases. Time taken: "
+                                                        + duration
+                                                        + " ms");
                                                 client.basicAck(
                                                     handler.result().getLong(DELIVERY_TAG), false);
                                                 mqConsumer.resume();
@@ -87,6 +94,9 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                                                     .getMessage()
                                                     .matches(ERROR_UNIQUE_KEY)) {
                                                   client.basicAck(deliveryTag, false);
+                                                } else {
+                                                  LOGGER.debug("trying requeue");
+                                                  client.basicNack(deliveryTag, false, true);
                                                 }
                                                 mqConsumer.resume();
                                                 LOGGER.debug("message consumption resumed");
@@ -94,6 +104,8 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                                             });
                                       } catch (Exception e) {
                                         LOGGER.error("Error while decoding the message");
+                                        LOGGER.debug("trying requeue");
+                                        client.basicNack(deliveryTag, false, true);
                                         mqConsumer.resume();
                                         LOGGER.debug("message consumption resumed");
                                       }
