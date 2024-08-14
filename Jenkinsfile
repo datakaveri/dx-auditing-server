@@ -42,15 +42,13 @@ pipeline {
           jacoco classPattern: 'target/classes', execPattern: 'target/jacoco.exec', sourcePattern: 'src/main/java', exclusionPattern:'**/*VertxEBProxy.class,**/Constants.class,**/*VertxProxyHandler.class,**/*Verticle.class,iudx/auditing/server/deploy/*.class,iudx/auditing/server/rabbitmq/RabbitMqService.class,iudx/auditing/server/querystrategy/AuditingServerStrategy.class,iudx/auditing/server/processor/MessageProcessService.class,iudx/auditing/server/postgres/PostgresService.class,iudx/auditing/server/immudb/ImmudbService.class,iudx/auditing/server/common/RabitMqConsumer.class,iudx/auditing/server/cache/*.class,iudx/auditing/server/rabbitmq/consumers/*.class,iudx/auditing/server/rabbitmq/RabbitMqServiceImpl.class'
           recordIssues(
             enabledForFailure: true,
-            blameDisabled: true,
-            forensicsDisabled: true,
+            skipBlames: true,
             qualityGates: [[threshold:0, type: 'TOTAL', unstable: false]],
             tool: checkStyle(pattern: 'target/checkstyle-result.xml')
           )
           recordIssues(
             enabledForFailure: true,
-            blameDisabled: true,
-            forensicsDisabled: true,
+            skipBlames: true,
             qualityGates: [[threshold:0, type: 'TOTAL', unstable: false]],
             tool: pmdParser(pattern: 'target/pmd.xml')
           )
@@ -89,8 +87,8 @@ pipeline {
           steps {
             script {
               docker.withRegistry( registryUri, registryCredential ) {
-                devImage.push("5.5.0-alpha-${env.GIT_HASH}")
-                deplImage.push("5.5.0-alpha-${env.GIT_HASH}")
+                devImage.push("5.6.0-alpha-${env.GIT_HASH}")
+                deplImage.push("5.6.0-alpha-${env.GIT_HASH}")
               }
             }
           }
@@ -98,7 +96,7 @@ pipeline {
         stage('Docker Swarm deployment') {
           steps {
             script {
-              sh "ssh azureuser@docker-swarm 'docker service update auditing_auditing --image ghcr.io/datakaveri/auditing-server-depl:5.5.0-alpha-${env.GIT_HASH}'"
+              sh "ssh azureuser@docker-swarm 'docker service update auditing_auditing --image ghcr.io/datakaveri/auditing-server-depl:5.6.0-alpha-${env.GIT_HASH}'"
               sh 'sleep 10'
             }
           }
