@@ -31,7 +31,7 @@ This enables data providers to identify which resources are being accessed and b
 - **Streaming Data Logging**: Monitors and logs data consumption for streaming data sources.
 
 # Explanation
-## Understanding Resource Server
+## Understanding Auditing Server
 - The section available [here](./docs/Solution_Architecture.md) explains the components/services used in implementing the Auditing Server
 
 # How To Guide
