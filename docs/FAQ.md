@@ -8,7 +8,7 @@
    - The auditing server records and manages access logs for various servers in CDPG, ensuring that all access and operations on the system are traceable.
 
 2. How do I set up the auditing server?
-   - Setting up the auditing server involves configuring the server environment, connecting to the message broker (such as RabbitMQ), and setting up any necessary database connections (e.g., PostgreSQL, Immudb). Detailed setup instructions can be found [here](SETUP-and-Installation.md)
+   - Setting up the auditing server involves configuring the server environment, connecting to the message broker (such as RabbitMQ), and setting up any necessary database connections (e.g., PostgreSQL, Immudb). Detailed setup instructions can be found [here](./SETUP-and-Installation.md)
 
 3. What databases are used in the auditing server, and why?
    - The auditing server uses PostgreSQL for fast read access and ImmuDB for immutable data storage, ensuring that audit logs are both accessible and tamper-proof.
