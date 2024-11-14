@@ -8,7 +8,7 @@ If you discover any vulnerabilities in the Data Exchange servers, please report 
 
 ```
 From: <your-email@example.com>
-To: DX Admin <admin@iudx.org.in>, DX Support <support@iudx.org.in>
+To: DX Admin <admin@iudx.org.in>, DX Support <support@cdpg.org.in>
 Subject: Vulnerability Report
 Attachments: <screenshots, reports, videos, etc.>
 

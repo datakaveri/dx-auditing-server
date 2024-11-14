@@ -4,7 +4,7 @@
 
 # Modules
 This document contains the information of the configurations to setup various services and dependencies in order to bring up the DX Auditing Server. 
-Please find the example configuration file [here](https://github.com/datakaveri/auditing-server/blob/main/example-configs/config-dev.json). While running the server, config.json file could
+Please find the example configuration file [here](https://github.com/datakaveri/auditing-server/blob/main/example-configs/config-example.json). While running the server, config.json file could
 be added [secrets](https://github.com/datakaveri/auditing-server/tree/main/secrets/all-verticles-configs).
 
 ## Other Configuration

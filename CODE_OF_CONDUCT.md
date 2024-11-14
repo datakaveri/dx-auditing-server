@@ -44,7 +44,9 @@ This Code of Conduct provides guidelines for positive interactions and reinforce
 - Encouraging any inappropriate behaviors listed above.
 
 ### Reporting Issues
-If you believe someone is violating the Code of Conduct or if you have concerns, please contact our team by emailing support@iudx.org.in. All reports will be reviewed, investigated, and addressed as appropriate.
+If you believe someone is violating the Code of Conduct or if you have concerns,
+please contact our team by emailing support@cdpg.org.in.
+All reports will be reviewed, investigated, and addressed as appropriate.
 
 ## Attribution
 This Code of Conduct is adapted from [Opensource.com](https://opensource.com/code-of-conduct) and the [Python Code of Conduct](https://policies.python.org/python.org/code-of-conduct/).
