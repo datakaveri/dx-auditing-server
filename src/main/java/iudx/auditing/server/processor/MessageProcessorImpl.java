@@ -22,7 +22,7 @@ public class MessageProcessorImpl implements MessageProcessService {
   private final ImmudbService immudbService;
   private final JsonObject config;
   private final CacheService cacheService;
-  private SubscriptionAuditService subsAuditService;
+  private final SubscriptionAuditService subsAuditService;
 
   public MessageProcessorImpl(
       PostgresService postgresService,
@@ -39,9 +39,9 @@ public class MessageProcessorImpl implements MessageProcessService {
 
   @Override
   public Future<JsonObject> processAuditEventMessages(JsonObject message) {
-    LOGGER.info("message processing starts : ");
+    LOGGER.info("processAuditEventMessages started()");
     JsonObject queries = queryBuilder(message);
-    LOGGER.debug("message processing {}", queries);
+    LOGGER.debug("auditing queries :  {}", queries);
     queries.put(DELIVERY_TAG, message.getLong(DELIVERY_TAG));
     queries.put(ORIGIN, message.getString(ORIGIN));
     Promise<JsonObject> promise = Promise.promise();
@@ -52,10 +52,11 @@ public class MessageProcessorImpl implements MessageProcessService {
         .onComplete(
             dbHandler -> {
               if (dbHandler.succeeded()) {
-                LOGGER.info("Inserted successfully for the Origin {}", message.getString(ORIGIN));
+                LOGGER.info(
+                    "Log audited successfully for the Origin : {}", message.getString(ORIGIN));
                 promise.complete(dbHandler.result());
               } else {
-                LOGGER.error(dbHandler.cause());
+                LOGGER.error("Failed databaseOperations : {}", dbHandler.cause().getMessage());
                 promise.fail(dbHandler.cause());
               }
             });
@@ -63,6 +64,7 @@ public class MessageProcessorImpl implements MessageProcessService {
   }
 
   private JsonObject queryBuilder(JsonObject request) {
+    LOGGER.trace("queryBuilder started()");
     String origin = request.getString(ORIGIN);
     ServerOrigin serverOrigin = ServerOrigin.fromRole(origin);
     ServerOriginContextFactory serverOriginContextFactory = new ServerOriginContextFactory(config);
@@ -79,6 +81,7 @@ public class MessageProcessorImpl implements MessageProcessService {
 
   @Override
   public Future<Void> processSubscriptionMonitoringMessages(JsonObject message) {
+    LOGGER.trace("processSubscriptionMonitoringMessages started()");
     Promise<Void> promise = Promise.promise();
     subsAuditService
         .generateAuditLog(message)
@@ -94,11 +97,9 @@ public class MessageProcessorImpl implements MessageProcessService {
   }
 
   private Future<JsonObject> databaseOperations(JsonObject queries) {
+    LOGGER.trace("databaseOperations started()");
     Promise<JsonObject> promise = Promise.promise();
-    LOGGER.debug("Queries are : {}", queries.encode());
     Future<JsonObject> insertInPostgres = postgresService.executeWriteQuery(queries);
-    LOGGER.debug(
-        "Queries from origin is {} , Query : {}", queries.getString(ORIGIN), queries.encode());
     insertInPostgres
         .onSuccess(
             insertInImmudbHandler -> {
@@ -109,7 +110,7 @@ public class MessageProcessorImpl implements MessageProcessService {
                       promise.complete(queries);
                     } else {
                       LOGGER.error(
-                          "Failed: unable to update immudb table for server origin" + " {}",
+                          "Failed: unable to update immudb table for server origin : {}",
                           queries.getString(ORIGIN));
                       Future<JsonObject> deleteFromPostgres =
                           postgresService.executeDeleteQuery(queries);
@@ -117,9 +118,9 @@ public class MessageProcessorImpl implements MessageProcessService {
                           postgresHandler -> {
                             if (deleteFromPostgres.succeeded()) {
                               LOGGER.error(
-                                  "Rollback : success delete. Message Origin: {}",
+                                  "Rollback : success delete. Message Origin : {}",
                                   queries.getString(ORIGIN));
-                              promise.fail(immudbHandler.cause().getMessage());
+                              promise.fail("immudb failed");
                             } else {
                               LOGGER.info("Rollback : delete failed");
                               promise.fail(deleteFromPostgres.cause().getMessage());
@@ -135,7 +136,7 @@ public class MessageProcessorImpl implements MessageProcessService {
                   "failed to insert in postgres for server origin["
                       + serverOrigin
                       + "]"
-                      + failureHandler.getCause());
+                      + failureHandler.getMessage());
             });
 
     return promise.future();
