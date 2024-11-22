@@ -48,7 +48,7 @@ public class AclApdAuditingStrategy implements AuditingServerStrategy {
         .replace("$2", userId)
         .replace("$3", api)
         .replace("$4", method)
-        .replace("$5", body.toString())
+        .replace("$5", body.encode())
         .replace("$6", Long.toString(responseSize))
         .replace("$7", utcTime.toString());
   }

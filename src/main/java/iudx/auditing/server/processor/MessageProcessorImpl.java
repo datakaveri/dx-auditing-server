@@ -39,9 +39,9 @@ public class MessageProcessorImpl implements MessageProcessService {
 
   @Override
   public Future<JsonObject> processAuditEventMessages(JsonObject message) {
-    LOGGER.info("message processing starts : ");
+    LOGGER.info("processAuditEventMessages started()");
     JsonObject queries = queryBuilder(message);
-    LOGGER.debug("message processing {}", queries);
+    LOGGER.debug("auditing queries :  {}", queries);
     queries.put(DELIVERY_TAG, message.getLong(DELIVERY_TAG));
     queries.put(ORIGIN, message.getString(ORIGIN));
     Promise<JsonObject> promise = Promise.promise();
@@ -52,10 +52,11 @@ public class MessageProcessorImpl implements MessageProcessService {
         .onComplete(
             dbHandler -> {
               if (dbHandler.succeeded()) {
-                LOGGER.info("Inserted successfully for the Origin {}", message.getString(ORIGIN));
+                LOGGER.info(
+                    "Log audited successfully for the Origin {}", message.getString(ORIGIN));
                 promise.complete(dbHandler.result());
               } else {
-                LOGGER.error(dbHandler.cause());
+                LOGGER.error("Failed databaseOperations : {}", dbHandler.cause().getMessage());
                 promise.fail(dbHandler.cause());
               }
             });
@@ -99,7 +100,6 @@ public class MessageProcessorImpl implements MessageProcessService {
     LOGGER.trace("databaseOperations started");
     Promise<JsonObject> promise = Promise.promise();
     Future<JsonObject> insertInPostgres = postgresService.executeWriteQuery(queries);
-    LOGGER.debug("Queries from origin is {} ", queries.getString(ORIGIN));
     insertInPostgres
         .onSuccess(
             insertInImmudbHandler -> {
@@ -110,7 +110,7 @@ public class MessageProcessorImpl implements MessageProcessService {
                       promise.complete(queries);
                     } else {
                       LOGGER.error(
-                          "Failed: unable to update immudb table for server origin" + " {}",
+                          "Failed: unable to update immudb table for server origin : {}",
                           queries.getString(ORIGIN));
                       Future<JsonObject> deleteFromPostgres =
                           postgresService.executeDeleteQuery(queries);
