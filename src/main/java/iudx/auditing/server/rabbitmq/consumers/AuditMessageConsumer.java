@@ -53,7 +53,6 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                                 RabbitMQConsumer mqConsumer = receiveResultHandler.result();
                                 mqConsumer.handler(
                                     message -> {
-                                      long startTime = System.currentTimeMillis();
                                       mqConsumer.pause();
                                       LOGGER.debug("message consumption paused.");
                                       JsonObject request = new JsonObject();
@@ -64,27 +63,18 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                                                 .body()
                                                 .toJsonObject()
                                                 .put(DELIVERY_TAG, deliveryTag);
+                                        LOGGER.debug("Log received {}", request);
                                         LOGGER.info(
-                                            "message received from {}", request.getString(ORIGIN));
+                                            "Log received from {}", request.getString(ORIGIN));
                                         Future<JsonObject> processResult =
                                             msgService.processAuditEventMessages(request);
                                         processResult.onComplete(
                                             handler -> {
                                               if (handler.succeeded()) {
-                                                long endTime =
-                                                    System.currentTimeMillis(); // End time
-                                                long duration =
-                                                    endTime - startTime; // Time difference
-                                                LOGGER.info(
-                                                    "Audit message published in databases. Time taken: "
-                                                        + duration
-                                                        + " ms");
                                                 client.basicAck(
                                                     handler.result().getLong(DELIVERY_TAG), false);
                                                 mqConsumer.resume();
                                                 LOGGER.debug("message consumption resumed");
-                                                successCount++;
-                                                LOGGER.info(" success count == " + successCount);
                                               } else {
                                                 LOGGER.error(
                                                     "Error while publishing messages for processing "
@@ -109,8 +99,6 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                                         mqConsumer.resume();
                                         LOGGER.debug("message consumption resumed");
                                       }
-                                      totalCount++;
-                                      LOGGER.info(" total count == " + totalCount);
                                     });
                               } else {
                                 LOGGER.error(
