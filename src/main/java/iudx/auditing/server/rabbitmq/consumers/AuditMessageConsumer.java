@@ -1,6 +1,7 @@
 package iudx.auditing.server.rabbitmq.consumers;
 
 import static iudx.auditing.server.common.Constants.*;
+import static iudx.auditing.server.querystrategy.util.Constants.ERROR_UNIQUE_KEY;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -55,7 +56,8 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                               long deliveryTag = message.envelope().getDeliveryTag();
                               request =
                                   message.body().toJsonObject().put(DELIVERY_TAG, deliveryTag);
-                              LOGGER.info("message received from {}", request.getString(ORIGIN));
+                              LOGGER.debug("Log received : {}", request);
+                              LOGGER.info("Log received from : {}", request.getString(ORIGIN));
                               Future<JsonObject> processResult =
                                   msgService.processAuditEventMessages(request);
                               processResult.onComplete(
@@ -70,6 +72,9 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                                       LOGGER.error(
                                           "Error while publishing messages for processing "
                                               + handler.cause().getMessage());
+                                      if (handler.cause().getMessage().matches(ERROR_UNIQUE_KEY)) {
+                                        client.basicAck(deliveryTag, false);
+                                      }
                                       mqConsumer.resume();
                                       LOGGER.debug("message consumption resumed");
                                     }
