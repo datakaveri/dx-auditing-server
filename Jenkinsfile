@@ -29,6 +29,7 @@ pipeline {
       steps{
         script{
           catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+            sh 'sudo update-alternatives --set java /usr/lib/jvm/java-21-openjdk-amd64/bin/java'
             sh 'mvn clean test checkstyle:checkstyle pmd:pmd'
           }
         }
@@ -61,6 +62,7 @@ pipeline {
         }
         cleanup{
           script{
+            sh 'sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java'
             sh 'sudo rm -rf target/'
           }
         }        
