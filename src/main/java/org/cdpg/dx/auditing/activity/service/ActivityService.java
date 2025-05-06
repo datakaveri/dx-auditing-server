@@ -1,6 +1,8 @@
 package org.cdpg.dx.auditing.activity.service;
 
 import io.vertx.core.Future;
+import java.util.List;
+import java.util.UUID;
 import org.cdpg.dx.auditing.activity.model.ActivityLog;
 
 public interface ActivityService {
@@ -10,5 +12,5 @@ public interface ActivityService {
    * @param userId The ID of the user for whom the activity log is to be fetched.
    * @return A Future containing the activity log for the specified user.
    */
-  Future<ActivityLog> getActivityLog(String userId);
+  Future<List<ActivityLog>> getActivityLogByUserId(UUID userId);
 }
