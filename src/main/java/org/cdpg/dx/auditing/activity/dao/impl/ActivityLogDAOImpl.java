@@ -33,10 +33,6 @@ public class ActivityLogDAOImpl extends AbstractBaseDAO<ActivityLog> implements 
               return Future.succeededFuture(entities);
             })
         .recover(
-            err -> {
-              // LOGGER.error("Error fetching all from: {}, msg: {}", tableName, err.getMessage(),
-              // err);
-              return Future.failedFuture(err);
-            });
+                Future::failedFuture);
   }
 }
