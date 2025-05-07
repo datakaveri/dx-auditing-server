@@ -13,7 +13,7 @@
         </Console>
     </Appenders>
     <Loggers>
-        <logger name="iudx.auditing.server" level="${env:LOG_LEVEL:-INFO}"
+        <logger name="org.cdpg.dx" level="${env:LOG_LEVEL:-INFO}"
             additivity="false">
             <appender-ref ref="ConsoleAppender" />
         </logger>

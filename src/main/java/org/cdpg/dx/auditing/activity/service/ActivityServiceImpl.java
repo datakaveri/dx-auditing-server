@@ -15,7 +15,11 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   public Future<List<ActivityLog>> getActivityLogByUserId(UUID userId) {
-   return activityLogDAO.getAllActivityLogsByUserId(userId);
+    return activityLogDAO.getAllActivityLogsByUserId(userId);
+  }
 
+  @Override
+  public Future<ActivityLog> insertActivityLog(ActivityLog activityLog) {
+    return activityLogDAO.createActivityLog(activityLog);
   }
 }
