@@ -1,11 +1,10 @@
 package org.cdpg.dx.databroker.listeners;
 
-import static iudx.auditing.server.common.Constants.*;
+import static org.cdpg.dx.databroker.listeners.util.Constans.AUDIT_LATEST_QUEUE;
 
 import io.vertx.rabbitmq.QueueOptions;
 import io.vertx.rabbitmq.RabbitMQClient;
 import io.vertx.rabbitmq.RabbitMQConsumer;
-import iudx.auditing.server.common.RabitMqConsumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,9 +35,10 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                   receiveResultHandler -> {
                     if (receiveResultHandler.succeeded()) {
                       RabbitMQConsumer mqConsumer = receiveResultHandler.result();
-                      mqConsumer.handler(message -> {
-                        LOGGER.info("Consuming messaging");
-                      });
+                      mqConsumer.handler(
+                          message -> {
+                            LOGGER.info("Consuming messaging");
+                          });
                     } else {
                       LOGGER.error(
                           "failed to consume message from auditing-messages Q : {}",
