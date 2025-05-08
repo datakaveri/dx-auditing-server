@@ -28,8 +28,8 @@
         <maven-pmd-plugin.version>3.26.0</maven-pmd-plugin.version>
         <vertx.version>4.5.11</vertx.version>
         <junit-jupiter.version>5.11.3</junit-jupiter.version>
-        <exec.mainClass>iudx.auditing.server.deploy.Deployer</exec.mainClass>
-        <exec.mainClassDev>iudx.auditing.server.deploy.DeployerDev</exec.mainClassDev>
+        <exec.mainClass>org.cdpg.dx.deploy.Deployer</exec.mainClass>
+        <exec.mainClassDev>org.cdpg.dx.deploy.Deployer</exec.mainClassDev>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -130,6 +130,11 @@
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
+            <version>${micrometer.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus-simpleclient</artifactId>
             <version>${micrometer.version}</version>
         </dependency>
         <!--  Packages for Hazelcast clustering based on Zookeeper discovery  -->
@@ -373,7 +378,7 @@
                     <execution>
                         <id>auditing-server</id>
                         <configuration>
-                            <mainClass>iudx.auditing.server.deploy.DeployerDev</mainClass>
+                            <mainClass>org.cdpg.dx.deploy.Deployer</mainClass>
                             <arguments>
                                 <argument>-jar</argument>
                                 <argument>

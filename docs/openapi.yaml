@@ -1,0 +1,62 @@
+openapi: 3.0.3
+info:
+  title: Activity API
+  description: API for managing activity logs.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+
+    # Global security definition (applies to all paths unless overridden)
+security:
+  - authorization: [ ]
+
+paths:
+  /activity:
+    get:
+      operationId: getAllActivityLogs
+      summary: Get all activity logs
+      description: Retrieve a list of all activity logs.
+      responses:
+        '200':
+          description: A list of activity logs.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActivityLog'
+        '401':
+          description: Unauthorized. Token is required.
+        '500':
+          description: Internal server error.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ActivityLog:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the activity log.
+        name:
+          type: string
+          description: Name of the activity.
+        description:
+          type: string
+          description: Description of the activity.
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the activity was created.
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the activity was last updated.
+      required:
+        - name
+        - createdAt

@@ -21,7 +21,7 @@ public class DateTimeHelper {
     // Parse string to LocalDateTime
     public static Optional<LocalDateTime> parse(String dateTimeStr) {
         try {
-            return Optional.of(LocalDateTime.parse(dateTimeStr, DEFAULT_FORMATTER));
+            return Optional.of(LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         } catch (Exception e) {
             return Optional.empty();
         }

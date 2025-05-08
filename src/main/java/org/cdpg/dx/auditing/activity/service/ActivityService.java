@@ -13,4 +13,12 @@ public interface ActivityService {
    * @return A Future containing the activity log for the specified user.
    */
   Future<List<ActivityLog>> getActivityLogByUserId(UUID userId);
+
+  /**
+   * This method is used to create a new activity log.
+   *
+   * @param activityLog The activity log to be created.
+   * @return A Future containing the created activity log.
+   */
+  Future<ActivityLog> insertActivityLog(ActivityLog activityLog);
 }
