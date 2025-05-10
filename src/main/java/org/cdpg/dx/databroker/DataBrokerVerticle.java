@@ -12,6 +12,11 @@ import io.vertx.rabbitmq.RabbitMQOptions;
 import io.vertx.serviceproxy.ServiceBinder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.auditing.activity.dao.ActivityLogDAO;
+import org.cdpg.dx.auditing.activity.dao.impl.ActivityLogDAOImpl;
+import org.cdpg.dx.auditing.activity.service.ActivityService;
+import org.cdpg.dx.auditing.activity.service.ActivityServiceImpl;
+import org.cdpg.dx.database.postgres.service.PostgresService;
 import org.cdpg.dx.databroker.client.RabbitClient;
 import org.cdpg.dx.databroker.client.RabbitWebClient;
 import org.cdpg.dx.databroker.listeners.AuditMessageConsumer;
@@ -118,7 +123,8 @@ public class DataBrokerVerticle extends AbstractVerticle {
     binder = new ServiceBinder(vertx);
 
     /* Create RabbitMQ listeners for revoke client queue, unique attribute queue and async query queue. */
-    // *************************** Need only while deployment of rs server uncomment line 122-130 ***************************
+    // *************************** Need only while deployment of rs server uncomment line 122-130
+    // ***************************
     /*revokedService = RevokedService.createProxy(vertx, REVOKED_SERVICE_ADDRESS);
     uniqueAttributeService = UniqueAttributeService.createProxy(vertx, UNIQUE_ATTRIBUTE_SERVICE_ADDRESS);
     RevokeClientQlistener revokeQlistener =
@@ -128,10 +134,13 @@ public class DataBrokerVerticle extends AbstractVerticle {
 
     revokeQlistener.start();
     uniqueAttrQlistener.start();*/
+    PostgresService postgresService = PostgresService.createProxy(vertx, PG_SERVICE_ADDRESS);
+    ActivityLogDAO activityLogDAO = new ActivityLogDAOImpl(postgresService);
+    ActivityService activityService = new ActivityServiceImpl(activityLogDAO);
 
-
-    // *************************** Need only while deployment of auditing server uncomment line 131-135 ***************************
-    auditConsumer = new AuditMessageConsumer(iudxInternalRabbitMqClient);
+    // *************************** Need only while deployment of auditing server uncomment line
+    // 131-135 ***************************
+    auditConsumer = new AuditMessageConsumer(iudxInternalRabbitMqClient,activityService);
     auditConsumer.start();
 
     dataBrokerService =
