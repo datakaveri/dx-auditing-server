@@ -11,5 +11,5 @@ public interface ActivityLogDAO extends BaseDAO<ActivityLog> {
 
   Future<List<ActivityLog>> getAllActivityLogsByUserId(UUID userId);
 
-  Future<ActivityLog> createActivityLog(ActivityLog activityLog);
+  Future<Void> createActivityLog(ActivityLog activityLog);
 }

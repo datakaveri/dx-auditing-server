@@ -14,11 +14,7 @@ public class ControllerFactory {
   private final Vertx vertx;
   private PostgresService pgService;
 
-  // private DataBrokerService brokerService;
-  private String dxApiBasePath;
-
-  public ControllerFactory(String dxApiBasePath, Vertx vertx) {
-    this.dxApiBasePath = dxApiBasePath;
+  public ControllerFactory(Vertx vertx) {
     this.vertx = vertx;
     CreateProxies(vertx);
   }
@@ -29,7 +25,5 @@ public class ControllerFactory {
 
   private void CreateProxies(Vertx vertx) {
     pgService = PostgresService.createProxy(vertx, PG_SERVICE_ADDRESS);
-    // brokerService = DataBrokerService.createProxy(vertx, DATA_BROKER_SERVICE_ADDRESS);
-
   }
 }
