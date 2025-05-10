@@ -20,5 +20,5 @@ public interface ActivityService {
    * @param activityLog The activity log to be created.
    * @return A Future containing the created activity log.
    */
-  Future<ActivityLog> insertActivityLog(ActivityLog activityLog);
+  Future<Void> insertActivityLogIntoDb(ActivityLog activityLog);
 }

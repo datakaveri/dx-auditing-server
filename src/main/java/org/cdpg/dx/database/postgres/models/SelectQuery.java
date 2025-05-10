@@ -5,7 +5,6 @@ import io.vertx.core.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.cdpg.dx.database.postgres.models.Join;
 
 @DataObject(generateConverter = true)
 public class SelectQuery implements Query {
@@ -18,6 +17,7 @@ public class SelectQuery implements Query {
     private Integer limit;
     private Integer offset;
     private List<Join> joins; // List to store joins
+    private List<Object> queryParams = new ArrayList<>();
 
     // Default constructor
     public SelectQuery() {}
@@ -35,7 +35,6 @@ public class SelectQuery implements Query {
         this.offset = offset;
         this.joins = joins != null ? joins : new ArrayList<>();
     }
-
     public SelectQuery(String table, List<String> columns, Condition condition, List<String> groupBy,
                        List<OrderBy> orderBy, Integer limit, Integer offset) {
         this.table = table;
@@ -47,6 +46,11 @@ public class SelectQuery implements Query {
         this.limit = limit;
         this.offset = offset;
         this.joins = null;
+    }
+
+    // Overloaded constructor for common use cases
+    public SelectQuery(String tableName, List<String> columns, Condition condition) {
+        this(tableName, columns, condition, null, null, null, null);
     }
 
     // Copy constructor
@@ -146,8 +150,6 @@ public class SelectQuery implements Query {
     public void setJoins(List<Join> joins) {
         this.joins = joins;
     }
-
-    private List<Object> queryParams = new ArrayList<>();
 
     @Override
     public String toSQL() {

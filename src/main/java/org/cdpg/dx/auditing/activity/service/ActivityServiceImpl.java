@@ -19,7 +19,7 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
-  public Future<ActivityLog> insertActivityLog(ActivityLog activityLog) {
+  public Future<Void> insertActivityLogIntoDb(ActivityLog activityLog) {
     return activityLogDAO.createActivityLog(activityLog);
   }
 }

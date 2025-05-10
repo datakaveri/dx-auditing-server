@@ -33,7 +33,8 @@ public class ActivityLogDAOImpl extends AbstractBaseDAO<ActivityLog> implements 
     Condition condition =
         new Condition(USER_ID, Condition.Operator.EQUALS, List.of(userId.toString()));
 
-    SelectQuery query = new SelectQuery(tableName, List.of("*"), condition, null, null, null, null);
+    SelectQuery query =
+        new SelectQuery(ACTIVITY_LOG_TABLE_NAME, List.of("*"), condition);
 
     return postgresService
         .select(query)
@@ -48,7 +49,7 @@ public class ActivityLogDAOImpl extends AbstractBaseDAO<ActivityLog> implements 
         .recover(Future::failedFuture);
   }
 
-  @Override
+  /* @Override
   public Future<ActivityLog> createActivityLog(ActivityLog activityLog) {
     Map<String, Object> dataMap = activityLog.toNonEmptyFieldsMap();
     InsertQuery query =
@@ -68,5 +69,10 @@ public class ActivityLogDAOImpl extends AbstractBaseDAO<ActivityLog> implements 
               LOGGER.error("Error inserting to {}: msg: {}", tableName, err.getMessage(), err);
               return Future.failedFuture(err);
             });
+  }*/
+
+  @Override
+  public Future<Void> createActivityLog(ActivityLog activityLog) {
+    return create(activityLog).mapEmpty();
   }
 }
