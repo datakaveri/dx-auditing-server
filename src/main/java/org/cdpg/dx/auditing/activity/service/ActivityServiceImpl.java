@@ -3,13 +3,13 @@ package org.cdpg.dx.auditing.activity.service;
 import io.vertx.core.Future;
 import java.util.List;
 import java.util.UUID;
-import org.cdpg.dx.auditing.activity.dao.ActivityLogDAO;
+import org.cdpg.dx.auditing.activity.dao.ActivityLogDao;
 import org.cdpg.dx.auditing.activity.model.ActivityLog;
 
 public class ActivityServiceImpl implements ActivityService {
-  private ActivityLogDAO activityLogDAO;
+  private ActivityLogDao activityLogDAO;
 
-  public ActivityServiceImpl(ActivityLogDAO activityLogDAO) {
+  public ActivityServiceImpl(ActivityLogDao activityLogDAO) {
     this.activityLogDAO = activityLogDAO;
   }
 

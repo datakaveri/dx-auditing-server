@@ -3,8 +3,6 @@ package org.cdpg.dx.database.postgres.models;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
-import java.util.Objects;
-
 @DataObject(generateConverter = true)
 public class Join {
 
@@ -13,33 +11,6 @@ public class Join {
     private String tableAlias;
     private String onColumn;
     private String joinColumn;
-
-    public enum JoinType {
-        INNER("INNER JOIN"),
-        LEFT("LEFT JOIN"),
-        RIGHT("RIGHT JOIN"),
-        FULL("FULL JOIN"),
-        CROSS("CROSS JOIN");
-
-        private final String joinType;
-
-        JoinType(String joinType) {
-            this.joinType = joinType;
-        }
-
-        public String getJoinType() {
-            return joinType;
-        }
-
-        public static JoinType fromString(String value) {
-            for (JoinType type : JoinType.values()) {
-                if (type.name().equalsIgnoreCase(value)) {
-                    return type;
-                }
-            }
-            throw new IllegalArgumentException("Invalid JoinType: " + value);
-        }
-    }
 
     public Join() {
     }
@@ -122,5 +93,32 @@ public class Join {
                 : table;
         String lhs = (tableAlias != null && !tableAlias.isEmpty()) ? tableAlias + "." + joinColumn : table + "." + joinColumn;
         return joinType.getJoinType() + " " + tableWithAlias + " ON " + lhs + " = " + onColumn;
+    }
+
+    public enum JoinType {
+        INNER("INNER JOIN"),
+        LEFT("LEFT JOIN"),
+        RIGHT("RIGHT JOIN"),
+        FULL("FULL JOIN"),
+        CROSS("CROSS JOIN");
+
+        private final String joinType;
+
+        JoinType(String joinType) {
+            this.joinType = joinType;
+        }
+
+        public static JoinType fromString(String value) {
+            for (JoinType type : JoinType.values()) {
+                if (type.name().equalsIgnoreCase(value)) {
+                    return type;
+                }
+            }
+            throw new IllegalArgumentException("Invalid JoinType: " + value);
+        }
+
+        public String getJoinType() {
+            return joinType;
+        }
     }
 }

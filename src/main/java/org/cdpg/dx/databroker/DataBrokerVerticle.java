@@ -12,8 +12,8 @@ import io.vertx.rabbitmq.RabbitMQOptions;
 import io.vertx.serviceproxy.ServiceBinder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.cdpg.dx.auditing.activity.dao.ActivityLogDAO;
-import org.cdpg.dx.auditing.activity.dao.impl.ActivityLogDAOImpl;
+import org.cdpg.dx.auditing.activity.dao.ActivityLogDao;
+import org.cdpg.dx.auditing.activity.dao.impl.ActivityLogDaoImpl;
 import org.cdpg.dx.auditing.activity.service.ActivityService;
 import org.cdpg.dx.auditing.activity.service.ActivityServiceImpl;
 import org.cdpg.dx.database.postgres.service.PostgresService;
@@ -135,7 +135,7 @@ public class DataBrokerVerticle extends AbstractVerticle {
     revokeQlistener.start();
     uniqueAttrQlistener.start();*/
     PostgresService postgresService = PostgresService.createProxy(vertx, PG_SERVICE_ADDRESS);
-    ActivityLogDAO activityLogDAO = new ActivityLogDAOImpl(postgresService);
+    ActivityLogDao activityLogDAO = new ActivityLogDaoImpl(postgresService);
     ActivityService activityService = new ActivityServiceImpl(activityLogDAO);
 
     // *************************** Need only while deployment of auditing server uncomment line

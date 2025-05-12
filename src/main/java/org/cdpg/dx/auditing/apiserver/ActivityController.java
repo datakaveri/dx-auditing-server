@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.cdpg.dx.auditing.activity.dao.impl.ActivityLogDAOImpl;
+import org.cdpg.dx.auditing.activity.dao.impl.ActivityLogDaoImpl;
 import org.cdpg.dx.auditing.activity.model.ActivityLog;
 import org.cdpg.dx.auditing.activity.service.ActivityService;
 import org.cdpg.dx.auditing.activity.service.ActivityServiceImpl;
@@ -23,7 +23,7 @@ public class ActivityController implements ApiController {
   private final Vertx vertx;
 
   public ActivityController(PostgresService pgService, Vertx vertx) {
-    ActivityLogDAOImpl activityLogDAO = new ActivityLogDAOImpl(pgService);
+    ActivityLogDaoImpl activityLogDAO = new ActivityLogDaoImpl(pgService);
     this.activityService = new ActivityServiceImpl(activityLogDAO);
     this.vertx = vertx;
   }
