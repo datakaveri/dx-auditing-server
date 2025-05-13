@@ -7,8 +7,9 @@ import io.vertx.ext.web.RoutingContext;
 import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.cdpg.dx.common.models.JwtData;
-import org.cdpg.dx.common.models.User;
+import org.cdpg.dx.auth.authentication.model.JwtData;
+
+// import org.cdpg.dx.common.models.User;
 
 public final class RoutingContextHelper {
   private static final Logger LOGGER = LogManager.getLogger(RoutingContextHelper.class);
@@ -24,13 +25,13 @@ public final class RoutingContextHelper {
     // Prevent instantiation
   }
 
-  public static void setUser(RoutingContext routingContext, User user) {
+  /* public static void setUser(RoutingContext routingContext, User user) {
     routingContext.put(USER, user);
-  }
+  }*/
 
-  public static Optional<User> getUser(RoutingContext routingContext) {
+  /* public static Optional<User> getUser(RoutingContext routingContext) {
     return Optional.ofNullable(routingContext.get(USER));
-  }
+  }*/
 
   public static JsonObject getAuthInfo(RoutingContext routingContext) {
     return new JsonObject()

@@ -6,8 +6,8 @@ import io.vertx.rabbitmq.RabbitMQClient;
 import io.vertx.rabbitmq.RabbitMQConsumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.cdpg.dx.auditing.activity.model.ActivityLog;
-import org.cdpg.dx.auditing.activity.service.ActivityService;
+import org.cdpg.dx.auditingserver.activity.model.ActivityLogEntity;
+import org.cdpg.dx.auditingserver.activity.service.ActivityService;
 
 public class AuditMessageConsumer implements RabitMqConsumer {
 
@@ -44,10 +44,10 @@ public class AuditMessageConsumer implements RabitMqConsumer {
                             LOGGER.info("Consuming message: {}", message.body().toString());
                             long deliveryTag = message.envelope().getDeliveryTag();
                             JsonObject json = message.body().toJsonObject();
-                            ActivityLog activityLog = ActivityLog.fromJson(json);
+                            ActivityLogEntity activityLogEntity = ActivityLogEntity.fromJson(json);
 
                             activityService
-                                .insertActivityLogIntoDb(activityLog)
+                                .insertActivityLogIntoDb(activityLogEntity)
                                 .onSuccess(
                                     v -> {
                                       LOGGER.info("Activity log inserted successfully.");

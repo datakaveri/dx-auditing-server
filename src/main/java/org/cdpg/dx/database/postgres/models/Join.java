@@ -12,6 +12,33 @@ public class Join {
     private String onColumn;
     private String joinColumn;
 
+    public enum JoinType {
+        INNER("INNER JOIN"),
+        LEFT("LEFT JOIN"),
+        RIGHT("RIGHT JOIN"),
+        FULL("FULL JOIN"),
+        CROSS("CROSS JOIN");
+
+        private final String joinType;
+
+        JoinType(String joinType) {
+            this.joinType = joinType;
+        }
+
+        public String getJoinType() {
+            return joinType;
+        }
+
+        public static JoinType fromString(String value) {
+            for (JoinType type : JoinType.values()) {
+                if (type.name().equalsIgnoreCase(value)) {
+                    return type;
+                }
+            }
+            throw new IllegalArgumentException("Invalid JoinType: " + value);
+        }
+    }
+
     public Join() {
     }
 
@@ -51,41 +78,50 @@ public class Join {
         return joinType;
     }
 
-    public void setJoinType(JoinType joinType) {
-        this.joinType = joinType;
-    }
 
     public String getTable() {
         return table;
     }
 
-    public void setTable(String table) {
+    public Join setJoinType(JoinType joinType) {
+        this.joinType = joinType;
+        return this;
+    }
+
+    public Join setTable(String table) {
         this.table = table;
+        return this;
+    }
+
+    public Join setTableAlias(String tableAlias) {
+        this.tableAlias = tableAlias;
+        return this;
+    }
+
+    public Join setOnColumn(String onColumn) {
+        this.onColumn = onColumn;
+        return this;
+    }
+
+    public Join setJoinColumn(String joinColumn) {
+        this.joinColumn = joinColumn;
+        return this;
     }
 
     public String getTableAlias() {
         return tableAlias;
     }
 
-    public void setTableAlias(String tableAlias) {
-        this.tableAlias = tableAlias;
-    }
 
     public String getOnColumn() {
         return onColumn;
     }
 
-    public void setOnColumn(String onColumn) {
-        this.onColumn = onColumn;
-    }
 
     public String getJoinColumn() {
         return joinColumn;
     }
 
-    public void setJoinColumn(String joinColumn) {
-        this.joinColumn = joinColumn;
-    }
 
     public String toSQL() {
         String tableWithAlias = (tableAlias != null && !tableAlias.isEmpty())
@@ -93,32 +129,5 @@ public class Join {
                 : table;
         String lhs = (tableAlias != null && !tableAlias.isEmpty()) ? tableAlias + "." + joinColumn : table + "." + joinColumn;
         return joinType.getJoinType() + " " + tableWithAlias + " ON " + lhs + " = " + onColumn;
-    }
-
-    public enum JoinType {
-        INNER("INNER JOIN"),
-        LEFT("LEFT JOIN"),
-        RIGHT("RIGHT JOIN"),
-        FULL("FULL JOIN"),
-        CROSS("CROSS JOIN");
-
-        private final String joinType;
-
-        JoinType(String joinType) {
-            this.joinType = joinType;
-        }
-
-        public static JoinType fromString(String value) {
-            for (JoinType type : JoinType.values()) {
-                if (type.name().equalsIgnoreCase(value)) {
-                    return type;
-                }
-            }
-            throw new IllegalArgumentException("Invalid JoinType: " + value);
-        }
-
-        public String getJoinType() {
-            return joinType;
-        }
     }
 }

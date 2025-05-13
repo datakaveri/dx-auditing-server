@@ -1,7 +1,7 @@
 package org.cdpg.dx.auth.authentication.service;
 
 import io.vertx.core.Future;
-import org.cdpg.dx.common.models.JwtData;
+import org.cdpg.dx.auth.authentication.model.JwtData;
 
 public interface TokenAuthenticatorService {
 

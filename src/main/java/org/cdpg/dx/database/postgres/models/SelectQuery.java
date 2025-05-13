@@ -17,7 +17,6 @@ public class SelectQuery implements Query {
     private Integer limit;
     private Integer offset;
     private List<Join> joins; // List to store joins
-    private List<Object> queryParams = new ArrayList<>();
 
     // Default constructor
     public SelectQuery() {}
@@ -35,6 +34,7 @@ public class SelectQuery implements Query {
         this.offset = offset;
         this.joins = joins != null ? joins : new ArrayList<>();
     }
+
     public SelectQuery(String table, List<String> columns, Condition condition, List<String> groupBy,
                        List<OrderBy> orderBy, Integer limit, Integer offset) {
         this.table = table;
@@ -46,11 +46,6 @@ public class SelectQuery implements Query {
         this.limit = limit;
         this.offset = offset;
         this.joins = null;
-    }
-
-    // Overloaded constructor for common use cases
-    public SelectQuery(String tableName, List<String> columns, Condition condition) {
-        this(tableName, columns, condition, null, null, null, null);
     }
 
     // Copy constructor
@@ -83,73 +78,97 @@ public class SelectQuery implements Query {
         return table;
     }
 
-    public void setTable(String table) {
+    public SelectQuery setTable(String table) {
         this.table = table;
+        return this;
+    }
+
+    public SelectQuery setTableAlias(String tableAlias) {
+        this.tableAlias = tableAlias;
+        return this;
+    }
+
+    public SelectQuery setColumns(List<String> columns) {
+        this.columns = columns;
+        return this;
+    }
+
+    public SelectQuery setCondition(Condition condition) {
+        this.condition = condition;
+        return this;
+    }
+
+    public SelectQuery setGroupBy(List<String> groupBy) {
+        this.groupBy = groupBy;
+        return this;
+    }
+
+    public SelectQuery setOrderBy(List<OrderBy> orderBy) {
+        this.orderBy = orderBy;
+        return this;
+    }
+
+    public SelectQuery setLimit(Integer limit) {
+        this.limit = limit;
+        return this;
+    }
+
+    public SelectQuery setOffset(Integer offset) {
+        this.offset = offset;
+        return this;
+    }
+
+    public SelectQuery setJoins(List<Join> joins) {
+        this.joins = joins;
+        return this;
+    }
+
+    public SelectQuery setQueryParams(List<Object> queryParams) {
+        this.queryParams = queryParams;
+        return this;
     }
 
     public String getTableAlias() {
         return tableAlias;
     }
 
-    public void setTableAlias(String tableAlias) {
-        this.tableAlias = tableAlias;
-    }
 
     public List<String> getColumns() {
         return columns;
     }
 
-    public void setColumns(List<String> columns) {
-        this.columns = columns;
-    }
 
     public Condition getCondition() {
         return condition;
     }
 
-    public void setCondition(Condition condition) {
-        this.condition = condition;
-    }
 
     public List<String> getGroupBy() {
         return groupBy;
     }
 
-    public void setGroupBy(List<String> groupBy) {
-        this.groupBy = groupBy;
-    }
 
     public List<OrderBy> getOrderBy() {
         return orderBy;
     }
 
-    public void setOrderBy(List<OrderBy> orderBy) {
-        this.orderBy = orderBy;
-    }
 
     public Integer getLimit() {
         return limit;
     }
 
-    public void setLimit(Integer limit) {
-        this.limit = limit;
-    }
 
     public Integer getOffset() {
         return offset;
     }
 
-    public void setOffset(Integer offset) {
-        this.offset = offset;
-    }
 
     public List<Join> getJoins() {
         return joins;
     }
 
-    public void setJoins(List<Join> joins) {
-        this.joins = joins;
-    }
+
+    private List<Object> queryParams = new ArrayList<>();
 
     @Override
     public String toSQL() {
@@ -169,7 +188,8 @@ public class SelectQuery implements Query {
                 query.append(" ").append(join.toSQL());
             }
         }
-
+        System.out.println("hereeee 1 : " + condition);
+        
         // Adding condition (WHERE clause)
         if (condition != null) {
             query.append(" WHERE ").append(condition.toSQL(queryParams));
@@ -195,6 +215,7 @@ public class SelectQuery implements Query {
         if (offset != null) {
             query.append(" OFFSET ").append(offset);
         }
+        System.out.println("hereeeeee : " + query);
 
         return query.toString();
     }
