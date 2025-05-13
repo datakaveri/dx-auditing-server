@@ -7,7 +7,7 @@ import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.cdpg.dx.common.models.JwtData;
+import org.cdpg.dx.auth.authentication.model.JwtData;
 
 public class JwtAuthenticatorServiceImpl implements TokenAuthenticatorService {
   private static final Logger LOGGER = LogManager.getLogger(JwtAuthenticatorServiceImpl.class);

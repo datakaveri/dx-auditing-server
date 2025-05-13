@@ -1,6 +1,6 @@
 package org.cdpg.dx.databroker;
 
-import static org.cdpg.dx.common.util.ProxyAddressConstants.*;
+import static org.cdpg.dx.common.config.ServiceProxyAddressConstants.*;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
@@ -12,10 +12,10 @@ import io.vertx.rabbitmq.RabbitMQOptions;
 import io.vertx.serviceproxy.ServiceBinder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.cdpg.dx.auditing.activity.dao.ActivityLogDAO;
-import org.cdpg.dx.auditing.activity.dao.impl.ActivityLogDAOImpl;
-import org.cdpg.dx.auditing.activity.service.ActivityService;
-import org.cdpg.dx.auditing.activity.service.ActivityServiceImpl;
+import org.cdpg.dx.auditingserver.activity.dao.ActivityLogDao;
+import org.cdpg.dx.auditingserver.activity.dao.impl.ActivityLogDaoImpl;
+import org.cdpg.dx.auditingserver.activity.service.ActivityService;
+import org.cdpg.dx.auditingserver.activity.service.impl.ActivityServiceImpl;
 import org.cdpg.dx.database.postgres.service.PostgresService;
 import org.cdpg.dx.databroker.client.RabbitClient;
 import org.cdpg.dx.databroker.client.RabbitWebClient;
@@ -134,8 +134,8 @@ public class DataBrokerVerticle extends AbstractVerticle {
 
     revokeQlistener.start();
     uniqueAttrQlistener.start();*/
-    PostgresService postgresService = PostgresService.createProxy(vertx, PG_SERVICE_ADDRESS);
-    ActivityLogDAO activityLogDAO = new ActivityLogDAOImpl(postgresService);
+    PostgresService postgresService = PostgresService.createProxy(vertx, POSTGRES_SERVICE_ADDRESS);
+    ActivityLogDao activityLogDAO = new ActivityLogDaoImpl(postgresService);
     ActivityService activityService = new ActivityServiceImpl(activityLogDAO);
 
     // *************************** Need only while deployment of auditing server uncomment line
