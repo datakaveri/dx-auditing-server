@@ -13,17 +13,17 @@ import org.cdpg.dx.common.util.DateTimeHelper;
 import org.cdpg.dx.database.postgres.base.entity.BaseEntity;
 import org.cdpg.dx.database.postgres.util.EntityUtil;
 
-public record ActivityLogEntity(
+public record ActivityLog(
     Optional<UUID> id,
     Optional<UUID> UserId,
     String name,
     Optional<String> description,
     Optional<LocalDateTime> createdAt,
     Optional<LocalDateTime> updatedAt)
-    implements BaseEntity<ActivityLogEntity> {
+    implements BaseEntity<ActivityLog> {
 
-  public static ActivityLogEntity fromJson(JsonObject json) {
-    return new ActivityLogEntity(
+  public static ActivityLog fromJson(JsonObject json) {
+    return new ActivityLog(
         EntityUtil.parseUUID(json.getString(ActivityConstants.ID)),
         EntityUtil.parseUUID(json.getString(ActivityConstants.USER_ID)),
         json.getString(ActivityConstants.NAME),
