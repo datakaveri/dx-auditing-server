@@ -53,7 +53,7 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
         .recover(
             err -> {
               LOGGER.error("Error inserting to {}: msg: {}", tableName, err.getMessage(), err);
-              return Future.failedFuture(err);
+              return Future.failedFuture(DxPgExceptionMapper.from(err));
             });
   }
 

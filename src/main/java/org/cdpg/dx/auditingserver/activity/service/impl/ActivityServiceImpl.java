@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.auditingserver.activity.dao.ActivityLogDao;
-import org.cdpg.dx.auditingserver.activity.model.ActivityLogEntity;
+import org.cdpg.dx.auditingserver.activity.model.ActivityLog;
 import org.cdpg.dx.auditingserver.activity.service.ActivityService;
 
 public class ActivityServiceImpl implements ActivityService {
@@ -18,12 +18,12 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
-  public Future<List<ActivityLogEntity>> getActivityLogByUserId(UUID userId) {
+  public Future<List<ActivityLog>> getActivityLogByUserId(UUID userId) {
     return activityLogDAO.getAllActivityLogsByUserId(userId);
   }
 
-  @Override
-  public Future<Void> insertActivityLogIntoDb(ActivityLogEntity activityLogEntity) {
+@Override
+public Future<Void> insertActivityLogIntoDb(ActivityLog activityLogEntity) {
     LOGGER.trace("insertActivityLogIntoDb() started");
     return activityLogDAO.createActivityLog(activityLogEntity).mapEmpty();
   }
