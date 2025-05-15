@@ -83,7 +83,8 @@ public class PostgresServiceImpl implements PostgresService {
           String paramStr = (String) param;
 
           // Check if it's an ISO timestamp string
-          if (paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$")) {
+          if (paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$")
+                  || paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{1,9}$")) {
             try {
               // Parse and
               // qconvert to LocalDateTime
