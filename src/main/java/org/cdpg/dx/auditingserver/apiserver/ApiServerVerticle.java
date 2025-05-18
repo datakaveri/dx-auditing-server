@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.auth.authentication.client.SecretKeyClientImpl;
+import org.cdpg.dx.auth.authentication.handler.KeycloakAuthenticationHandler;
 import org.cdpg.dx.auth.authentication.handler.TokenAuthenticationHandler;
 import org.cdpg.dx.common.FailureHandler;
 import org.cdpg.dx.util.HttpStatusCode;
@@ -43,11 +44,14 @@ public class ApiServerVerticle extends AbstractVerticle {
   public void start() {
     port = config().getInteger("httpPort", 8443);
     String dxApiBasePath = config().getString("dxApiBasePath");
+    // configured for Keycloak token authentication
+    KeycloakAuthenticationHandler keycloakAuthenticationHandler =
+        new KeycloakAuthenticationHandler(config(), vertx);
 
-    SecretKeyClientImpl secretKeyClient = new SecretKeyClientImpl(config(), vertx);
-    TokenAuthenticationHandler authenticatorHandler =
-        new TokenAuthenticationHandler(config(), secretKeyClient, vertx);
-
+    /*SecretKeyClientImpl secretKeyClient = new SecretKeyClientImpl(config(), vertx);
+            TokenAuthenticationHandler authenticatorHandler =
+                new TokenAuthenticationHandler(config(), secretKeyClient, vertx);
+    */
     List<ApiController> controllers = ControllerFactory.createControllers(vertx);
 
     RouterBuilder.create(vertx, "docs/openapi.yaml")
@@ -64,7 +68,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                 RouterBuilderOptions factoryOptions =
                     new RouterBuilderOptions().setMountResponseContentTypeHandler(true);
                 routerBuilder.setOptions(factoryOptions);
-                routerBuilder.securityHandler("authorization", authenticatorHandler);
+                // configured for Keycloak token authentication
+                routerBuilder.securityHandler("authorization", keycloakAuthenticationHandler);
 
                 controllers.forEach(controller -> controller.register(routerBuilder));
 
