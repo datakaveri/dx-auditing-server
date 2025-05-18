@@ -4,37 +4,42 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
-import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import java.util.Collections;
-import org.cdpg.dx.auth.authentication.client.SecretKeyClient;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.cdpg.dx.auth.authentication.client.KeyCloakSecretKeyClientImpl;
 
-public class JwtAuthProvider {
+public class JwtAuthProviderForKc {
 
   private static JWTAuth jwtAuthInstance;
 
-  private JwtAuthProvider() {
+  private JwtAuthProviderForKc() {
     // private constructor to prevent instantiation
   }
 
   public static Future<JWTAuth> init(
-      Vertx vertx, JsonObject config, SecretKeyClient secretKeyClient) {
+      Vertx vertx, JsonObject config, KeyCloakSecretKeyClientImpl keyCloakSecretKeyClient) {
     if (jwtAuthInstance != null) {
       return Future.succeededFuture(jwtAuthInstance);
     }
 
-    return secretKeyClient
+    return keyCloakSecretKeyClient
         .fetchCertKey()
         .compose(
             certJson -> {
               if (certJson == null || certJson.isEmpty()) {
                 return Future.failedFuture("Public key (certificate) is empty or null");
               }
-              String cert = certJson.getString("cert");
+              List<JsonObject> jwks =
+                  certJson.getJsonArray("keys").stream()
+                      .map(obj -> (JsonObject) obj)
+                      .collect(Collectors.toList());
+
               JWTAuthOptions options =
                   new JWTAuthOptions()
-                      .addPubSecKey(new PubSecKeyOptions().setAlgorithm("ES256").setBuffer(cert))
+                      .setJwks(jwks)
                       .setJWTOptions(
                           new JWTOptions()
                               .setLeeway(30)
