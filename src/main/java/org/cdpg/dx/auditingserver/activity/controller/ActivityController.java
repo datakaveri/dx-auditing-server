@@ -43,7 +43,7 @@ public class ActivityController implements ApiController {
                 ResponseBuilder.sendNoContent(context);
               } else {
                 LOGGER.info("Fetched activity logs successfully for consumer user: {}", userId);
-                ResponseBuilder.sendSuccess(context, mapActivityLogsToJsonArray(logs));
+                ResponseBuilder.sendSuccess(context, logs);
               }
             })
         .onFailure(
@@ -64,7 +64,7 @@ public class ActivityController implements ApiController {
                 ResponseBuilder.sendNoContent(context);
               } else {
                 LOGGER.info("Fetched activity logs successfully for admin");
-                ResponseBuilder.sendSuccess(context, mapActivityLogsToJsonArray(logs));
+                ResponseBuilder.sendSuccess(context, logs);
               }
             })
         .onFailure(
