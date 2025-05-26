@@ -93,7 +93,7 @@ public class ReportController implements ApiController {
                   ResponseBuilder.send(routingContext, HttpStatusCode.BAD_REQUEST, TOO_MANY_ROWS , null);
                 return;
               } else if (filePath.equalsIgnoreCase(EMPTY_FILE)) {
-                  ResponseBuilder.sendSuccess(routingContext,EMPTY_FILE);
+                  ResponseBuilder.sendNoContent(routingContext);
                 return;
               }
               LOGGER.info("CSV file generated successfully at: {}", filePath);
