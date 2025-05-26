@@ -4,6 +4,7 @@ package org.cdpg.dx.auditingserver.apiserver;
 
 import static org.cdpg.dx.util.Constants.*;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -53,10 +54,12 @@ public class ApiServerVerticle extends AbstractVerticle {
     // Register the module for default Vert.x ObjectMapper
     ObjectMapper mapper = DatabindCodec.mapper();
     mapper.registerModule(new JavaTimeModule());
+      mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     ObjectMapper prettyMapper = DatabindCodec.prettyMapper();
     prettyMapper.registerModule(new JavaTimeModule());
+      prettyMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     prettyMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     Future<RouterBuilder> routerFuture = RouterBuilder.create(vertx, "docs/openapi.yaml");
