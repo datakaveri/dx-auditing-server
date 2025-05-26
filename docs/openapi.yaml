@@ -11,9 +11,28 @@ security:
   - authorization: [ ]
 
 paths:
-  /activity:
+  /dx/auditing/consumer/activity:
     get:
-      operationId: getAllActivityLogs
+      operationId: get-ActivityLogs-for-consumer-user
+      summary: Get all activity logs
+      description: Retrieve a list of all activity logs.
+      responses:
+        '200':
+          description: A list of activity logs.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActivityLog'
+        '401':
+          description: Unauthorized. Token is required.
+        '500':
+          description: Internal server error.
+
+  /dx/auditing/admin/activity:
+    get:
+      operationId: get-activityLogs-for-admin-user
       summary: Get all activity logs
       description: Retrieve a list of all activity logs.
       responses:

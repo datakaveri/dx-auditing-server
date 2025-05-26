@@ -22,9 +22,13 @@ public class ActivityServiceImpl implements ActivityService {
     return activityLogDAO.getAllActivityLogsByUserId(userId);
   }
 
-@Override
-public Future<Void> insertActivityLogIntoDb(ActivityLog activityLogEntity) {
-    LOGGER.trace("insertActivityLogIntoDb() started");
+  @Override
+  public Future<List<ActivityLog>> getAllActivityLogsForAdmin() {
+    return activityLogDAO.getAllActivityLogsForAdmin();
+  }
+
+  @Override
+  public Future<Void> insertActivityLogIntoDb(ActivityLog activityLogEntity) {
     return activityLogDAO.createActivityLog(activityLogEntity).mapEmpty();
   }
 }
