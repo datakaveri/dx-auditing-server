@@ -10,12 +10,13 @@ import io.vertx.sqlclient.Tuple;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.database.postgres.models.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PostgresServiceImpl implements PostgresService {
-  private static final Logger LOG = LoggerFactory.getLogger(PostgresServiceImpl.class);
+  private static final Logger LOG = LogManager.getLogger(PostgresServiceImpl.class);
   private final Pool client;
 
   public PostgresServiceImpl(Pool client) {
@@ -84,7 +85,7 @@ public class PostgresServiceImpl implements PostgresService {
 
           // Check if it's an ISO timestamp string
           if (paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$")
-                  || paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{1,9}$")) {
+              || paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{1,9}$")) {
             try {
               // Parse and
               // qconvert to LocalDateTime

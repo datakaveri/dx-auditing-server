@@ -15,6 +15,13 @@ public interface ActivityService {
   Future<List<ActivityLog>> getActivityLogByUserId(UUID userId);
 
   /**
+   * This method is used to get all activity logs for admin users.
+   *
+   * @return A Future containing a list of all activity logs.
+   */
+  Future<List<ActivityLog>> getAllActivityLogsForAdmin();
+
+  /**
    * This method is used to create a new activity log.
    *
    * @param activityLogEntity The activity log to be created.
