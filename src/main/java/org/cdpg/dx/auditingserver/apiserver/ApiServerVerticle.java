@@ -51,18 +51,17 @@ public class ApiServerVerticle extends AbstractVerticle {
   @Override
   public void start() {
     port = config().getInteger("httpPort", 8443);
-    // Register the module for default Vert.x ObjectMapper
-    ObjectMapper mapper = DatabindCodec.mapper();
-    mapper.registerModule(new JavaTimeModule());
-      mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+      ObjectMapper mapper = DatabindCodec.mapper();
+      mapper.registerModule(new JavaTimeModule());
+      mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+      mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY); // Exclude null & empty
 
-    ObjectMapper prettyMapper = DatabindCodec.prettyMapper();
-    prettyMapper.registerModule(new JavaTimeModule());
-      prettyMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    prettyMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+      // Optionally, configure custom pretty mapper if needed
+      ObjectMapper prettyMapper = mapper.copy();
+      prettyMapper.enable(SerializationFeature.INDENT_OUTPUT); // pretty-printing
 
-    Future<RouterBuilder> routerFuture = RouterBuilder.create(vertx, "docs/openapi.yaml");
+
+      Future<RouterBuilder> routerFuture = RouterBuilder.create(vertx, "docs/openapi.yaml");
     Future<JWTAuth> authFuture = JwtAuthProvider.init(vertx, config());
 
     List<ApiController> controllers = ControllerFactory.createControllers(vertx, config());

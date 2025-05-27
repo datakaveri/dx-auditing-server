@@ -1,7 +1,5 @@
 package org.cdpg.dx.auditingserver.activity.model;
 
-import static org.cdpg.dx.auditingserver.activity.util.ActivityConstants.ACTIVITY_LOG_TABLE_NAME;
-
 import io.vertx.core.json.JsonObject;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -79,17 +77,18 @@ public record ActivityLog(
     putIfNonEmpty(json, ActivityConstants.ROLE, role);
     putIfNonEmpty(json, ActivityConstants.USER_ID, userId.toString());
     putIfNonEmpty(json, ActivityConstants.ORIGIN_SERVER, originServer);
+    putIfNonEmpty(json, ActivityConstants.MYACTIVITY_ENABLED, myactivityEnabled);
     return json;
   }
 
   private <T> void putIfNonEmpty(JsonObject json, String key, T value) {
     if (value != null) {
-      json.put(key, value.toString());
+      json.put(key, value);
     }
   }
 
   @Override
   public String getTableName() {
-    return ACTIVITY_LOG_TABLE_NAME;
+    return "";
   }
 }
