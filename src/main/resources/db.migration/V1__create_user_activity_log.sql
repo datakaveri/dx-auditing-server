@@ -10,7 +10,7 @@ END$$;
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
-    CREATE TYPE user_role AS ENUM ('Explorer', 'Admin', 'Publisher', 'Consumer');
+    CREATE TYPE user_role AS ENUM ('CONSUMER', 'PROVIDER', 'COS_ADMIN', 'ORG_ADMIN', 'COMPUTE');
   END IF;
 END$$;
 
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS user_activity_log (
     asset_id UUID NOT NULL,
     api VARCHAR NOT NULL,
     method http_method NOT NULL,
-    size BIGINT,
+    size BIGINT NOT NULL DEFAULT 0,
     role user_role NOT NULL,
     user_id UUID NOT NULL,
     origin_server origin_system NOT NULL,
