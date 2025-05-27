@@ -8,9 +8,7 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.List;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.database.postgres.models.*;
@@ -80,8 +78,7 @@ public class PostgresServiceImpl implements PostgresService {
                 + ", value: "
                 + param);
 
-        if (param instanceof String) {
-          String paramStr = (String) param;
+        if (param instanceof String paramStr) {
 
           // Check if it's an ISO timestamp string
           if (paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$")
@@ -138,7 +135,28 @@ public class PostgresServiceImpl implements PostgresService {
   }
 
   @Override
-  public Future<QueryResult> select(SelectQuery query) {
-    return executeQuery(query.toSQL(), query.getQueryParams());
+  public Future<QueryResult> select(SelectQuery query, boolean isCountQueryEnabled) {
+    String sql = query.toSQL();
+    if (isCountQueryEnabled) {
+      // Insert COUNT(*) OVER() AS total_count into the select columns
+      int selectIndex = sql.toLowerCase().indexOf("select") + 6;
+      sql =
+          sql.substring(0, selectIndex)
+              + " COUNT(*) OVER() AS total_count,"
+              + sql.substring(selectIndex);
+    }
+    return executeQuery(sql, query.getQueryParams())
+        .map(
+            result -> {
+              if (isCountQueryEnabled && !result.getRows().isEmpty()) {
+                int totalCount = result.getRows().getJsonObject(0).getInteger("total_count", 0);
+                result.setTotalCount(totalCount);
+                // Optionally, remove total_count from each row if not needed in the output
+                /*for (int i = 0; i < result.getRows().size(); i++) {
+                  result.getRows().getJsonObject(i).remove("total_count");
+                }*/
+              }
+              return result;
+            });
   }
 }

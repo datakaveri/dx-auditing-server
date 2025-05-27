@@ -48,6 +48,41 @@ paths:
           description: Unauthorized. Token is required.
         '500':
           description: Internal server error.
+
+  /dx/auditing/reportactivity/admin:
+    get:
+      operationId: get-admin-report
+      summary: Get Csv of activity logs
+      description: Csv file for a list of activity logs for admin.
+      responses:
+        '200':
+          description: Csv file generation Success. (send file data)
+        '204':
+          description: No content. No activity logs found.
+        '400':
+          description: Bad request. Invalid parameters / Too Many files to write.
+        '401':
+          description: Unauthorized. Token is required.
+        '500':
+          description: Internal server error.
+
+  /dx/auditing/reportactivity/consumer:
+    get:
+      operationId: get-consumer-report
+      summary: Get Csv of activity logs
+      description: Csv file for a list of activity logs for consumer.
+      responses:
+        '200':
+          description: Csv file generation Success. (send file data)
+        '204':
+          description: No content. No activity logs found.
+        '400':
+            description: Bad request. Invalid parameters / Too Many files to write.
+        '401':
+          description: Unauthorized. Token is required.
+        '500':
+          description: Internal server error.
+
 components:
   securitySchemes:
     bearerAuth:
@@ -79,3 +114,14 @@ components:
       required:
         - name
         - createdAt
+
+
+    CsvFile:
+      type: object
+      properties:
+        userid:
+          type: string
+          format: uuid
+          description: Unique identifier for the activity log.
+      required:
+        - userid

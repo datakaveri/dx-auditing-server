@@ -64,7 +64,7 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
     SelectQuery query = new SelectQuery(tableName, List.of("*"), condition, null, null, null, null);
 
     return postgresService
-        .select(query)
+        .select(query,false)
         .compose(
             result -> {
               if (result.getRows().isEmpty()) {
@@ -89,7 +89,7 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
     SelectQuery query = new SelectQuery(tableName, List.of("*"), null, null, null, null, null);
 
     return postgresService
-        .select(query)
+        .select(query, false)
         .compose(
             result -> {
               List<T> entities =
@@ -117,7 +117,7 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
     SelectQuery query = new SelectQuery(tableName, List.of("*"), condition, null, null, null, null);
 
     return postgresService
-        .select(query)
+        .select(query,false)
         .compose(
             result -> {
               List<T> entities =
