@@ -16,7 +16,7 @@ public interface BaseDAO<T extends BaseEntity<T>> {
 
   Future<List<T>> getAllWithFilters(Map<String, Object> filters);
 
-  Future<Boolean> update(Map<String, Object> conditionMap, Map<String, Object> updateMap);
+  Future<T> update(Map<String, Object> conditionMap, Map<String, Object> updateMap);
 
   Future<T> get(UUID id);
 }
