@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.common.exception.BaseDxException;
+import org.cdpg.dx.common.exception.DxPgException;
 import org.cdpg.dx.common.exception.NoRowFoundException;
 import org.cdpg.dx.database.postgres.base.entity.BaseEntity;
 import org.cdpg.dx.database.postgres.models.*;
@@ -64,11 +65,11 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
     SelectQuery query = new SelectQuery(tableName, List.of("*"), condition, null, null, null, null);
 
     return postgresService
-        .select(query)
+        .select(query, false)
         .compose(
             result -> {
               if (result.getRows().isEmpty()) {
-                return Future.failedFuture("Select query returned no rows id :" + id.toString());
+                return Future.failedFuture("Select query returned no rows id :" + id);
               }
               return Future.succeededFuture(fromJson.apply(result.getRows().getJsonObject(0)));
             })
@@ -89,7 +90,7 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
     SelectQuery query = new SelectQuery(tableName, List.of("*"), null, null, null, null, null);
 
     return postgresService
-        .select(query)
+        .select(query, false)
         .compose(
             result -> {
               List<T> entities =
@@ -117,7 +118,7 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
     SelectQuery query = new SelectQuery(tableName, List.of("*"), condition, null, null, null, null);
 
     return postgresService
-        .select(query)
+        .select(query, false)
         .compose(
             result -> {
               List<T> entities =
@@ -135,8 +136,7 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
   }
 
   @Override
-  public Future<Boolean> update(
-      Map<String, Object> conditionMap, Map<String, Object> updateDataMap) {
+  public Future<T> update(Map<String, Object> conditionMap, Map<String, Object> updateDataMap) {
     Condition condition =
         conditionMap.entrySet().stream()
             .map(e -> new Condition(e.getKey(), Condition.Operator.EQUALS, List.of(e.getValue())))
@@ -154,12 +154,12 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
               if (!result.isRowsAffected()) {
                 return Future.failedFuture(new NoRowFoundException("No rows updated for"));
               }
-              return Future.succeededFuture(true);
+              return Future.succeededFuture(fromJson.apply(result.getRows().getJsonObject(0)));
             })
         .recover(
             err -> {
               LOGGER.error("Error updating  in {} : msg{}", tableName, err.getMessage(), err);
-              return Future.failedFuture(BaseDxException.from(err));
+              return Future.failedFuture(DxPgException.from(err));
             });
   }
 
