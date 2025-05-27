@@ -20,6 +20,8 @@ ENV JAR="iudx.auditing.server-cluster-${VERSION}-fat.jar"
 
 WORKDIR /usr/share/app
 
+COPY docs/openapi.yaml docs/apidoc.html docs/
+
 COPY iudx-pmd-ruleset.xml iudx-pmd-ruleset.xml
 COPY google_checks.xml google_checks.xml
 
