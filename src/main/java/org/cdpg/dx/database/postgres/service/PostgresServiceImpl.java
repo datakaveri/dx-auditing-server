@@ -142,14 +142,14 @@ public class PostgresServiceImpl implements PostgresService {
       int selectIndex = sql.toLowerCase().indexOf("select") + 6;
       sql =
           sql.substring(0, selectIndex)
-              + " COUNT(*) OVER() AS total_count,"
+              + " COUNT(*) OVER() AS total_result_count,"
               + sql.substring(selectIndex);
     }
     return executeQuery(sql, query.getQueryParams())
         .map(
             result -> {
               if (isCountQueryEnabled && !result.getRows().isEmpty()) {
-                int totalCount = result.getRows().getJsonObject(0).getInteger("total_count", 0);
+                int totalCount = result.getRows().getJsonObject(0).getInteger("total_result_count", 0);
                 result.setTotalCount(totalCount);
                 // Optionally, remove total_count from each row if not needed in the output
                 /*for (int i = 0; i < result.getRows().size(); i++) {
