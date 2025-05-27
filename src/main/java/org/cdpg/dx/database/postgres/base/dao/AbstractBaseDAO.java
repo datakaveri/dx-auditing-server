@@ -10,11 +10,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.common.exception.BaseDxException;
 import org.cdpg.dx.common.exception.NoRowFoundException;
 import org.cdpg.dx.database.postgres.base.entity.BaseEntity;
 import org.cdpg.dx.database.postgres.models.*;
 import org.cdpg.dx.database.postgres.service.PostgresService;
-import org.cdpg.dx.database.postgres.util.DxPgExceptionMapper;
 
 public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDAO<T> {
 
@@ -53,7 +53,7 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
         .recover(
             err -> {
               LOGGER.error("Error inserting to {}: msg: {}", tableName, err.getMessage(), err);
-              return Future.failedFuture(DxPgExceptionMapper.from(err));
+              return Future.failedFuture(BaseDxException.from(err));
             });
   }
 
@@ -64,7 +64,7 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
     SelectQuery query = new SelectQuery(tableName, List.of("*"), condition, null, null, null, null);
 
     return postgresService
-        .select(query,false)
+        .select(query)
         .compose(
             result -> {
               if (result.getRows().isEmpty()) {
@@ -80,7 +80,7 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
                   id,
                   err.getMessage(),
                   err);
-              return Future.failedFuture(DxPgExceptionMapper.from(err));
+              return Future.failedFuture(BaseDxException.from(err));
             });
   }
 
@@ -89,7 +89,7 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
     SelectQuery query = new SelectQuery(tableName, List.of("*"), null, null, null, null, null);
 
     return postgresService
-        .select(query, false)
+        .select(query)
         .compose(
             result -> {
               List<T> entities =
@@ -102,7 +102,7 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
             err -> {
               LOGGER.error(
                   "Error fetching all from: {}, msg: {}", tableName, err.getMessage(), err);
-              return Future.failedFuture(DxPgExceptionMapper.from(err));
+              return Future.failedFuture(BaseDxException.from(err));
             });
   }
 
@@ -117,7 +117,7 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
     SelectQuery query = new SelectQuery(tableName, List.of("*"), condition, null, null, null, null);
 
     return postgresService
-        .select(query,false)
+        .select(query)
         .compose(
             result -> {
               List<T> entities =
@@ -130,7 +130,7 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
             err -> {
               LOGGER.error(
                   "Error fetching all from: {}, msg: {}", tableName, err.getMessage(), err);
-              return Future.failedFuture(DxPgExceptionMapper.from(err));
+              return Future.failedFuture(BaseDxException.from(err));
             });
   }
 
@@ -159,7 +159,7 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
         .recover(
             err -> {
               LOGGER.error("Error updating  in {} : msg{}", tableName, err.getMessage(), err);
-              return Future.failedFuture(DxPgExceptionMapper.from(err));
+              return Future.failedFuture(BaseDxException.from(err));
             });
   }
 
@@ -184,7 +184,7 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
             err -> {
               LOGGER.error(
                   "Error deleting from {} with ID {}: msg{}", tableName, id, err.getMessage(), err);
-              return Future.failedFuture(DxPgExceptionMapper.from(err));
+              return Future.failedFuture(BaseDxException.from(err));
             });
   }
 }

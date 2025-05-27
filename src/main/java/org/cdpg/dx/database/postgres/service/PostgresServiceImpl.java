@@ -8,13 +8,15 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.database.postgres.models.*;
+import org.cdpg.dx.database.postgres.util.DxPgExceptionMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PostgresServiceImpl implements PostgresService {
-  private static final Logger LOG = LogManager.getLogger(PostgresServiceImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PostgresServiceImpl.class);
   private final Pool client;
 
   public PostgresServiceImpl(Pool client) {
@@ -78,11 +80,12 @@ public class PostgresServiceImpl implements PostgresService {
                 + ", value: "
                 + param);
 
-        if (param instanceof String paramStr) {
+        if (param instanceof String) {
+          String paramStr = (String) param;
 
           // Check if it's an ISO timestamp string
           if (paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$")
-              || paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{1,9}$")) {
+                  || paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{1,9}$")) {
             try {
               // Parse and
               // qconvert to LocalDateTime
@@ -106,16 +109,15 @@ public class PostgresServiceImpl implements PostgresService {
                 LOG.info("Query executed successfully.");
                 return convertToQueryResult(rowSet);
               })
-          .onFailure(
+          .recover(
               err -> {
                 LOG.error("SQL execution error: {}", err.getMessage());
-                err.printStackTrace();
+                return  Future.failedFuture(DxPgExceptionMapper.from(err));
               });
 
     } catch (Exception e) {
       LOG.error("Exception while building Tuple or executing query: {}", e.getMessage());
-      e.printStackTrace();
-      return Future.failedFuture("Error in PostgresServiceImpl: " + e.getMessage());
+      return Future.failedFuture(DxPgExceptionMapper.from(e));
     }
   }
 
@@ -135,28 +137,7 @@ public class PostgresServiceImpl implements PostgresService {
   }
 
   @Override
-  public Future<QueryResult> select(SelectQuery query, boolean isCountQueryEnabled) {
-    String sql = query.toSQL();
-    if (isCountQueryEnabled) {
-      // Insert COUNT(*) OVER() AS total_count into the select columns
-      int selectIndex = sql.toLowerCase().indexOf("select") + 6;
-      sql =
-          sql.substring(0, selectIndex)
-              + " COUNT(*) OVER() AS total_count,"
-              + sql.substring(selectIndex);
-    }
-    return executeQuery(sql, query.getQueryParams())
-        .map(
-            result -> {
-              if (isCountQueryEnabled && !result.getRows().isEmpty()) {
-                int totalCount = result.getRows().getJsonObject(0).getInteger("total_count", 0);
-                result.setTotalCount(totalCount);
-                // Optionally, remove total_count from each row if not needed in the output
-                /*for (int i = 0; i < result.getRows().size(); i++) {
-                  result.getRows().getJsonObject(i).remove("total_count");
-                }*/
-              }
-              return result;
-            });
+  public Future<QueryResult> select(SelectQuery query) {
+    return executeQuery(query.toSQL(), query.getQueryParams());
   }
 }
