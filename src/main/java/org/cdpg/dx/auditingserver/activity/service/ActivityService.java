@@ -3,6 +3,8 @@ package org.cdpg.dx.auditingserver.activity.service;
 import io.vertx.core.Future;
 import java.util.List;
 import java.util.UUID;
+
+import org.cdpg.dx.auditingserver.activity.model.Pagination;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLog;
 
 public interface ActivityService {
@@ -28,4 +30,6 @@ public interface ActivityService {
    * @return A Future containing the created activity log.
    */
   Future<Void> insertActivityLogIntoDb(ActivityLog activityLogEntity);
+
+  Future<Pagination<ActivityLog>> getAllWitPagination(int limit, int offset);
 }

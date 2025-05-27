@@ -3,6 +3,7 @@ package org.cdpg.dx.auditingserver.activity.dao;
 import io.vertx.core.Future;
 import java.util.List;
 import java.util.UUID;
+import org.cdpg.dx.auditingserver.activity.model.Pagination;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLog;
 import org.cdpg.dx.database.postgres.base.dao.BaseDAO;
 
@@ -14,4 +15,8 @@ public interface ActivityLogDao extends BaseDAO<ActivityLog> {
   Future<ActivityLog> createActivityLog(ActivityLog activityLogEntity);
 
   Future<List<ActivityLog>> getAllActivityLogsForAdmin();
+
+  Future<Pagination<ActivityLog>> getAllWitPagination(int offset, int limit);
+
+
 }

@@ -136,6 +136,7 @@ public class PostgresServiceImpl implements PostgresService {
 
   @Override
   public Future<QueryResult> select(SelectQuery query, boolean isCountQueryEnabled) {
+    LOG.info("Executing select query: {}", query.toSQL());
     String sql = query.toSQL();
     if (isCountQueryEnabled) {
       // Insert COUNT(*) OVER() AS total_count into the select columns

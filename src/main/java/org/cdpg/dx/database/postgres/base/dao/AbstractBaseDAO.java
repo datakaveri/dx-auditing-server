@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.auditingserver.activity.model.Pagination;
 import org.cdpg.dx.common.exception.BaseDxException;
 import org.cdpg.dx.common.exception.DxPgException;
 import org.cdpg.dx.common.exception.NoRowFoundException;
@@ -184,6 +185,32 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
             err -> {
               LOGGER.error(
                   "Error deleting from {} with ID {}: msg{}", tableName, id, err.getMessage(), err);
+              return Future.failedFuture(BaseDxException.from(err));
+            });
+  }
+
+  // todo: this is a temporary implementation, need to be replaced with proper pagination
+  public Future<Pagination<T>> getAllWithPagination() {
+    LOGGER.info("getAllWithPagination() called for table: {}", tableName);
+    SelectQuery query = new SelectQuery(tableName, List.of("*"), null, null, null, 10, 1);
+
+    return postgresService
+        .select(query, true)
+        .compose(
+            result -> {
+              List<T> entities =
+                  result.getRows().stream()
+                      .map(row -> fromJson.apply((JsonObject) row))
+                      .collect(Collectors.toList());
+              Pagination<T> pagination =
+                  new Pagination<>(5, 1, entities.size(), 100, true, true, entities);
+
+              return Future.succeededFuture(pagination);
+            })
+        .recover(
+            err -> {
+              LOGGER.error(
+                  "Error fetching all from: {}, msg: {}", tableName, err.getMessage(), err);
               return Future.failedFuture(BaseDxException.from(err));
             });
   }
