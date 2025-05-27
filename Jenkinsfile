@@ -42,7 +42,6 @@ pipeline {
           steps {
             script {
               docker.withRegistry( registryUri, registryCredential ) {
-                devImage.push("tgdex-5.6.0-${env.GIT_HASH}")
                 deplImage.push("tgdex-5.6.0-${env.GIT_HASH}")
               }
             }
