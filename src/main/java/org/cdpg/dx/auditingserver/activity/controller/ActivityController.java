@@ -1,6 +1,7 @@
 package org.cdpg.dx.auditingserver.activity.controller;
 
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
@@ -55,18 +56,22 @@ public class ActivityController implements ApiController {
 
   private void handleGetAllActivityLogsForAdmin(RoutingContext context) {
     LOGGER.info("handleGetAllActivityLogsForAdmin() started");
-
+      int offset = Integer.parseInt(context.request().getParam("offset"));
+        int limit = Integer.parseInt(context.request().getParam("limit"));
     activityService
-        .getAllActivityLogsForAdmin()
-        .onSuccess(
-            logs -> {
-              if (logs.isEmpty()) {
-                ResponseBuilder.sendNoContent(context);
-              } else {
-                LOGGER.info("Fetched activity logs successfully for admin");
-                ResponseBuilder.sendSuccess(context, logs);
-              }
-            })
+        .getAllWitPagination(offset,limit)
+                .onSuccess(pagination -> {
+                    LOGGER.info("Fetched activity logs successfully for admin");
+                    JsonObject response = new JsonObject()
+                        .put("page", pagination.page())
+                        .put("size", pagination.size())
+                        .put("totalCount", pagination.totalCount())
+                        .put("totalPages", pagination.totalPages())
+                        .put("hasNext", pagination.hasNext())
+                        .put("hasPrevious", pagination.hasPrevious())
+                        .put("result", mapActivityLogsToJsonArray(pagination.data())); // or .result() if you renamed the field
+                    ResponseBuilder.sendSuccess(context, response);
+                })
         .onFailure(
             failure -> {
               LOGGER.error("Failed to fetch activity logs: {}", failure.getMessage(), failure);

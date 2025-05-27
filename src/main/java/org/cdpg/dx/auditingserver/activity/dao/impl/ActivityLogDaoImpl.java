@@ -1,5 +1,6 @@
 package org.cdpg.dx.auditingserver.activity.dao.impl;
 
+
 import static org.cdpg.dx.auditingserver.activity.util.ActivityConstants.*;
 
 import io.vertx.core.Future;
@@ -10,6 +11,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.auditingserver.activity.model.Pagination;
 import org.cdpg.dx.auditingserver.activity.dao.ActivityLogDao;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLog;
 import org.cdpg.dx.database.postgres.base.dao.AbstractBaseDAO;
@@ -88,8 +90,47 @@ public class ActivityLogDaoImpl extends AbstractBaseDAO<ActivityLog> implements 
               return Future.failedFuture(DxPgExceptionMapper.from(err));
             });
   }
+    public Future<Pagination<ActivityLog>> getAllWitPagination(int offset, int limit) {
+        int size = limit > 0 ? limit : 10;
+        int page = (limit > 0) ? (offset / limit) + 1 : 1;
 
-  /**
+
+        SelectQuery query = new SelectQuery(
+                ACTIVITY_LOG_TABLE_NAME,
+                MINIMAL_COLUMNS,
+                null,
+                null,
+                null,
+                size,
+                offset
+        );
+
+        return postgresService.select(query, true)
+                .map(result -> {
+                    List<ActivityLog> data = mapToActivityLogs(result.getRows());
+
+                    long totalCount = result.getTotalCount();
+                    int totalPages = (int) Math.ceil((double) totalCount / size);
+                    boolean hasNext = page < totalPages;
+                    boolean hasPrevious = page > 1;
+
+                    return new Pagination<>(
+                            page,
+                            size,
+                            totalCount,
+                            totalPages,
+                            hasNext,
+                            hasPrevious,
+                            data
+                    );
+                })
+                .recover(err -> {
+                    LOGGER.error("Error fetching paginated activity logs: {}", err.getMessage(), err);
+                    return Future.failedFuture(DxPgExceptionMapper.from(err));
+                });
+    }
+
+    /**
    * Maps a JsonArray of rows to a List of ActivityLog objects.
    *
    * @param rows The JsonArray containing the rows to be mapped.
