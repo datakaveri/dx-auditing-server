@@ -31,5 +31,5 @@ public interface ActivityService {
    */
   Future<Void> insertActivityLogIntoDb(ActivityLog activityLogEntity);
 
-  Future<Pagination<ActivityLog>> getAllWitPagination(int limit, int offset);
+  public Future<Pagination<ActivityLog>> getAllWitPagination(int limit, int offset);
 }

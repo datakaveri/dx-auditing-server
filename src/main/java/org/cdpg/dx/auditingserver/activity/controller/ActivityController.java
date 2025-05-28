@@ -10,6 +10,7 @@ import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLog;
+import org.cdpg.dx.auditingserver.activity.model.ActivityLogAdminResponse;
 import org.cdpg.dx.auditingserver.activity.service.ActivityService;
 import org.cdpg.dx.auditingserver.apiserver.ApiController;
 import org.cdpg.dx.common.response.ResponseBuilder;
@@ -24,14 +25,16 @@ public class ActivityController implements ApiController {
 
   @Override
   public void register(RouterBuilder builder) {
-    builder.operation("get-ActivityLogs-for-consumer-user").handler(this::handleGetAllActivityLogs);
+    builder
+        .operation("get-ActivityLogs-for-consumer-user")
+        .handler(this::handleGetAllActivityLogsForUser);
     builder
         .operation("get-activityLogs-for-admin-user")
         .handler(this::handleGetAllActivityLogsForAdmin);
   }
 
-  private void handleGetAllActivityLogs(RoutingContext context) {
-    LOGGER.info("handleGetAllActivityLogs() started");
+  private void handleGetAllActivityLogsForUser(RoutingContext context) {
+    LOGGER.info("handleGetAllActivityLogsForUser() started");
 
     User user = context.user();
     UUID userId = UUID.fromString(user.subject());
@@ -56,22 +59,15 @@ public class ActivityController implements ApiController {
 
   private void handleGetAllActivityLogsForAdmin(RoutingContext context) {
     LOGGER.info("handleGetAllActivityLogsForAdmin() started");
-      int offset = Integer.parseInt(context.request().getParam("offset"));
-        int limit = Integer.parseInt(context.request().getParam("limit"));
+    int offset = Integer.parseInt(context.request().getParam("offset"));
+    int limit = Integer.parseInt(context.request().getParam("limit"));
     activityService
-        .getAllWitPagination(offset,limit)
-                .onSuccess(pagination -> {
-                    LOGGER.info("Fetched activity logs successfully for admin");
-                    JsonObject response = new JsonObject()
-                        .put("page", pagination.page())
-                        .put("size", pagination.size())
-                        .put("totalCount", pagination.totalCount())
-                        .put("totalPages", pagination.totalPages())
-                        .put("hasNext", pagination.hasNext())
-                        .put("hasPrevious", pagination.hasPrevious())
-                        .put("result", mapActivityLogsToJsonArray(pagination.data())); // or .result() if you renamed the field
-                    ResponseBuilder.sendSuccess(context, response);
-                })
+        .getAllWitPagination(limit, offset)
+            .onSuccess(pagination -> {
+                ActivityLogAdminResponse<ActivityLog> response =
+                        new ActivityLogAdminResponse<>(pagination);
+                ResponseBuilder.sendSuccess(context, response);
+            })
         .onFailure(
             failure -> {
               LOGGER.error("Failed to fetch activity logs: {}", failure.getMessage(), failure);

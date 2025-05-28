@@ -13,7 +13,7 @@ import org.cdpg.dx.auditingserver.activity.service.ActivityService;
 public class AuditMessageConsumer implements RabitMqConsumer {
 
   private static final Logger LOGGER = LogManager.getLogger(AuditMessageConsumer.class);
-  private static final String QUEUE_NAME = "test-auditing";
+  private static final String QUEUE_NAME = "auditing-messages";
   private final RabbitMQClient rabbitMqClient;
   private final ActivityService activityService;
   private final QueueOptions options =

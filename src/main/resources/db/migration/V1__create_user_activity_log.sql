@@ -39,7 +39,8 @@ CREATE TABLE IF NOT EXISTS user_activity_log (
     role user_role NOT NULL,
     user_id UUID NOT NULL,
     origin_server origin_system NOT NULL,
-    myactivity_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    myactivity_enabled BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-GRANT SELECT, INSERT ON TABLE user_activity_log TO  ${rsUser};;
+-- Grant access
+GRANT SELECT, INSERT ON TABLE user_activity_log TO ${auditUser};
