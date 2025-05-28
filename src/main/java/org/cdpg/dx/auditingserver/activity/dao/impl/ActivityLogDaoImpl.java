@@ -5,6 +5,7 @@ import static org.cdpg.dx.auditingserver.activity.util.ActivityConstants.*;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -12,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.auditingserver.activity.dao.ActivityLogDao;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLog;
+import org.cdpg.dx.auditingserver.activity.model.ActivityLogAdminRequest;
 import org.cdpg.dx.auditingserver.activity.model.Pagination;
 import org.cdpg.dx.database.postgres.base.dao.AbstractBaseDAO;
 import org.cdpg.dx.database.postgres.models.Condition;
@@ -31,7 +33,12 @@ public class ActivityLogDaoImpl extends AbstractBaseDAO<ActivityLog> implements 
   }
 
   @Override
-  public Future<List<ActivityLog>> getAllActivityLogsByUserId(UUID userId) {
+  public Future<Pagination<ActivityLog>> getAllActivityLogsByUserId(
+      UUID userId, int limit, int offset) {
+
+    int size = limit > 0 ? limit : 10;
+    int page = (limit > 0) ? (offset / limit) + 1 : 1;
+
     Condition condition =
         new Condition(USER_ID, Condition.Operator.EQUALS, List.of(userId.toString()));
 
@@ -39,22 +46,22 @@ public class ActivityLogDaoImpl extends AbstractBaseDAO<ActivityLog> implements 
         new SelectQuery(ACTIVITY_LOG_TABLE_NAME, List.of("*"), condition, null, null, null, null);
 
     return postgresService
-        .select(query, false)
-        .compose(
+        .select(query, true)
+        .map(
             result -> {
-              List<ActivityLog> entities = mapToActivityLogs(result.getRows());
-              LOGGER.debug("Fetched {} rows for userId {}", entities.size(), userId);
+              List<ActivityLog> data = mapToActivityLogs(result.getRows());
 
-              return Future.succeededFuture(entities);
+              long totalCount = result.getTotalCount();
+              int totalPages = (int) Math.ceil((double) totalCount / size);
+              boolean hasNext = page < totalPages;
+              boolean hasPrevious = page > 1;
+
+              return new Pagination<>(
+                  page, size, totalCount, totalPages, hasNext, hasPrevious, data);
             })
         .recover(
             err -> {
-              LOGGER.error(
-                  "Error fetching activity logs for user ID {} from {}: {}",
-                  userId,
-                  tableName,
-                  err.getMessage(),
-                  err);
+              LOGGER.error("Error fetching paginated activity logs: {}", err.getMessage(), err);
               return Future.failedFuture(DxPgExceptionMapper.from(err));
             });
   }
@@ -65,27 +72,62 @@ public class ActivityLogDaoImpl extends AbstractBaseDAO<ActivityLog> implements 
   }
 
   @Override
-  public Future<List<ActivityLog>> getAllActivityLogsForAdmin() {
+  public Future<Pagination<ActivityLog>> getAllActivityLogsForAdmin(ActivityLogAdminRequest req) {
     LOGGER.info("getAllActivityLogsForAdmin() called");
 
-    SelectQuery query =
-        new SelectQuery(ACTIVITY_LOG_TABLE_NAME, MINIMAL_COLUMNS, null, null, null, null, null);
+    int limit = req.getLimit();
+    int offset = req.getOffset();
 
+    int size = limit > 0 ? limit : 10;
+    int page = (limit > 0) ? (offset / limit) + 1 : 1;
+
+    List<Condition> conditions = new ArrayList<>();
+
+    if (req.getUserId() != null) {
+      conditions.add(
+          new Condition(USER_ID, Condition.Operator.EQUALS, List.of(req.getUserId().toString())));
+    }
+    if (req.getStartTime() != null) {
+      conditions.add(
+          new Condition(
+              CREATED_AT, Condition.Operator.GREATER_EQUALS, List.of(req.getStartTime())));
+    }
+    if (req.getEndTime() != null) {
+      conditions.add(
+          new Condition(CREATED_AT, Condition.Operator.LESS_EQUALS, List.of(req.getEndTime())));
+    }
+
+    Condition finalCondition =
+        conditions.isEmpty() ? null : new Condition(conditions, Condition.LogicalOperator.AND);
+
+    LOGGER.debug("finalCondition: {}", finalCondition);
+
+    SelectQuery query =
+        new SelectQuery(
+            ACTIVITY_LOG_TABLE_NAME, MINIMAL_COLUMNS, finalCondition, null, null, limit, offset);
+
+    LOGGER.debug("column:: {}", query.getColumns());
+    LOGGER.debug("params:: {}", query.getQueryParams());
+    /* SelectQuery query =
+            new SelectQuery(ACTIVITY_LOG_TABLE_NAME, MINIMAL_COLUMNS, null, null, null, null, null);
+    */
     return postgresService
-        .select(query, false)
-        .compose(
+        .select(query, true)
+        .map(
             result -> {
-              List<ActivityLog> entities = mapToActivityLogs(result.getRows());
-              LOGGER.debug("Fetched {} activity logs for admin", entities.size());
-              return Future.succeededFuture(entities);
+              List<ActivityLog> data = mapToActivityLogs(result.getRows());
+
+              long totalCount = result.getTotalCount();
+              int totalPages = (int) Math.ceil((double) totalCount / size);
+              boolean hasNext = page < totalPages;
+              boolean hasPrevious = page > 1;
+
+              return new Pagination<>(
+                  page, size, totalCount, totalPages, hasNext, hasPrevious, data);
             })
         .recover(
             err -> {
-              LOGGER.error(
-                  "Error fetching activity logs for admin from {}: {}",
-                  tableName,
-                  err.getMessage(),
-                  err);
+              LOGGER.error("Error fetching paginated activity logs: {}", err.getMessage(), err);
               return Future.failedFuture(DxPgExceptionMapper.from(err));
             });
   }
