@@ -36,7 +36,7 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   public Future<Pagination<ActivityLog>> getAllWitPagination(int limit, int offset) {
     return activityLogDAO
-        .getAllWithPagination()
+        .getAllWitPagination(limit, offset)
         .compose(
             pagination -> {
               List<ActivityLog> logs = pagination.data();
