@@ -52,15 +52,20 @@ paths:
   /dx/auditing/reportactivity/admin:
     get:
       operationId: get-admin-report
-      summary: Get Csv of activity logs
+      summary: Admin Report
       description: Csv file for a list of activity logs for admin.
+      parameters:
+        - name: Authorization
+          in: header
+          description: A <b> valid data exchange Auth token(starting with Bearer) </b> to process the request. <br/> This field is <b> mandatory </b> for accessing a <b> resource </b> .  <br/> If not provided with a valid token, user will be responded with <b> 401 Unauthorized </b> .
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Csv file generation Success. (send file data)
-        '204':
-          description: No content. No activity logs found.
         '400':
-          description: Bad request. Invalid parameters / Too Many files to write.
+          description: Bad request. No data available for CSV generation/Too many records.
         '401':
           description: Unauthorized. Token is required.
         '500':
@@ -69,15 +74,27 @@ paths:
   /dx/auditing/reportactivity/consumer:
     get:
       operationId: get-consumer-report
-      summary: Get Csv of activity logs
+      summary: Consumer Report
       description: Csv file for a list of activity logs for consumer.
+      parameters:
+        - name: userid
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier for the user.
+        - name: Authorization
+          in: header
+          description: A <b> valid data exchange Auth token(starting with Bearer) </b> to process the request. <br/> This field is <b> mandatory </b> for accessing a <b> resource </b> .  <br/> If not provided with a valid token, user will be responded with <b> 401 Unauthorized </b> .
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Csv file generation Success. (send file data)
-        '204':
-          description: No content. No activity logs found.
         '400':
-            description: Bad request. Invalid parameters / Too Many files to write.
+          description: Bad request. No data available for CSV generation/Too many records.
         '401':
           description: Unauthorized. Token is required.
         '500':

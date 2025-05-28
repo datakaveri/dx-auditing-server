@@ -8,8 +8,8 @@ import org.cdpg.dx.auditingserver.report.service.impl.ReportServiceImpl;
 import org.cdpg.dx.database.postgres.service.PostgresService;
 
 public class ReportFactory {
-  public static ReportService create(PostgresService postgresService, Vertx vertx) {
-    ActivityLogDao activityLogDao = new ActivityLogDaoImpl(postgresService);
-    return new ReportServiceImpl(activityLogDao);
+  public static ReportService create(PostgresService pgService, Vertx vertx) {
+    ActivityLogDao activityLogDao = new ActivityLogDaoImpl(pgService);
+    return new ReportServiceImpl(activityLogDao, vertx);
   }
 }

@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.auditingserver.report.dao.ActivityLogDao;
 import org.cdpg.dx.auditingserver.report.model.ActivityLog;
+import org.cdpg.dx.auditingserver.report.model.ReportMetaData;
 import org.cdpg.dx.database.postgres.base.dao.AbstractBaseDAO;
 import org.cdpg.dx.database.postgres.models.Condition;
 import org.cdpg.dx.database.postgres.models.SelectQuery;
@@ -28,21 +29,15 @@ public class ActivityLogDaoImpl extends AbstractBaseDAO<ActivityLog> implements 
   }
 
   @Override
-  public Future<List<ActivityLog>> getCsvGeneratedByUserId(UUID userId) {
-    Condition condition =
-        new Condition(USER_ID, Condition.Operator.EQUALS, List.of(userId.toString()));
-
+  public Future<ReportMetaData> getCsvGenerateForAdmin(int limit, int offset) {
     SelectQuery query =
-        new SelectQuery(ACTIVITY_LOG_TABLE_NAME, List.of("*"), condition, null, null, null, null);
-
+        new SelectQuery(ACTIVITY_LOG_TABLE_NAME, List.of("*"), null, null, null, limit, offset);
     return postgresService
         .select(query, true)
         .compose(
             result -> {
-              LOGGER.trace("total counts :: " + result.getTotalCount());
               List<ActivityLog> entities = mapToActivityLogs(result.getRows());
-              LOGGER.debug("Fetched {} activity logs for csv", entities.size());
-              return Future.succeededFuture(entities);
+              return Future.succeededFuture(new ReportMetaData(entities, result.getTotalCount()));
             })
         .recover(
             err -> {
@@ -56,17 +51,51 @@ public class ActivityLogDaoImpl extends AbstractBaseDAO<ActivityLog> implements 
   }
 
   @Override
-  public Future<List<ActivityLog>> getCsvGenerateForAdmin() {
+  public Future<ReportMetaData> getCsvGenerateForConsumer(UUID userId, int limit, int offset) {
+    Condition condition =
+        new Condition(USER_ID, Condition.Operator.EQUALS, List.of(userId.toString()));
     SelectQuery query =
-        new SelectQuery(ACTIVITY_LOG_TABLE_NAME, List.of("*"), null, null, null, null, null);
+        new SelectQuery(
+            ACTIVITY_LOG_TABLE_NAME, List.of("*"), condition, null, null, limit, offset);
 
     return postgresService
         .select(query, true)
         .compose(
             result -> {
-              LOGGER.trace("total counts :: " + result.getTotalCount());
               List<ActivityLog> entities = mapToActivityLogs(result.getRows());
-              LOGGER.debug("Fetched {} activity logs for csv", entities.size());
+              return Future.succeededFuture(new ReportMetaData(entities, result.getTotalCount()));
+            })
+        .recover(
+            err -> {
+              LOGGER.error(
+                  "Error fetching activity logs for csv from {}: {}",
+                  tableName,
+                  err.getMessage(),
+                  err);
+              return Future.failedFuture(DxPgExceptionMapper.from(err));
+            });
+  }
+
+  public Future<List<ActivityLog>> getCsvGeneratedByPaginated(
+      int limit, int offset, String userId) {
+    SelectQuery query;
+    if (userId == null || userId.isEmpty()) {
+      query =
+          new SelectQuery(ACTIVITY_LOG_TABLE_NAME, List.of("*"), null, null, null, limit, offset);
+    } else {
+      Condition condition = new Condition(USER_ID, Condition.Operator.EQUALS, List.of(userId));
+      query =
+          new SelectQuery(
+              ACTIVITY_LOG_TABLE_NAME, List.of("*"), condition, null, null, limit, offset);
+    }
+    return postgresService
+        .select(query, false)
+        .compose(
+            result -> {
+              List<ActivityLog> entities = mapToActivityLogs(result.getRows());
+              LOGGER.debug(
+                  "Record will be fetched  in batch of {} from activity logs for csv",
+                  entities.size());
               return Future.succeededFuture(entities);
             })
         .recover(
