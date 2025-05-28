@@ -1,11 +1,13 @@
-package org.cdpg.dx.auditingserver.activity.model;
+package org.cdpg.dx.auditingserver.report.model;
+
+import static org.cdpg.dx.auditingserver.report.util.ActivityConstants.ACTIVITY_LOG_TABLE_NAME;
 
 import io.vertx.core.json.JsonObject;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.cdpg.dx.auditingserver.activity.util.ActivityConstants;
+import org.cdpg.dx.auditingserver.report.util.ActivityConstants;
 import org.cdpg.dx.common.util.DateTimeHelper;
 import org.cdpg.dx.database.postgres.base.entity.BaseEntity;
 import org.cdpg.dx.database.postgres.util.EntityUtil;
@@ -24,7 +26,7 @@ public record ActivityLog(
     UUID userId,
     String originServer,
     Boolean myactivityEnabled)
-    implements BaseEntity<ActivityLog>  {
+    implements BaseEntity<ActivityLog> {
 
   public static ActivityLog fromJson(JsonObject json) {
     return new ActivityLog(
@@ -77,18 +79,17 @@ public record ActivityLog(
     putIfNonEmpty(json, ActivityConstants.ROLE, role);
     putIfNonEmpty(json, ActivityConstants.USER_ID, userId.toString());
     putIfNonEmpty(json, ActivityConstants.ORIGIN_SERVER, originServer);
-    putIfNonEmpty(json, ActivityConstants.MYACTIVITY_ENABLED, myactivityEnabled);
     return json;
   }
 
   private <T> void putIfNonEmpty(JsonObject json, String key, T value) {
     if (value != null) {
-      json.put(key, value);
+      json.put(key, value.toString());
     }
   }
 
   @Override
   public String getTableName() {
-    return "";
+    return ACTIVITY_LOG_TABLE_NAME;
   }
 }

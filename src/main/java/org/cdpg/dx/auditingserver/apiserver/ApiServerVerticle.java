@@ -1,15 +1,20 @@
 package org.cdpg.dx.auditingserver.apiserver;
 
-//import static org.cdpg.dx.auditingserver.apiserver.config.ApiConstants.*;
+// import static org.cdpg.dx.auditingserver.apiserver.config.ApiConstants.*;
 
+import static org.cdpg.dx.util.Constants.*;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.jackson.DatabindCodec;
 import io.vertx.core.net.KeyStoreOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Route;
@@ -21,210 +26,200 @@ import io.vertx.ext.web.handler.TimeoutHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
 import io.vertx.serviceproxy.HelperUtils;
-
 import java.util.List;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.cdpg.dx.auditingserver.apiserver.ApiController;
-import org.cdpg.dx.auditingserver.apiserver.ControllerFactory;
 import org.cdpg.dx.auth.authentication.handler.KeycloakJwtAuthHandler;
 import org.cdpg.dx.auth.authentication.provider.JwtAuthProvider;
 import org.cdpg.dx.common.FailureHandler;
 import org.cdpg.dx.common.HttpStatusCode;
 
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import io.vertx.core.json.jackson.DatabindCodec;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
-import static org.cdpg.dx.util.Constants.*;
-
 public class ApiServerVerticle extends AbstractVerticle {
-    private static final Logger LOGGER = LogManager.getLogger(ApiServerVerticle.class);
-    private int port;
-    private HttpServer server;
-    private Router router;
+  private static final Logger LOGGER = LogManager.getLogger(ApiServerVerticle.class);
+  private int port;
+  private HttpServer server;
+  private Router router;
 
-    public static String errorResponse(HttpStatusCode code) {
-        return new JsonObject()
-                .put("type", code.getUrn())
-                .put("title", code.getDescription())
-                .put("detail", code.getDescription())
-                .toString();
-    }
+  public static String errorResponse(HttpStatusCode code) {
+    return new JsonObject()
+        .put("type", code.getUrn())
+        .put("title", code.getDescription())
+        .put("detail", code.getDescription())
+        .toString();
+  }
 
-    @Override
-    public void start() {
-        port = config().getInteger("httpPort", 8443);
-        // Register the module for default Vert.x ObjectMapper
-        ObjectMapper mapper = DatabindCodec.mapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+  @Override
+  public void start() {
+    port = config().getInteger("httpPort", 8443);
+      ObjectMapper mapper = DatabindCodec.mapper();
+      mapper.registerModule(new JavaTimeModule());
+      mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+      mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY); // Exclude null & empty
 
-        ObjectMapper prettyMapper = DatabindCodec.prettyMapper();
-        prettyMapper.registerModule(new JavaTimeModule());
-        prettyMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+      // Optionally, configure custom pretty mapper if needed
+      ObjectMapper prettyMapper = mapper.copy();
+      prettyMapper.enable(SerializationFeature.INDENT_OUTPUT); // pretty-printing
 
 
-        Future<RouterBuilder> routerFuture = RouterBuilder.create(vertx, "docs/openapi.yaml");
-        Future<JWTAuth> authFuture = JwtAuthProvider.init(vertx, config());
+      Future<RouterBuilder> routerFuture = RouterBuilder.create(vertx, "docs/openapi.yaml");
+    Future<JWTAuth> authFuture = JwtAuthProvider.init(vertx, config());
 
-        List<ApiController> controllers = ControllerFactory.createControllers(vertx, config());
+    List<ApiController> controllers = ControllerFactory.createControllers(vertx, config());
 
-        Future.all(routerFuture, authFuture)
-                .onSuccess(cf -> {
-                    RouterBuilder routerBuilder = cf.resultAt(0);
-                    JWTAuth jwtAuth = cf.resultAt(1);
-                    AuthenticationHandler authHandler = new KeycloakJwtAuthHandler(jwtAuth);
-                    try {
+    Future.all(routerFuture, authFuture)
+        .onSuccess(
+            cf -> {
+              RouterBuilder routerBuilder = cf.resultAt(0);
+              JWTAuth jwtAuth = cf.resultAt(1);
+              AuthenticationHandler authHandler = new KeycloakJwtAuthHandler(jwtAuth);
+              try {
 
-                        LOGGER.debug("Adding platform handlers...");
-                        int timeout = config().getInteger("timeout", 100000); // Configurable timeout
-                        routerBuilder.rootHandler(TimeoutHandler.create(timeout, 408));
-                        routerBuilder.rootHandler(BodyHandler.create().setHandleFileUploads(false));
+                LOGGER.debug("Adding platform handlers...");
+                int timeout = config().getInteger("timeout", 100000); // Configurable timeout
+                routerBuilder.rootHandler(TimeoutHandler.create(timeout, 408));
+                routerBuilder.rootHandler(BodyHandler.create().setHandleFileUploads(false));
 
-                        LOGGER.debug("Registering controllers...");
-                        RouterBuilderOptions factoryOptions =
-                                new RouterBuilderOptions().setMountResponseContentTypeHandler(true);
-                        routerBuilder.setOptions(factoryOptions);
-                        routerBuilder.securityHandler("authorization", authHandler);
+                LOGGER.debug("Registering controllers...");
+                RouterBuilderOptions factoryOptions =
+                    new RouterBuilderOptions().setMountResponseContentTypeHandler(true);
+                routerBuilder.setOptions(factoryOptions);
+                routerBuilder.securityHandler("authorization", authHandler);
 
-                        controllers.forEach(controller -> controller.register(routerBuilder));
+                controllers.forEach(controller -> controller.register(routerBuilder));
 
-                        LOGGER.debug("Creating router...");
-                        router = routerBuilder.createRouter();
+                LOGGER.debug("Creating router...");
+                router = routerBuilder.createRouter();
 
-                        LOGGER.debug("Configuring CORS and error handlers...");
-                        configureCorsHandler(routerBuilder);
-                        putCommonResponseHeaders();
-                        configureFailureHandler(router);
-                        configureErrorHandlers(router);
+                LOGGER.debug("Configuring CORS and error handlers...");
+                configureCorsHandler(routerBuilder);
+                putCommonResponseHeaders();
+                configureErrorHandlers(router);
+                configureFailureHandler(router);
 
-                        LOGGER.debug("Starting HTTP server...");
-                        HttpServerOptions serverOptions = new HttpServerOptions();
+                LOGGER.debug("Starting HTTP server...");
+                HttpServerOptions serverOptions = new HttpServerOptions();
 
-                        /* Documentation routes */
-                        router
-                                .get(ROUTE_STATIC_SPEC)
-                                .produces(APPLICATION_JSON)
-                                .handler(
-                                        routingContext -> {
-                                            HttpServerResponse response = routingContext.response();
-                                            response.sendFile("docs/openapi.yaml");
-                                        });
-                        router
-                                .get(ROUTE_DOC)
-                                .produces("text/html")
-                                .handler(
-                                        routingContext -> {
-                                            HttpServerResponse response = routingContext.response();
-                                            response.sendFile("docs/apidoc.html");
-                                        });
-                        setServerOptions(serverOptions);
-                        server = vertx.createHttpServer(serverOptions);
-                        server
-                                .requestHandler(router)
-                                .listen(
-                                        port,
-                                        http -> {
-                                            if (http.succeeded()) {
-                                                printDeployedEndpoints(router);
-                                                LOGGER.info("ApiServerVerticle  deployed on port: {}", port);
-                                            } else {
-                                                LOGGER.error(
-                                                        "HTTP server failed to start: {}",
-                                                        http.cause().getMessage(),
-                                                        http.cause());
-                                            }
-                                        });
-                    } catch (Exception e) {
-                        LOGGER.error(
-                                "Error during router creation or server startup: {}", e.getMessage(), e);
-                    }
-                })
-                .onFailure(
-                        failure -> {
-                            LOGGER.error(
-                                    "Failed to create RouterBuilder from OpenAPI spec: {}",
-                                    failure.getMessage(),
-                                    failure);
+                /* Documentation routes */
+                router
+                    .get(ROUTE_STATIC_SPEC)
+                    .produces(APPLICATION_JSON)
+                    .handler(
+                        routingContext -> {
+                          HttpServerResponse response = routingContext.response();
+                          response.sendFile("docs/openapi.yaml");
                         });
-    }
-
-    private void configureCorsHandler(RouterBuilder routerBuilder) {
-        routerBuilder.rootHandler(
-                CorsHandler.create().allowedHeaders(ALLOWED_HEADERS).allowedMethods(ALLOWED_METHODS));
-    }
-
-    private void putCommonResponseHeaders() {
-        router
-                .route()
-                .handler(
-                        ctx -> {
-                            ctx.response()
-                                    .putHeader("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0")
-                                    .putHeader("Pragma", "no-cache")
-                                    .putHeader("Expires", "0")
-                                    .putHeader("X-Content-Type-Options", "nosniff");
-                            ctx.next();
+                router
+                    .get(ROUTE_DOC)
+                    .produces("text/html")
+                    .handler(
+                        routingContext -> {
+                          HttpServerResponse response = routingContext.response();
+                          response.sendFile("docs/apidoc.html");
                         });
-    }
-
-    private void configureErrorHandlers(Router router) {
-
-        router.errorHandler(
-                401,
-                ctx -> {
-                    HttpServerResponse response = ctx.response();
-                    if (response.headWritten()) {
-                        try {
-                            response.reset();
-                        } catch (RuntimeException e) {
+                setServerOptions(serverOptions);
+                server = vertx.createHttpServer(serverOptions);
+                server
+                    .requestHandler(router)
+                    .listen(
+                        port,
+                        http -> {
+                          if (http.succeeded()) {
+                            printDeployedEndpoints(router);
+                            LOGGER.info("ApiServerVerticle  deployed on port: {}", port);
+                          } else {
                             LOGGER.error(
-                                    "Failed to reset response: {}", HelperUtils.convertStackTrace(e).encode());
-                        }
-                        return;
-                    }
-                    response
-                            .setStatusCode(401)
-                            .putHeader(CONTENT_TYPE, APPLICATION_JSON)
-                            .end("not implemented");
-                });
-    }
+                                "HTTP server failed to start: {}",
+                                http.cause().getMessage(),
+                                http.cause());
+                          }
+                        });
+              } catch (Exception e) {
+                LOGGER.error(
+                    "Error during router creation or server startup: {}", e.getMessage(), e);
+              }
+            })
+        .onFailure(
+            failure -> {
+              LOGGER.error(
+                  "Failed to create RouterBuilder from OpenAPI spec: {}",
+                  failure.getMessage(),
+                  failure);
+            });
+  }
 
-    private void setServerOptions(HttpServerOptions serverOptions) {
-        boolean isSsl = config().getBoolean("ssl", false);
-        if (isSsl) {
-            LOGGER.info("Info: Starting HTTPs server");
-            String keystore = config().getString("keystore");
-            String keystorePassword = config().getString("keystorePassword");
-            serverOptions
-                    .setSsl(true)
-                    .setKeyCertOptions(new KeyStoreOptions().setPath(keystore).setPassword(keystorePassword));
-        } else {
-            LOGGER.info("Info: Starting HTTP server");
-            serverOptions.setSsl(false);
-        }
-    }
+  private void configureCorsHandler(RouterBuilder routerBuilder) {
+    routerBuilder.rootHandler(
+        CorsHandler.create().allowedHeaders(ALLOWED_HEADERS).allowedMethods(ALLOWED_METHODS));
+  }
 
-    private void configureFailureHandler(Router router) {
-        router.route().failureHandler(new FailureHandler());
-    }
+  private void putCommonResponseHeaders() {
+    router
+        .route()
+        .handler(
+            ctx -> {
+              ctx.response()
+                  .putHeader("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0")
+                  .putHeader("Pragma", "no-cache")
+                  .putHeader("Expires", "0")
+                  .putHeader("X-Content-Type-Options", "nosniff");
+              ctx.next();
+            });
+  }
 
-    private void printDeployedEndpoints(Router router) {
-        for (Route route : router.getRoutes()) {
-            if (route.getPath() != null) {
-                LOGGER.info("Deployed endpoint [{}] {}", route.methods(), route.getPath());
+  private void configureErrorHandlers(Router router) {
+    for (HttpStatusCode code : HttpStatusCode.values()) {
+      router.errorHandler(
+          code.getValue(),
+          ctx -> {
+            HttpServerResponse response = ctx.response();
+            if (response.headWritten()) {
+              try {
+                response.reset();
+              } catch (RuntimeException e) {
+                LOGGER.error(
+                    "Failed to reset response: {}", HelperUtils.convertStackTrace(e).encode());
+              }
+              return;
             }
-        }
+            response
+                .setStatusCode(code.getValue())
+                .putHeader(CONTENT_TYPE, APPLICATION_JSON)
+                .end(errorResponse(code));
+          });
     }
+  }
 
-    @Override
-    public void stop() {
-        if (server != null) {
-            server.close();
-        }
+  private void setServerOptions(HttpServerOptions serverOptions) {
+    boolean isSsl = config().getBoolean("ssl", false);
+    if (isSsl) {
+      LOGGER.info("Info: Starting HTTPs server");
+      String keystore = config().getString("keystore");
+      String keystorePassword = config().getString("keystorePassword");
+      serverOptions
+          .setSsl(true)
+          .setKeyCertOptions(new KeyStoreOptions().setPath(keystore).setPassword(keystorePassword));
+    } else {
+      LOGGER.info("Info: Starting HTTP server");
+      serverOptions.setSsl(false);
     }
+  }
+
+  private void configureFailureHandler(Router router) {
+    router.route().failureHandler(new FailureHandler());
+  }
+
+  private void printDeployedEndpoints(Router router) {
+    for (Route route : router.getRoutes()) {
+      if (route.getPath() != null) {
+        LOGGER.info("Deployed endpoint [{}] {}", route.methods(), route.getPath());
+      }
+    }
+  }
+
+  @Override
+  public void stop() {
+    if (server != null) {
+      server.close();
+    }
+  }
 }
