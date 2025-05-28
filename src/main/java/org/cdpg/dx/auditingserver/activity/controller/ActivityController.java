@@ -1,15 +1,13 @@
 package org.cdpg.dx.auditingserver.activity.controller;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
-import java.util.List;
 import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLog;
+import org.cdpg.dx.auditingserver.activity.model.ActivityLogAdminRequest;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLogAdminResponse;
 import org.cdpg.dx.auditingserver.activity.service.ActivityService;
 import org.cdpg.dx.auditingserver.apiserver.ApiController;
@@ -39,16 +37,20 @@ public class ActivityController implements ApiController {
     User user = context.user();
     UUID userId = UUID.fromString(user.subject());
 
+    String limitParam = context.request().getParam("limit");
+    int limit = (limitParam != null && !limitParam.isEmpty()) ? Integer.parseInt(limitParam) : 1000;
+
+    String offsetParam = context.request().getParam("offset");
+    int offset =
+        (offsetParam != null && !offsetParam.isEmpty()) ? Integer.parseInt(offsetParam) : 0;
+
     activityService
-        .getActivityLogByUserId(userId)
+        .getActivityLogByUserId(userId, limit, offset)
         .onSuccess(
-            logs -> {
-              if (logs.isEmpty()) {
-                ResponseBuilder.sendNoContent(context);
-              } else {
-                LOGGER.info("Fetched activity logs successfully for consumer user: {}", userId);
-                ResponseBuilder.sendSuccess(context, logs);
-              }
+            pagination -> {
+              ActivityLogAdminResponse<ActivityLog> response =
+                  new ActivityLogAdminResponse<>(pagination);
+              ResponseBuilder.sendSuccess(context, response);
             })
         .onFailure(
             failure -> {
@@ -59,25 +61,36 @@ public class ActivityController implements ApiController {
 
   private void handleGetAllActivityLogsForAdmin(RoutingContext context) {
     LOGGER.info("handleGetAllActivityLogsForAdmin() started");
-    int offset = Integer.parseInt(context.request().getParam("offset"));
-    int limit = Integer.parseInt(context.request().getParam("limit"));
+    UUID userId = null;
+    String userIdParam = context.request().getParam("userId");
+    if (userIdParam != null && !userIdParam.isEmpty()) {
+      userId = UUID.fromString(userIdParam);
+    }
+
+    String startTime = context.request().getParam("starttime");
+    String endTime = context.request().getParam("endtime");
+
+    String limitParam = context.request().getParam("limit");
+    int limit = (limitParam != null && !limitParam.isEmpty()) ? Integer.parseInt(limitParam) : 1000;
+
+    String offsetParam = context.request().getParam("offset");
+    int offset =
+        (offsetParam != null && !offsetParam.isEmpty()) ? Integer.parseInt(offsetParam) : 0;
+    ActivityLogAdminRequest activityLogAdminRequest =
+        new ActivityLogAdminRequest(userId, startTime, endTime, limit, offset);
+
     activityService
-        .getAllWitPagination(limit, offset)
-            .onSuccess(pagination -> {
-                ActivityLogAdminResponse<ActivityLog> response =
-                        new ActivityLogAdminResponse<>(pagination);
-                ResponseBuilder.sendSuccess(context, response);
+        .getAllActivityLogsForAdmin(activityLogAdminRequest)
+        .onSuccess(
+            pagination -> {
+              ActivityLogAdminResponse<ActivityLog> response =
+                  new ActivityLogAdminResponse<>(pagination);
+              ResponseBuilder.sendSuccess(context, response);
             })
         .onFailure(
             failure -> {
               LOGGER.error("Failed to fetch activity logs: {}", failure.getMessage(), failure);
               context.fail(failure);
             });
-  }
-
-  private JsonArray mapActivityLogsToJsonArray(List<ActivityLog> logs) {
-    return logs.stream()
-        .map(ActivityLog::toJson)
-        .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
   }
 }

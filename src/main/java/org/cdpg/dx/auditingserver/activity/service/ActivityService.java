@@ -1,11 +1,10 @@
 package org.cdpg.dx.auditingserver.activity.service;
 
 import io.vertx.core.Future;
-import java.util.List;
 import java.util.UUID;
-
-import org.cdpg.dx.auditingserver.activity.model.Pagination;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLog;
+import org.cdpg.dx.auditingserver.activity.model.ActivityLogAdminRequest;
+import org.cdpg.dx.auditingserver.activity.model.Pagination;
 
 public interface ActivityService {
   /**
@@ -14,14 +13,15 @@ public interface ActivityService {
    * @param userId The ID of the user for whom the activity log is to be fetched.
    * @return A Future containing the activity log for the specified user.
    */
-  Future<List<ActivityLog>> getActivityLogByUserId(UUID userId);
+  Future<Pagination<ActivityLog>> getActivityLogByUserId(UUID userId, int limit, int offset);
 
   /**
    * This method is used to get all activity logs for admin users.
    *
    * @return A Future containing a list of all activity logs.
    */
-  Future<List<ActivityLog>> getAllActivityLogsForAdmin();
+  Future<Pagination<ActivityLog>> getAllActivityLogsForAdmin(
+      ActivityLogAdminRequest activityLogAdminRequest);
 
   /**
    * This method is used to create a new activity log.

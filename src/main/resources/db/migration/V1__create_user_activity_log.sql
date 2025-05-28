@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS user_activity_log (
         'View', 'Download', 'Requested', 'MetaData Published', 'Databank Published',
         'MetaData Deleted', 'Databank Deleted', 'Model Deleted', 'App Deleted'
     )),
-    created_at TIMESTAMPTZ NOT NULL,
+    created_at timestamp without time zone NOT NULL,
     asset_id UUID NOT NULL,
     api VARCHAR NOT NULL,
     method http_method NOT NULL,

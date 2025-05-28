@@ -5,27 +5,30 @@ import java.util.List;
 import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.cdpg.dx.auditingserver.activity.model.Pagination;
 import org.cdpg.dx.auditingserver.activity.dao.ActivityLogDao;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLog;
+import org.cdpg.dx.auditingserver.activity.model.ActivityLogAdminRequest;
+import org.cdpg.dx.auditingserver.activity.model.Pagination;
 import org.cdpg.dx.auditingserver.activity.service.ActivityService;
 
 public class ActivityServiceImpl implements ActivityService {
   private static final Logger LOGGER = LogManager.getLogger(ActivityServiceImpl.class);
-  private ActivityLogDao activityLogDAO;
+  private final ActivityLogDao activityLogDAO;
 
   public ActivityServiceImpl(ActivityLogDao activityLogDAO) {
     this.activityLogDAO = activityLogDAO;
   }
 
   @Override
-  public Future<List<ActivityLog>> getActivityLogByUserId(UUID userId) {
-    return activityLogDAO.getAllActivityLogsByUserId(userId);
+  public Future<Pagination<ActivityLog>> getActivityLogByUserId(
+      UUID userId, int limit, int offset) {
+    return activityLogDAO.getAllActivityLogsByUserId(userId, limit, offset);
   }
 
   @Override
-  public Future<List<ActivityLog>> getAllActivityLogsForAdmin() {
-    return activityLogDAO.getAllActivityLogsForAdmin();
+  public Future<Pagination<ActivityLog>> getAllActivityLogsForAdmin(
+      ActivityLogAdminRequest activityLogAdminRequest) {
+    return activityLogDAO.getAllActivityLogsForAdmin(activityLogAdminRequest);
   }
 
   @Override
