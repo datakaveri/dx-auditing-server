@@ -10,7 +10,7 @@ END$$;
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
-    CREATE TYPE user_role AS ENUM ('CONSUMER', 'PROVIDER', 'COS_ADMIN', 'ORG_ADMIN', 'COMPUTE');
+    CREATE TYPE user_role AS ENUM ('consumer', 'provider', 'cos_admin', 'org_admin', 'compute');
   END IF;
 END$$;
 
@@ -26,11 +26,8 @@ END$$;
 CREATE TABLE IF NOT EXISTS user_activity_log (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
     asset_name VARCHAR NOT NULL,
-    asset_type VARCHAR(20) NOT NULL CHECK (asset_type IN ('Data Bank', 'Model', 'App')),
-    operation VARCHAR(30) NOT NULL CHECK (operation IN (
-        'View', 'Download', 'Requested', 'MetaData Published', 'Databank Published',
-        'MetaData Deleted', 'Databank Deleted', 'Model Deleted', 'App Deleted'
-    )),
+    asset_type VARCHAR(60) NOT NULL,
+    operation VARCHAR(60) NOT NULL,
     created_at timestamp without time zone NOT NULL,
     asset_id UUID NOT NULL,
     api VARCHAR NOT NULL,

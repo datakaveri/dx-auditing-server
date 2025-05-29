@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.cdpg.dx.auditingserver.activity.model.Pagination;
 import org.cdpg.dx.database.postgres.base.entity.BaseEntity;
+import org.cdpg.dx.database.postgres.models.PaginationInfo;
 
 public interface BaseDAO<T extends BaseEntity<T>> {
 
@@ -21,5 +22,10 @@ public interface BaseDAO<T extends BaseEntity<T>> {
 
   Future<T> get(UUID id);
 
-  Future<Pagination<T>> getAllWithPagination();
+  Future<Pagination<T>> get(UUID id, PaginationInfo paginationInfo);
+
+  Future<Pagination<T>> getAll(PaginationInfo paginationInfo);
+
+  Future<Pagination<T>> getAllWithFilters(
+      Map<String, Object> filters, PaginationInfo paginationInfo);
 }

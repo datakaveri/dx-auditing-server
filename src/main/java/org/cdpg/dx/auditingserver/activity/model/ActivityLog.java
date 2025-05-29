@@ -24,7 +24,7 @@ public record ActivityLog(
     UUID userId,
     String originServer,
     Boolean myactivityEnabled)
-    implements BaseEntity<ActivityLog>  {
+    implements BaseEntity<ActivityLog> {
 
   public static ActivityLog fromJson(JsonObject json) {
     return new ActivityLog(

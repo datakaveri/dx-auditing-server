@@ -140,7 +140,7 @@ public class DataBrokerVerticle extends AbstractVerticle {
 
     // *************************** Need only while deployment of auditing server uncomment line
     // 131-135 ***************************
-    auditConsumer = new AuditMessageConsumer(iudxInternalRabbitMqClient,activityService);
+    auditConsumer = new AuditMessageConsumer(iudxInternalRabbitMqClient, activityService);
     auditConsumer.start();
 
     dataBrokerService =

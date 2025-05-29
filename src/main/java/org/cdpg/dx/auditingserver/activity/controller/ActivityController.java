@@ -1,16 +1,22 @@
 package org.cdpg.dx.auditingserver.activity.controller;
 
+import static org.cdpg.dx.auditingserver.activity.validator.ActivityLogRequestValidator.validateAndExtractAdminActivityParams;
+
+import io.vertx.core.Handler;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
+import java.util.Optional;
 import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLog;
-import org.cdpg.dx.auditingserver.activity.model.ActivityLogAdminRequest;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLogAdminResponse;
+import org.cdpg.dx.auditingserver.activity.model.ActivityLogRequest;
 import org.cdpg.dx.auditingserver.activity.service.ActivityService;
 import org.cdpg.dx.auditingserver.apiserver.ApiController;
+import org.cdpg.dx.auth.authorization.handler.AuthorizationHandler;
+import org.cdpg.dx.auth.authorization.model.DxRole;
 import org.cdpg.dx.common.response.ResponseBuilder;
 
 public class ActivityController implements ApiController {
@@ -23,11 +29,18 @@ public class ActivityController implements ApiController {
 
   @Override
   public void register(RouterBuilder builder) {
+
+    Handler<RoutingContext> adminAccessHandler =
+        AuthorizationHandler.forRoles(DxRole.ORG_ADMIN, DxRole.ORG_ADMIN);
+    Handler<RoutingContext> consumerAccessHandler = AuthorizationHandler.forRoles(DxRole.CONSUMER);
+
     builder
         .operation("get-ActivityLogs-for-consumer-user")
+        .handler(consumerAccessHandler)
         .handler(this::handleGetAllActivityLogsForUser);
     builder
         .operation("get-activityLogs-for-admin-user")
+        .handler(adminAccessHandler)
         .handler(this::handleGetAllActivityLogsForAdmin);
   }
 
@@ -37,15 +50,11 @@ public class ActivityController implements ApiController {
     User user = context.user();
     UUID userId = UUID.fromString(user.subject());
 
-    String limitParam = context.request().getParam("limit");
-    int limit = (limitParam != null && !limitParam.isEmpty()) ? Integer.parseInt(limitParam) : 1000;
-
-    String offsetParam = context.request().getParam("offset");
-    int offset =
-        (offsetParam != null && !offsetParam.isEmpty()) ? Integer.parseInt(offsetParam) : 0;
+    Optional<ActivityLogRequest> optReq = validateAndExtractAdminActivityParams(context, userId);
+    if (optReq.isEmpty()) return;
 
     activityService
-        .getActivityLogByUserId(userId, limit, offset)
+        .getActivityLogByUserId(optReq.get())
         .onSuccess(
             pagination -> {
               ActivityLogAdminResponse<ActivityLog> response =
@@ -61,26 +70,11 @@ public class ActivityController implements ApiController {
 
   private void handleGetAllActivityLogsForAdmin(RoutingContext context) {
     LOGGER.info("handleGetAllActivityLogsForAdmin() started");
-    UUID userId = null;
-    String userIdParam = context.request().getParam("userId");
-    if (userIdParam != null && !userIdParam.isEmpty()) {
-      userId = UUID.fromString(userIdParam);
-    }
-
-    String startTime = context.request().getParam("starttime");
-    String endTime = context.request().getParam("endtime");
-
-    String limitParam = context.request().getParam("limit");
-    int limit = (limitParam != null && !limitParam.isEmpty()) ? Integer.parseInt(limitParam) : 1000;
-
-    String offsetParam = context.request().getParam("offset");
-    int offset =
-        (offsetParam != null && !offsetParam.isEmpty()) ? Integer.parseInt(offsetParam) : 0;
-    ActivityLogAdminRequest activityLogAdminRequest =
-        new ActivityLogAdminRequest(userId, startTime, endTime, limit, offset);
+    Optional<ActivityLogRequest> optReq = validateAndExtractAdminActivityParams(context, null);
+    if (optReq.isEmpty()) return;
 
     activityService
-        .getAllActivityLogsForAdmin(activityLogAdminRequest)
+        .getAllActivityLogsForAdmin(optReq.get())
         .onSuccess(
             pagination -> {
               ActivityLogAdminResponse<ActivityLog> response =

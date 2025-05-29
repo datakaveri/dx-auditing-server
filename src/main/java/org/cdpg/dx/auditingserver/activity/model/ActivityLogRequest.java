@@ -2,20 +2,20 @@ package org.cdpg.dx.auditingserver.activity.model;
 
 import java.util.UUID;
 
-public class ActivityLogAdminRequest {
+public class ActivityLogRequest {
   private UUID userId;
   private String startTime;
   private String endTime;
-  private int limit;
-  private int offset;
+  private int size;
+  private int page;
 
-  public ActivityLogAdminRequest(
-      UUID userId, String startTime, String endTime, int limit, int offset) {
+  public ActivityLogRequest(
+      UUID userId, String startTime, String endTime, int size, int page) {
     this.userId = userId;
     this.startTime = startTime;
     this.endTime = endTime;
-    this.limit = limit;
-    this.offset = offset;
+    this.size = size;
+    this.page = page;
   }
 
   public UUID getUserId() {
@@ -42,19 +42,19 @@ public class ActivityLogAdminRequest {
     this.endTime = endTime;
   }
 
-  public int getLimit() {
-    return limit;
+  public int getSize() {
+    return size;
   }
 
-  public void setLimit(int limit) {
-    this.limit = limit;
+  public void setSize(int size) {
+    this.size = size;
   }
 
-  public int getOffset() {
-    return offset;
+  public int getPage() {
+    return page;
   }
 
-  public void setOffset(int offset) {
-    this.offset = offset;
+  public void setPage(int page) {
+    this.page = page;
   }
 }
