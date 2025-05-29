@@ -17,6 +17,7 @@ import org.cdpg.dx.common.exception.NoRowFoundException;
 import org.cdpg.dx.database.postgres.base.entity.BaseEntity;
 import org.cdpg.dx.database.postgres.models.*;
 import org.cdpg.dx.database.postgres.service.PostgresService;
+import org.cdpg.dx.database.postgres.util.DxPgExceptionMapper;
 
 public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDAO<T> {
 
@@ -189,29 +190,111 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
             });
   }
 
-  // todo: this is a temporary implementation, need to be replaced with proper pagination
-  public Future<Pagination<T>> getAllWithPagination() {
-    LOGGER.info("getAllWithPagination() called for table: {}", tableName);
-    SelectQuery query = new SelectQuery(tableName, List.of("*"), null, null, null, 10, 1);
+  @Override
+  public Future<Pagination<T>> get(UUID id, PaginationInfo paginationInfo) {
+
+    int page = paginationInfo.getPage() > 0 ? paginationInfo.getPage() : 1;
+    int size = paginationInfo.getSize() > 0 ? paginationInfo.getSize() : 10;
+    int offset = (page - 1) * size;
+
+    Condition condition =
+        new Condition(idFileld, Condition.Operator.EQUALS, List.of(id.toString()));
+    SelectQuery query =
+        new SelectQuery(tableName, List.of("*"), condition, null, null, size, offset);
 
     return postgresService
         .select(query, true)
-        .compose(
+        .map(
             result -> {
               List<T> entities =
                   result.getRows().stream()
                       .map(row -> fromJson.apply((JsonObject) row))
                       .collect(Collectors.toList());
-              Pagination<T> pagination =
-                  new Pagination<>(5, 1, entities.size(), 100, true, true, entities);
+              long totalCount = result.getTotalCount();
+              int totalPages = (int) Math.ceil((double) totalCount / size);
+              boolean hasNext = page < totalPages;
+              boolean hasPrevious = page > 1;
 
-              return Future.succeededFuture(pagination);
+              return new Pagination<>(
+                  page, size, totalCount, totalPages, hasNext, hasPrevious, entities);
             })
         .recover(
             err -> {
               LOGGER.error(
                   "Error fetching all from: {}, msg: {}", tableName, err.getMessage(), err);
               return Future.failedFuture(BaseDxException.from(err));
+            });
+  }
+
+  @Override
+  public Future<Pagination<T>> getAll(PaginationInfo paginationInfo) {
+
+    int page = paginationInfo.getPage() > 0 ? paginationInfo.getPage() : 1;
+    int size = paginationInfo.getSize() > 0 ? paginationInfo.getSize() : 10;
+    int offset = (page - 1) * size;
+
+    SelectQuery query = new SelectQuery(tableName, List.of("*"), null, null, null, size, offset);
+
+    return postgresService
+        .select(query, true)
+        .map(
+            result -> {
+              List<T> entities =
+                  result.getRows().stream()
+                      .map(row -> fromJson.apply((JsonObject) row))
+                      .collect(Collectors.toList());
+              long totalCount = result.getTotalCount();
+              int totalPages = (int) Math.ceil((double) totalCount / size);
+              boolean hasNext = page < totalPages;
+              boolean hasPrevious = page > 1;
+
+              return new Pagination<>(
+                  page, size, totalCount, totalPages, hasNext, hasPrevious, entities);
+            })
+        .recover(
+            err -> {
+              LOGGER.error(
+                  "Error fetching all from: {}, msg: {}", tableName, err.getMessage(), err);
+              return Future.failedFuture(BaseDxException.from(err));
+            });
+  }
+
+  @Override
+  public Future<Pagination<T>> getAllWithFilters(
+      Map<String, Object> filters, PaginationInfo paginationInfo) {
+
+    int page = paginationInfo.getPage() > 0 ? paginationInfo.getPage() : 1;
+    int size = paginationInfo.getSize() > 0 ? paginationInfo.getSize() : 10;
+    int offset = (page - 1) * size;
+    Condition condition =
+        filters.entrySet().stream()
+            .map(e -> new Condition(e.getKey(), Condition.Operator.EQUALS, List.of(e.getValue())))
+            .reduce((c1, c2) -> new Condition(List.of(c1, c2), Condition.LogicalOperator.AND))
+            .orElse(null);
+
+    SelectQuery query =
+        new SelectQuery(tableName, List.of("*"), condition, null, null, size, offset);
+
+    return postgresService
+        .select(query, true)
+        .map(
+            result -> {
+              List<T> entities =
+                  result.getRows().stream()
+                      .map(row -> fromJson.apply((JsonObject) row))
+                      .collect(Collectors.toList());
+              long totalCount = result.getTotalCount();
+              int totalPages = (int) Math.ceil((double) totalCount / size);
+              boolean hasNext = page < totalPages;
+              boolean hasPrevious = page > 1;
+
+              return new Pagination<>(
+                  page, size, totalCount, totalPages, hasNext, hasPrevious, entities);
+            })
+        .recover(
+            err -> {
+              LOGGER.error("Error fetching paginated activity logs: {}", err.getMessage(), err);
+              return Future.failedFuture(DxPgExceptionMapper.from(err));
             });
   }
 }

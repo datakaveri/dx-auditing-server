@@ -48,9 +48,9 @@ public class ResponseBuilder {
     send(ctx, HttpStatusCode.NO_CONTENT, null, null);
   }
 
-  public static void sendAccepted(RoutingContext ctx, String detail) {
+/*  public static void sendAccepted(RoutingContext ctx, String detail) {
     send(ctx, HttpStatusCode.ACCEPTED, detail, null);
-  }
+  }*/
 
   public static void sendProcessing(RoutingContext ctx, String detail) {
     send(ctx, HttpStatusCode.PROCESSING, detail, null);
