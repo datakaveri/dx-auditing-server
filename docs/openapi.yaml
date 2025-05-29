@@ -57,7 +57,7 @@ paths:
       parameters:
         - name: Authorization
           in: header
-          description: A <b> valid data exchange Auth token(starting with Bearer) </b> to process the request. <br/> This field is <b> mandatory </b> for accessing a <b> resource </b> .  <br/> If not provided with a valid token, user will be responded with <b> 401 Unauthorized </b> .
+          description: A <b> valid data exchange Auth token(starting with Bearer) </b> to process the request. <br/> This field is <b> mandatory </b> for accessing a <b> report </b> .  <br/> If not provided with a valid token, user will be responded with <b> 401 Unauthorized </b> .
           required: true
           schema:
             type: string
@@ -86,7 +86,7 @@ paths:
           description: Unique identifier for the user.
         - name: Authorization
           in: header
-          description: A <b> valid data exchange Auth token(starting with Bearer) </b> to process the request. <br/> This field is <b> mandatory </b> for accessing a <b> resource </b> .  <br/> If not provided with a valid token, user will be responded with <b> 401 Unauthorized </b> .
+          description: A <b> valid data exchange Auth token(starting with Bearer) </b> to process the request. <br/> This field is <b> mandatory </b> for accessing a <b> report </b> .  <br/> If not provided with a valid token, user will be responded with <b> 401 Unauthorized </b> .
           required: true
           schema:
             type: string

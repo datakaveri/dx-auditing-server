@@ -93,7 +93,7 @@ public class ActivityLogDaoImpl extends AbstractBaseDAO<ActivityLog> implements 
         .compose(
             result -> {
               List<ActivityLog> entities = mapToActivityLogs(result.getRows());
-              LOGGER.debug(
+              LOGGER.trace(
                   "Record will be fetched  in batch of {} from activity logs for csv",
                   entities.size());
               return Future.succeededFuture(entities);
