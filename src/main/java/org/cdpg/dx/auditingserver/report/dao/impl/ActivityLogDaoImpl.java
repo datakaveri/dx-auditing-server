@@ -1,6 +1,6 @@
 package org.cdpg.dx.auditingserver.report.dao.impl;
 
-import static org.cdpg.dx.auditingserver.activity.util.ActivityConstants.*;
+import static org.cdpg.dx.auditingserver.report.util.ActivityConstants.*;
 
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
