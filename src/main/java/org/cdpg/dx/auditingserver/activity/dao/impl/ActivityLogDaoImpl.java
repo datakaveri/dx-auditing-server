@@ -13,9 +13,11 @@ import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.auditingserver.activity.dao.ActivityLogDao;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLog;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLogRequest;
-import org.cdpg.dx.auditingserver.activity.model.Pagination;
+import org.cdpg.dx.database.postgres.models.PagedResult;
+import org.cdpg.dx.common.exception.BaseDxException;
 import org.cdpg.dx.database.postgres.base.dao.AbstractBaseDAO;
 import org.cdpg.dx.database.postgres.models.Condition;
+import org.cdpg.dx.database.postgres.models.QueryResult;
 import org.cdpg.dx.database.postgres.models.SelectQuery;
 import org.cdpg.dx.database.postgres.service.PostgresService;
 import org.cdpg.dx.database.postgres.util.DxPgExceptionMapper;
@@ -32,7 +34,7 @@ public class ActivityLogDaoImpl extends AbstractBaseDAO<ActivityLog> implements 
   }
 
   @Override
-  public Future<Pagination<ActivityLog>> getAllActivityLogsByUserId(ActivityLogRequest req) {
+  public Future<PagedResult<ActivityLog>> getAllActivityLogsByUserId(ActivityLogRequest req) {
     LOGGER.info("getAllActivityLogsByUserId() started with request: {}", req.getUserId());
 
     int page = req.getPage() > 0 ? req.getPage() : 1;
@@ -68,17 +70,12 @@ public class ActivityLogDaoImpl extends AbstractBaseDAO<ActivityLog> implements 
 
     return postgresService
         .select(query, true)
-        .map(
-            result -> {
-              List<ActivityLog> data = mapToActivityLogs(result.getRows());
-
-              long totalCount = result.getTotalCount();
-              int totalPages = (int) Math.ceil((double) totalCount / size);
-              boolean hasNext = page < totalPages;
-              boolean hasPrevious = page > 1;
-
-              return new Pagination<>(
-                  page, size, totalCount, totalPages, hasNext, hasPrevious, data);
+        .map(result -> toPaginatedResult(result, page, size))
+        .recover(
+            err -> {
+              LOGGER.error(
+                  "Error fetching all from: {}, msg: {}", tableName, err.getMessage(), err);
+              return Future.failedFuture(BaseDxException.from(err));
             })
         .recover(
             err -> {
@@ -93,7 +90,7 @@ public class ActivityLogDaoImpl extends AbstractBaseDAO<ActivityLog> implements 
   }
 
   @Override
-  public Future<Pagination<ActivityLog>> getAllActivityLogsForAdmin(ActivityLogRequest req) {
+  public Future<PagedResult<ActivityLog>> getAllActivityLogsForAdmin(ActivityLogRequest req) {
     LOGGER.info("getAllActivityLogsForAdmin() called");
 
     int page = req.getPage() > 0 ? req.getPage() : 1;
@@ -132,16 +129,12 @@ public class ActivityLogDaoImpl extends AbstractBaseDAO<ActivityLog> implements 
 
     return postgresService
         .select(query, true)
-        .map(
-            result -> {
-              List<ActivityLog> data = mapToActivityLogs(result.getRows());
-              long totalCount = result.getTotalCount();
-              int totalPages = (int) Math.ceil((double) totalCount / size);
-              boolean hasNext = page < totalPages;
-              boolean hasPrevious = page > 1;
-
-              return new Pagination<>(
-                  page, size, totalCount, totalPages, hasNext, hasPrevious, data);
+        .map(result -> toPaginatedResult(result, page, size))
+        .recover(
+            err -> {
+              LOGGER.error(
+                  "Error fetching all from: {}, msg: {}", tableName, err.getMessage(), err);
+              return Future.failedFuture(BaseDxException.from(err));
             })
         .recover(
             err -> {
@@ -160,5 +153,19 @@ public class ActivityLogDaoImpl extends AbstractBaseDAO<ActivityLog> implements 
     return rows.stream()
         .map(obj -> ActivityLog.fromJson((JsonObject) obj))
         .collect(Collectors.toList());
+  }
+
+  private PagedResult<ActivityLog> toPaginatedResult(QueryResult result, int page, int size) {
+    List<ActivityLog> entities =
+        result.getRows().stream()
+            .map(row -> fromJson.apply((JsonObject) row))
+            .collect(Collectors.toList());
+    long totalCount = result.getTotalCount();
+    int totalPages = (int) Math.ceil((double) totalCount / size);
+    boolean hasNext = page < totalPages;
+    boolean hasPrevious = page > 1;
+
+    return new PagedResult<>(
+        page, size, totalCount, totalPages, hasNext, hasPrevious, entities);
   }
 }

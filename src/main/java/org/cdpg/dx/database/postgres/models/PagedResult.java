@@ -1,9 +1,9 @@
-package org.cdpg.dx.auditingserver.activity.model;
+package org.cdpg.dx.database.postgres.models;
 
 import java.util.List;
 import org.cdpg.dx.database.postgres.base.entity.BaseEntity;
 
-public record Pagination<T extends BaseEntity<T>>(
+public record PagedResult<T extends BaseEntity<T>>(
     int page,
     int size,
     long totalCount,

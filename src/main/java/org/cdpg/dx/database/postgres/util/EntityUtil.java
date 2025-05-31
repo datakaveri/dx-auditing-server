@@ -25,6 +25,7 @@ public class EntityUtil {
     if (value != null && !value.isEmpty()) {
       return UUID.fromString(value);
     }
+    System.out.printf("requested UUID is null or empty: %s%n", value);
     return null;
   }
 }

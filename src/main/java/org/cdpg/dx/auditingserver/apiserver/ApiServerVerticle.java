@@ -51,17 +51,16 @@ public class ApiServerVerticle extends AbstractVerticle {
   @Override
   public void start() {
     port = config().getInteger("httpPort", 8443);
-      ObjectMapper mapper = DatabindCodec.mapper();
-      mapper.registerModule(new JavaTimeModule());
-      mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-      mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY); // Exclude null & empty
 
-      // Optionally, configure custom pretty mapper if needed
-      ObjectMapper prettyMapper = mapper.copy();
-      prettyMapper.enable(SerializationFeature.INDENT_OUTPUT); // pretty-printing
+    ObjectMapper mapper = DatabindCodec.mapper();
+    mapper.registerModule(new JavaTimeModule());
+    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
 
+    ObjectMapper prettyMapper = mapper.copy();
+    prettyMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-      Future<RouterBuilder> routerFuture = RouterBuilder.create(vertx, "docs/openapi.yaml");
+    Future<RouterBuilder> routerFuture = RouterBuilder.create(vertx, "docs/updated.yaml");
     Future<JWTAuth> authFuture = JwtAuthProvider.init(vertx, config());
 
     List<ApiController> controllers = ControllerFactory.createControllers(vertx, config());
@@ -72,11 +71,15 @@ public class ApiServerVerticle extends AbstractVerticle {
               RouterBuilder routerBuilder = cf.resultAt(0);
               JWTAuth jwtAuth = cf.resultAt(1);
               AuthenticationHandler authHandler = new KeycloakJwtAuthHandler(jwtAuth);
-              try {
 
+              try {
                 LOGGER.debug("Adding platform handlers...");
-                int timeout = config().getInteger("timeout", 100000); // Configurable timeout
+                int timeout = config().getInteger("timeout", 100000);
                 routerBuilder.rootHandler(TimeoutHandler.create(timeout, 408));
+
+                // ✅ CORS must be registered BEFORE createRouter()
+                configureCorsHandler(routerBuilder);
+
                 routerBuilder.rootHandler(BodyHandler.create().setHandleFileUploads(false));
 
                 LOGGER.debug("Registering controllers...");
@@ -90,8 +93,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                 LOGGER.debug("Creating router...");
                 router = routerBuilder.createRouter();
 
-                LOGGER.debug("Configuring CORS and error handlers...");
-                configureCorsHandler(routerBuilder);
+                LOGGER.debug("Configuring common response headers, error, and failure handlers...");
                 putCommonResponseHeaders();
                 configureErrorHandlers(router);
                 configureFailureHandler(router);
@@ -99,23 +101,20 @@ public class ApiServerVerticle extends AbstractVerticle {
                 LOGGER.debug("Starting HTTP server...");
                 HttpServerOptions serverOptions = new HttpServerOptions();
 
-                /* Documentation routes */
+                // Serve static OpenAPI docs
                 router
                     .get(ROUTE_STATIC_SPEC)
                     .produces(APPLICATION_JSON)
                     .handler(
                         routingContext -> {
                           HttpServerResponse response = routingContext.response();
-                          response.sendFile("docs/openapi.yaml");
+                          response.sendFile("docs/updated.yaml");
                         });
                 router
                     .get(ROUTE_DOC)
                     .produces("text/html")
-                    .handler(
-                        routingContext -> {
-                          HttpServerResponse response = routingContext.response();
-                          response.sendFile("docs/apidoc.html");
-                        });
+                    .handler(ctx -> ctx.response().sendFile("docs/apidoc.html"));
+
                 setServerOptions(serverOptions);
                 server = vertx.createHttpServer(serverOptions);
                 server
@@ -125,7 +124,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                         http -> {
                           if (http.succeeded()) {
                             printDeployedEndpoints(router);
-                            LOGGER.info("ApiServerVerticle  deployed on port: {}", port);
+                            LOGGER.info("ApiServerVerticle deployed on port: {}", port);
                           } else {
                             LOGGER.error(
                                 "HTTP server failed to start: {}",
@@ -133,6 +132,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                                 http.cause());
                           }
                         });
+
               } catch (Exception e) {
                 LOGGER.error(
                     "Error during router creation or server startup: {}", e.getMessage(), e);

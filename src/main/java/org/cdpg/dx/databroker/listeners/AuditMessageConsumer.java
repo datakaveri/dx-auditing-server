@@ -13,7 +13,7 @@ import org.cdpg.dx.auditingserver.activity.service.ActivityService;
 public class AuditMessageConsumer implements RabitMqConsumer {
 
   private static final Logger LOGGER = LogManager.getLogger(AuditMessageConsumer.class);
-  private static final String QUEUE_NAME = "test-auditing";
+  private static final String QUEUE_NAME = "audit-msg";
   private final RabbitMQClient rabbitMqClient;
   private final ActivityService activityService;
   private final QueueOptions options =
@@ -35,7 +35,7 @@ public class AuditMessageConsumer implements RabitMqConsumer {
         .onSuccess(
             v ->
                 rabbitMqClient.basicConsumer(
-                    QUEUE_NAME,
+                    "audit-msg",
                     options,
                     result -> {
                       if (result.succeeded()) {
@@ -56,7 +56,14 @@ public class AuditMessageConsumer implements RabitMqConsumer {
     LOGGER.info("Consuming message: {}", message.body());
     long deliveryTag = message.envelope().getDeliveryTag();
     JsonObject json = message.body().toJsonObject();
-    ActivityLog activityLogEntity = ActivityLog.fromJson(json);
+    ActivityLog activityLogEntity = null;
+   try {
+         activityLogEntity = ActivityLog.fromJson(json);
+        // proceed with activityLogEntity
+    } catch (Exception e) {
+        LOGGER.error("Failed to parse ActivityLog from JSON: {}", e.getMessage());
+        ackMessage(deliveryTag); // Optionally ack to avoid retrying bad messages
+    }
 
     activityService
         .insertActivityLogIntoDb(activityLogEntity)

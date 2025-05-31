@@ -3,19 +3,19 @@ package org.cdpg.dx.auditingserver.report.controller;
 import static org.cdpg.dx.auditingserver.report.util.Constants.EMPTY_FILE;
 import static org.cdpg.dx.auditingserver.report.util.Constants.TOO_MANY_ROWS;
 
+import io.vertx.core.Handler;
 import io.vertx.core.file.OpenOptions;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import java.util.UUID;
-
-import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.auditingserver.apiserver.ApiController;
 import org.cdpg.dx.auditingserver.report.service.ReportService;
-import org.cdpg.dx.common.HttpStatusCode;
+import org.cdpg.dx.auth.authorization.handler.AuthorizationHandler;
+import org.cdpg.dx.auth.authorization.model.DxRole;
 import org.cdpg.dx.common.response.ResponseBuilder;
 
 public class ReportController implements ApiController {
@@ -28,8 +28,19 @@ public class ReportController implements ApiController {
 
   @Override
   public void register(RouterBuilder builder) {
-    builder.operation("get-admin-report").handler(this::handleGenerateCsvForAdmin);
-    builder.operation("get-consumer-report").handler(this::handleGenerateCsvForConsumer);
+
+    Handler<RoutingContext> adminAccessHandler =
+        AuthorizationHandler.forRoles(DxRole.ORG_ADMIN, DxRole.ORG_ADMIN);
+    Handler<RoutingContext> consumerAccessHandler = AuthorizationHandler.forRoles(DxRole.CONSUMER);
+
+    builder
+        .operation("get-admin-report")
+        .handler(adminAccessHandler)
+        .handler(this::handleGenerateCsvForAdmin);
+    builder
+        .operation("get-consumer-report")
+        .handler(consumerAccessHandler)
+        .handler(this::handleGenerateCsvForConsumer);
   }
 
   private void handleGenerateCsvForAdmin(RoutingContext routingContext) {
@@ -40,7 +51,8 @@ public class ReportController implements ApiController {
         .onSuccess(
             filePath -> {
               if (filePath.equalsIgnoreCase(TOO_MANY_ROWS)) {
-                ResponseBuilder.send(routingContext, HttpStatusCode.BAD_REQUEST, TOO_MANY_ROWS , null);
+                // ResponseBuilder.send(routingContext, HttpStatusCode.BAD_REQUEST, TOO_MANY_ROWS ,
+                // null);
                 return;
               } else if (filePath.equalsIgnoreCase(EMPTY_FILE)) {
                 ResponseBuilder.sendNoContent(routingContext);
@@ -90,10 +102,11 @@ public class ReportController implements ApiController {
         .onSuccess(
             filePath -> {
               if (filePath.equalsIgnoreCase(TOO_MANY_ROWS)) {
-                  ResponseBuilder.send(routingContext, HttpStatusCode.BAD_REQUEST, TOO_MANY_ROWS , null);
+                // ResponseBuilder.send(routingContext, HttpStatusCode.BAD_REQUEST, TOO_MANY_ROWS ,
+                // null);
                 return;
               } else if (filePath.equalsIgnoreCase(EMPTY_FILE)) {
-                  ResponseBuilder.sendNoContent(routingContext);
+                ResponseBuilder.sendNoContent(routingContext);
                 return;
               }
               LOGGER.info("CSV file generated successfully at: {}", filePath);
