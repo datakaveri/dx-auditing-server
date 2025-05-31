@@ -30,7 +30,6 @@ public class ActivityLogRequestValidator {
       String startRaw = req.getParam("starttime");
       String endRaw = req.getParam("endtime");
 
-
       // Enforce both-or-none rule
       boolean hasStart = startRaw != null && !startRaw.isBlank();
       boolean hasEnd = endRaw != null && !endRaw.isBlank();
@@ -79,7 +78,7 @@ public class ActivityLogRequestValidator {
       LocalDateTime local = LocalDateTime.parse(input, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
       return local.atZone(ZoneOffset.UTC).toInstant();
     } catch (DateTimeParseException ex) {
-      throw new IllegalArgumentException("Invalid datetime format: " + input);
+      throw new IllegalArgumentException("Invalid datetime format");
     }
   }
 }

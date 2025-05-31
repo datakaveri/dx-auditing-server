@@ -1,11 +1,13 @@
 package org.cdpg.dx.common.exception;
 
-public class DxUnauthorizedException extends BaseDxException {
-    public DxUnauthorizedException(String message) {
-        super(DxErrorCodes.UNAUTHORIZED, message);
-    }
+import org.cdpg.dx.auth.authentication.exception.AuthenticationException;
 
-    public DxUnauthorizedException(String message, Throwable cause) {
-        super(DxErrorCodes.UNAUTHORIZED, message, cause);
-    }
+public class DxUnauthorizedException extends AuthenticationException {
+  public DxUnauthorizedException(String message) {
+    super(message);
+  }
+
+  /* public DxUnauthorizedException(String message, Throwable cause) {
+      super(DxErrorCodes.UNAUTHORIZED, message, cause);
+  }*/
 }

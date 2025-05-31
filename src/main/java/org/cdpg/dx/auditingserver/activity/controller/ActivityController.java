@@ -10,13 +10,12 @@ import java.util.Optional;
 import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.cdpg.dx.auditingserver.activity.model.ActivityLog;
-import org.cdpg.dx.auditingserver.activity.model.ActivityLogAdminResponse;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLogRequest;
 import org.cdpg.dx.auditingserver.activity.service.ActivityService;
 import org.cdpg.dx.auditingserver.apiserver.ApiController;
 import org.cdpg.dx.auth.authorization.handler.AuthorizationHandler;
 import org.cdpg.dx.auth.authorization.model.DxRole;
+import org.cdpg.dx.common.response.PaginationInfo;
 import org.cdpg.dx.common.response.ResponseBuilder;
 
 public class ActivityController implements ApiController {
@@ -35,11 +34,11 @@ public class ActivityController implements ApiController {
     Handler<RoutingContext> consumerAccessHandler = AuthorizationHandler.forRoles(DxRole.CONSUMER);
 
     builder
-        .operation("get-ActivityLogs-for-consumer-user")
+        .operation("get-ActivityLogs-for-consumer")
         .handler(consumerAccessHandler)
         .handler(this::handleGetAllActivityLogsForUser);
     builder
-        .operation("get-activityLogs-for-admin-user")
+        .operation("get-activityLogs-for-admin")
         .handler(adminAccessHandler)
         .handler(this::handleGetAllActivityLogsForAdmin);
   }
@@ -48,7 +47,7 @@ public class ActivityController implements ApiController {
     LOGGER.info("handleGetAllActivityLogsForUser() started");
 
     User user = context.user();
-    UUID userId = UUID.fromString(user.subject());
+    UUID userId = UUID.fromString("e0782a4e-3bdb-43e3-be8c-7beafb89efd9");
 
     Optional<ActivityLogRequest> optReq = validateAndExtractAdminActivityParams(context, userId);
     if (optReq.isEmpty()) return;
@@ -56,10 +55,9 @@ public class ActivityController implements ApiController {
     activityService
         .getActivityLogByUserId(optReq.get())
         .onSuccess(
-            pagination -> {
-              ActivityLogAdminResponse<ActivityLog> response =
-                  new ActivityLogAdminResponse<>(pagination);
-              ResponseBuilder.sendSuccess(context, response);
+            pagedResult -> {
+              ResponseBuilder.sendSuccess(
+                  context, pagedResult.data(), PaginationInfo.fromPagedResult(pagedResult));
             })
         .onFailure(
             failure -> {
@@ -76,10 +74,9 @@ public class ActivityController implements ApiController {
     activityService
         .getAllActivityLogsForAdmin(optReq.get())
         .onSuccess(
-            pagination -> {
-              ActivityLogAdminResponse<ActivityLog> response =
-                  new ActivityLogAdminResponse<>(pagination);
-              ResponseBuilder.sendSuccess(context, response);
+            pagedResult -> {
+              ResponseBuilder.sendSuccess(
+                  context, pagedResult.data(), PaginationInfo.fromPagedResult(pagedResult));
             })
         .onFailure(
             failure -> {

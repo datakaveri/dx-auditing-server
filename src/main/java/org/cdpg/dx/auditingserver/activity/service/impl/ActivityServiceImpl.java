@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.auditingserver.activity.dao.ActivityLogDao;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLog;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLogRequest;
-import org.cdpg.dx.auditingserver.activity.model.Pagination;
+import org.cdpg.dx.database.postgres.models.PagedResult;
 import org.cdpg.dx.auditingserver.activity.service.ActivityService;
 
 public class ActivityServiceImpl implements ActivityService {
@@ -18,13 +18,13 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
-  public Future<Pagination<ActivityLog>> getActivityLogByUserId(
+  public Future<PagedResult<ActivityLog>> getActivityLogByUserId(
       ActivityLogRequest activityLogRequest) {
     return activityLogDAO.getAllActivityLogsByUserId(activityLogRequest);
   }
 
   @Override
-  public Future<Pagination<ActivityLog>> getAllActivityLogsForAdmin(
+  public Future<PagedResult<ActivityLog>> getAllActivityLogsForAdmin(
       ActivityLogRequest activityLogAdminRequest) {
     return activityLogDAO.getAllActivityLogsForAdmin(activityLogAdminRequest);
   }
