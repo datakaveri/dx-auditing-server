@@ -77,9 +77,6 @@ public class ApiServerVerticle extends AbstractVerticle {
                 int timeout = config().getInteger("timeout", 100000);
                 routerBuilder.rootHandler(TimeoutHandler.create(timeout, 408));
 
-                // ✅ CORS must be registered BEFORE createRouter()
-                configureCorsHandler(routerBuilder);
-
                 routerBuilder.rootHandler(BodyHandler.create().setHandleFileUploads(false));
 
                 LOGGER.debug("Registering controllers...");
@@ -93,7 +90,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                 LOGGER.debug("Creating router...");
                 router = routerBuilder.createRouter();
 
-                LOGGER.debug("Configuring common response headers, error, and failure handlers...");
+                LOGGER.debug("Configuring CORS and error handlers...");
+                configureCorsHandler(routerBuilder);
                 putCommonResponseHeaders();
                 configureErrorHandlers(router);
                 configureFailureHandler(router);
