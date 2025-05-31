@@ -60,7 +60,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     ObjectMapper prettyMapper = mapper.copy();
     prettyMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-    Future<RouterBuilder> routerFuture = RouterBuilder.create(vertx, "docs/updated.yaml");
+    Future<RouterBuilder> routerFuture = RouterBuilder.create(vertx, "docs/openapi.yaml");
     Future<JWTAuth> authFuture = JwtAuthProvider.init(vertx, config());
 
     List<ApiController> controllers = ControllerFactory.createControllers(vertx, config());
@@ -108,7 +108,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                     .handler(
                         routingContext -> {
                           HttpServerResponse response = routingContext.response();
-                          response.sendFile("docs/updated.yaml");
+                          response.sendFile("docs/openapi.yaml");
                         });
                 router
                     .get(ROUTE_DOC)
