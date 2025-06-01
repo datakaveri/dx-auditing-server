@@ -18,5 +18,8 @@ public class DxErrorCodes {
     public static final int FORBIDDEN = 12001;
     public static final int TOKEN_INVALID = 12002;
 
+    // 80000-90000: CsvStream
+    public static final int CSV_STREAM_ERROR = 80000;
+
 
 }

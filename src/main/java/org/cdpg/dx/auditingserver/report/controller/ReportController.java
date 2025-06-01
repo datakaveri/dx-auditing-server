@@ -1,10 +1,6 @@
 package org.cdpg.dx.auditingserver.report.controller;
 
-import static org.cdpg.dx.auditingserver.report.util.Constants.EMPTY_FILE;
-import static org.cdpg.dx.auditingserver.report.util.Constants.TOO_MANY_ROWS;
-
 import io.vertx.core.Handler;
-import io.vertx.core.file.OpenOptions;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
@@ -16,7 +12,6 @@ import org.cdpg.dx.auditingserver.apiserver.ApiController;
 import org.cdpg.dx.auditingserver.report.service.ReportService;
 import org.cdpg.dx.auth.authorization.handler.AuthorizationHandler;
 import org.cdpg.dx.auth.authorization.model.DxRole;
-import org.cdpg.dx.common.response.ResponseBuilder;
 
 public class ReportController implements ApiController {
   private static final Logger LOGGER = LogManager.getLogger(ReportController.class);
@@ -44,102 +39,63 @@ public class ReportController implements ApiController {
   }
 
   private void handleGenerateCsvForAdmin(RoutingContext routingContext) {
-    LOGGER.trace("handleGenerateCsvForAdminChunk started");
     HttpServerResponse response = routingContext.response();
+    response
+        .putHeader("Content-Type", "text/csv")
+        .putHeader("Content-Disposition", "attachment; filename=\"admin_report.csv\"")
+        .setChunked(true);
+
     reportService
-        .getAdminCsvReport()
+        .streamAdminCsvBatched()
         .onSuccess(
-            filePath -> {
-              if (filePath.equalsIgnoreCase(TOO_MANY_ROWS)) {
-                // ResponseBuilder.send(routingContext, HttpStatusCode.BAD_REQUEST, TOO_MANY_ROWS ,
-                // null);
-                return;
-              } else if (filePath.equalsIgnoreCase(EMPTY_FILE)) {
-                ResponseBuilder.sendNoContent(routingContext);
+            csvStream -> {
+              if (csvStream == null) {
+                response.end();
                 return;
               }
-
-              LOGGER.info("CSV file generated successfully at: {}", filePath);
-              String fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
-              response
-                  .putHeader("Content-Type", "text/csv")
-                  .putHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
-                  .setChunked(true);
-
-              routingContext
-                  .vertx()
-                  .fileSystem()
-                  .open(filePath, new OpenOptions())
-                  .onComplete(
-                      ar -> {
-                        if (ar.succeeded()) {
-                          ar.result()
-                              .pipeTo(response)
-                              .onFailure(
-                                  err -> {
-                                    LOGGER.error("Failed to stream file", err);
-                                    routingContext.fail(err);
-                                  });
-                        } else {
-                          LOGGER.error("Failed to open file", ar.cause());
-                          routingContext.fail(ar.cause());
-                        }
-                      });
+              csvStream.handler(buffer -> response.write(buffer));
+              csvStream.endHandler(v -> response.end());
+              csvStream.exceptionHandler(
+                  err -> {
+                    LOGGER.error("Failed to stream CSV", err);
+                    routingContext.fail(err);
+                  });
             })
         .onFailure(
-            failure -> {
-              LOGGER.error("Failed to generate CSV file", failure);
-              routingContext.fail(failure);
+            err -> {
+              LOGGER.error("Failed to stream CSV", err);
+              routingContext.fail(err);
             });
   }
 
   private void handleGenerateCsvForConsumer(RoutingContext routingContext) {
     HttpServerResponse response = routingContext.response();
+    response
+        .putHeader("Content-Type", "text/csv")
+        .putHeader("Content-Disposition", "attachment; filename=\"consumer_report.csv\"")
+        .setChunked(true);
     User user = routingContext.user();
     UUID userId = UUID.fromString(user.subject());
     reportService
-        .getConsumerCsvReport(userId)
+        .streamConsumerCsvBatched(userId)
         .onSuccess(
-            filePath -> {
-              if (filePath.equalsIgnoreCase(TOO_MANY_ROWS)) {
-                // ResponseBuilder.send(routingContext, HttpStatusCode.BAD_REQUEST, TOO_MANY_ROWS ,
-                // null);
-                return;
-              } else if (filePath.equalsIgnoreCase(EMPTY_FILE)) {
-                ResponseBuilder.sendNoContent(routingContext);
+            csvStream -> {
+              if (csvStream == null) {
+                response.end();
                 return;
               }
-              LOGGER.info("CSV file generated successfully at: {}", filePath);
-              String fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
-              response
-                  .putHeader("Content-Type", "text/csv")
-                  .putHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
-                  .setChunked(true);
-
-              routingContext
-                  .vertx()
-                  .fileSystem()
-                  .open(filePath, new OpenOptions())
-                  .onComplete(
-                      ar -> {
-                        if (ar.succeeded()) {
-                          ar.result()
-                              .pipeTo(response)
-                              .onFailure(
-                                  err -> {
-                                    LOGGER.error("Failed to stream file", err);
-                                    routingContext.fail(err);
-                                  });
-                        } else {
-                          LOGGER.error("Failed to open file", ar.cause());
-                          routingContext.fail(ar.cause());
-                        }
-                      });
+              csvStream.handler(buffer -> response.write(buffer));
+              csvStream.endHandler(v -> response.end());
+              csvStream.exceptionHandler(
+                  err -> {
+                    LOGGER.error("Failed to stream CSV", err);
+                    routingContext.fail(err);
+                  });
             })
         .onFailure(
-            failure -> {
-              LOGGER.error("Failed to generate CSV file");
-              routingContext.fail(failure);
+            err -> {
+              LOGGER.error("Failed to stream CSV", err);
+              routingContext.fail(err);
             });
   }
 }
