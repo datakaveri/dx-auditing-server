@@ -4,11 +4,9 @@ import io.vertx.core.Future;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import org.cdpg.dx.common.request.PaginatedRequest;
-import org.cdpg.dx.common.request.TemporalRequest;
-import org.cdpg.dx.database.postgres.models.PagedResult;
 import org.cdpg.dx.database.postgres.base.entity.BaseEntity;
+import org.cdpg.dx.database.postgres.models.PagedResult;
 import org.cdpg.dx.database.postgres.models.PaginationInfo;
 
 public interface BaseDAO<T extends BaseEntity<T>> {

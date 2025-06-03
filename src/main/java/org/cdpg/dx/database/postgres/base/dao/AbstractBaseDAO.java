@@ -290,10 +290,8 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
     SelectQuery query =
         new SelectQuery(tableName, List.of("*"), condition, null, null, size, offset);
 
-    LOGGER.debug("Paginated query: {}", query);
+    LOGGER.info("Executing paginated query: {}", query);
 
-    LOGGER.info(
-        "Executing paginated colums : {}, parms : {}", query.getColumns(), query.getQueryParams());
     return postgresService
         .select(query, true)
         .map(result -> toPaginatedResult(result, page, size))
