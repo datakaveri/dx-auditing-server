@@ -165,7 +165,6 @@ public class ActivityLogDaoImpl extends AbstractBaseDAO<ActivityLog> implements 
     boolean hasNext = page < totalPages;
     boolean hasPrevious = page > 1;
 
-    return new PagedResult<>(
-        page, size, totalCount, totalPages, hasNext, hasPrevious, entities);
+    return new PagedResult<>(page, size, totalCount, totalPages, hasNext, hasPrevious, entities);
   }
 }

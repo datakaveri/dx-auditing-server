@@ -1,20 +1,19 @@
 package org.cdpg.dx.auditingserver.activity.controller;
 
-import static org.cdpg.dx.auditingserver.activity.validator.ActivityLogRequestValidator.validateAndExtractAdminActivityParams;
-
 import io.vertx.core.Handler;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.Map;
+import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.cdpg.dx.auditingserver.activity.model.ActivityLogRequest;
 import org.cdpg.dx.auditingserver.activity.service.ActivityService;
 import org.cdpg.dx.auditingserver.apiserver.ApiController;
 import org.cdpg.dx.auth.authorization.handler.AuthorizationHandler;
 import org.cdpg.dx.auth.authorization.model.DxRole;
+import org.cdpg.dx.common.request.PaginatedRequest;
+import org.cdpg.dx.common.request.PaginationRequestBuilder;
 import org.cdpg.dx.common.response.PaginationInfo;
 import org.cdpg.dx.common.response.ResponseBuilder;
 
@@ -47,13 +46,27 @@ public class ActivityController implements ApiController {
     LOGGER.info("handleGetAllActivityLogsForUser() started");
 
     User user = context.user();
-    UUID userId = UUID.fromString("e0782a4e-3bdb-43e3-be8c-7beafb89efd9");
 
-    Optional<ActivityLogRequest> optReq = validateAndExtractAdminActivityParams(context, userId);
-    if (optReq.isEmpty()) return;
+    Set<String> allowedFilters = Set.of("userId");
+    Map<String, String> apiToDbMap = Map.of("userId", "user_id");
+
+    Map<String, String> additionalFilters = Map.of("user_id", user.subject());
+
+    Set<String> allowedTimeFields = Set.of("created_at");
+
+    PaginatedRequest request =
+        PaginationRequestBuilder.builder(
+            context,
+            allowedFilters,
+            apiToDbMap,
+            additionalFilters,
+            allowedTimeFields,
+            "created_at");
+
+    LOGGER.info("PaginatedRequest created for getActivityLogForConsumer:  {}", request);
 
     activityService
-        .getActivityLogByUserId(optReq.get())
+        .getActivityLogForConsumer(request)
         .onSuccess(
             pagedResult -> {
               ResponseBuilder.sendSuccess(
@@ -68,11 +81,22 @@ public class ActivityController implements ApiController {
 
   private void handleGetAllActivityLogsForAdmin(RoutingContext context) {
     LOGGER.info("handleGetAllActivityLogsForAdmin() started");
-    Optional<ActivityLogRequest> optReq = validateAndExtractAdminActivityParams(context, null);
-    if (optReq.isEmpty()) return;
+    /*    Optional<ActivityLogRequest> optReq = validateAndExtractAdminActivityParams(context, null);
+    if (optReq.isEmpty()) return;*/
+
+    Set<String> allowedFilters = Set.of("userId");
+    Map<String, String> apiToDbMap = Map.of("userId", "user_id");
+    // No additional filters for admin, as they can access all logs
+    Set<String> allowedTimeFields = Set.of("created_at");
+
+    PaginatedRequest request =
+        PaginationRequestBuilder.builder(
+            context, allowedFilters, apiToDbMap, null, allowedTimeFields, "created_at");
+
+    LOGGER.info("PaginatedRequest created for handleGetAllActivityLogsForAdmin:  {}", request);
 
     activityService
-        .getAllActivityLogsForAdmin(optReq.get())
+        .getAllActivityLogsForAdmin(request)
         .onSuccess(
             pagedResult -> {
               ResponseBuilder.sendSuccess(

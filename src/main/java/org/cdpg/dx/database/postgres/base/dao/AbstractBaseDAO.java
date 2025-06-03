@@ -1,5 +1,7 @@
 package org.cdpg.dx.database.postgres.base.dao;
 
+import static org.cdpg.dx.database.postgres.util.ConditionBuilder.fromFilters;
+
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import java.util.ArrayList;
@@ -13,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.common.exception.BaseDxException;
 import org.cdpg.dx.common.exception.DxPgException;
 import org.cdpg.dx.common.exception.NoRowFoundException;
+import org.cdpg.dx.common.request.PaginatedRequest;
 import org.cdpg.dx.database.postgres.base.entity.BaseEntity;
 import org.cdpg.dx.database.postgres.models.*;
 import org.cdpg.dx.database.postgres.models.PagedResult;
@@ -274,6 +277,31 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
             err -> {
               LOGGER.error("Error fetching paginated activity logs: {}", err.getMessage(), err);
               return Future.failedFuture(DxPgExceptionMapper.from(err));
+            });
+  }
+
+  public Future<PagedResult<T>> getAllWithFilters(PaginatedRequest request) {
+    int page = request.page() > 0 ? request.page() : 1;
+    int size = request.size() > 0 ? request.size() : 10;
+    int offset = (page - 1) * size;
+
+    Condition condition = fromFilters(request.filters(), request.temporalRequests());
+
+    SelectQuery query =
+        new SelectQuery(tableName, List.of("*"), condition, null, null, size, offset);
+
+    LOGGER.debug("Paginated query: {}", query);
+
+    LOGGER.info(
+        "Executing paginated colums : {}, parms : {}", query.getColumns(), query.getQueryParams());
+    return postgresService
+        .select(query, true)
+        .map(result -> toPaginatedResult(result, page, size))
+        .recover(
+            err -> {
+              LOGGER.error(
+                  "Error fetching paginated results from {}: {}", tableName, err.getMessage(), err);
+              return Future.failedFuture(BaseDxException.from(err));
             });
   }
 
