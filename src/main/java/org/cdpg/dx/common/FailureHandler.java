@@ -10,6 +10,8 @@ import org.cdpg.dx.common.util.ThrowableUtils;
 
 import java.time.LocalDateTime;
 
+import static org.cdpg.dx.util.Constants.HEADER_ALLOW_ORIGIN;
+
 public class FailureHandler implements Handler<RoutingContext> {
 
   private static final Logger LOGGER = LogManager.getLogger(FailureHandler.class);
@@ -44,6 +46,9 @@ public class FailureHandler implements Handler<RoutingContext> {
       context
           .response()
           .putHeader("Content-Type", "application/json")
+              .putHeader(HEADER_ALLOW_ORIGIN, "*")
+              .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+              .putHeader("Access-Control-Allow-Headers", "Authorization, Content-Type")
           .setStatusCode(status)
           .end(errorResponse.toJson().encode());
     }
