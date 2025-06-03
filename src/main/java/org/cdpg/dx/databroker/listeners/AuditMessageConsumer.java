@@ -9,19 +9,22 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLog;
 import org.cdpg.dx.auditingserver.activity.service.ActivityService;
+import org.cdpg.dx.database.immudb.service.ImmudbService;
 
 public class AuditMessageConsumer implements RabitMqConsumer {
 
   private static final Logger LOGGER = LogManager.getLogger(AuditMessageConsumer.class);
-  private static final String QUEUE_NAME = "test-auditing";
+  private static final String QUEUE_NAME = "audit-msg";
   private final RabbitMQClient rabbitMqClient;
   private final ActivityService activityService;
   private final QueueOptions options =
       new QueueOptions().setMaxInternalQueueSize(100).setKeepMostRecent(true).setAutoAck(false);
+  private final ImmudbService immudbService;
 
-  public AuditMessageConsumer(RabbitMQClient rabbitMqClient, ActivityService activityService) {
+  public AuditMessageConsumer(RabbitMQClient rabbitMqClient, ActivityService activityService, ImmudbService immudbService) {
     this.rabbitMqClient = rabbitMqClient;
     this.activityService = activityService;
+    this.immudbService = immudbService;
   }
 
   @Override
@@ -65,6 +68,12 @@ public class AuditMessageConsumer implements RabitMqConsumer {
       ackMessage(deliveryTag); // Optionally ack to avoid retrying bad messages
     }
 
+    immudbService.executeWriteQueryUsingClient().onSuccess(abcd -> {
+      LOGGER.info("ImmuDB write query executed successfully.");
+    }).onFailure(err -> {
+      LOGGER.error("Failed to execute ImmuDB write query: {}", err.getMessage());
+      // Handle failure, but do not ack here; message will remain in queue for retry
+    });
     activityService
         .insertActivityLogIntoDb(activityLogEntity)
         .onSuccess(

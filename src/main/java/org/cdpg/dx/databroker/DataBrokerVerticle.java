@@ -1,6 +1,7 @@
 package org.cdpg.dx.databroker;
 
 import static org.cdpg.dx.common.config.ServiceProxyAddressConstants.*;
+import static org.cdpg.dx.databroker.listeners.util.Constans.IMMUDB_SERVICE_ADDRESS;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
@@ -16,6 +17,7 @@ import org.cdpg.dx.auditingserver.activity.dao.ActivityLogDao;
 import org.cdpg.dx.auditingserver.activity.dao.impl.ActivityLogDaoImpl;
 import org.cdpg.dx.auditingserver.activity.service.ActivityService;
 import org.cdpg.dx.auditingserver.activity.service.impl.ActivityServiceImpl;
+import org.cdpg.dx.database.immudb.service.ImmudbService;
 import org.cdpg.dx.database.postgres.service.PostgresService;
 import org.cdpg.dx.databroker.client.RabbitClient;
 import org.cdpg.dx.databroker.client.RabbitWebClient;
@@ -52,6 +54,7 @@ public class DataBrokerVerticle extends AbstractVerticle {
   /*private RevokedService revokedService;
   private UniqueAttributeService uniqueAttributeService;*/
   private AuditMessageConsumer auditConsumer;
+  private ImmudbService immudbService;
 
   @Override
   public void start() throws Exception {
@@ -118,6 +121,7 @@ public class DataBrokerVerticle extends AbstractVerticle {
     rabbitWebClient = new RabbitWebClient(vertx, webConfig, propObj);
     iudxRabbitMqClient = RabbitMQClient.create(vertx, iudxConfig);
     iudxInternalRabbitMqClient = RabbitMQClient.create(vertx, iudxInternalConfig);
+    immudbService = ImmudbService.createProxy(vertx, IMMUDB_SERVICE_ADDRESS);
     rabbitClient =
         new RabbitClient(rabbitWebClient, iudxInternalRabbitMqClient, iudxRabbitMqClient);
     binder = new ServiceBinder(vertx);
@@ -140,7 +144,7 @@ public class DataBrokerVerticle extends AbstractVerticle {
 
     // *************************** Need only while deployment of auditing server uncomment line
     // 131-135 ***************************
-    auditConsumer = new AuditMessageConsumer(iudxInternalRabbitMqClient, activityService);
+    auditConsumer = new AuditMessageConsumer(iudxInternalRabbitMqClient, activityService, immudbService);
     auditConsumer.start();
 
     dataBrokerService =
