@@ -47,7 +47,7 @@ public class ActivityController implements ApiController {
     LOGGER.info("handleGetAllActivityLogsForUser() started");
 
     User user = context.user();
-    UUID userId = UUID.fromString("e0782a4e-3bdb-43e3-be8c-7beafb89efd9");
+    UUID userId = UUID.fromString(user.subject());
 
     Optional<ActivityLogRequest> optReq = validateAndExtractAdminActivityParams(context, userId);
     if (optReq.isEmpty()) return;
