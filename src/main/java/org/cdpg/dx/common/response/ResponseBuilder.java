@@ -31,6 +31,9 @@ public class ResponseBuilder {
     ctx.response()
         .setStatusCode(status.getValue())
         .putHeader("Content-Type", "application/json")
+            .putHeader("Access-Control-Allow-Origin", "*")
+            .putHeader("Access-Control-Allow-Headers", "Content-Type, Authorization")
+            .putHeader("Access-Control-Allow-Methods", "GET, POST,PUT, DELETE, OPTIONS")
         .end(JsonObject.mapFrom(response).encode());
   }
 

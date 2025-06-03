@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   version: 1.0.0
-  title: Telangana-Data-Exchange-ACL-APD
+  title: Telangana-Data-Exchange-Auditing
   description: |
 
     # Introduction
@@ -351,9 +351,23 @@ paths:
         '400':
           description: Bad request. No data available for CSV generation/Too many records.
         '401':
-          description: Unauthorized. Token is required.
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
         '500':
-          description: Internal server error.
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
       x-codeSamples:
         - lang: cURL
           label: Admin Csv Activity Logs
@@ -379,9 +393,23 @@ paths:
         '400':
           description: Bad request. No data available for CSV generation/Too many records.
         '401':
-          description: Unauthorized. Token is required.
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
         '500':
-          description: Internal server error.
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
       x-codeSamples:
         - lang: cURL
           label: Admin Csv Activity Logs

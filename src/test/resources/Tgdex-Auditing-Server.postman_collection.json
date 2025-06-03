@@ -1,0 +1,565 @@
+{
+	"info": {
+		"_postman_id": "069433bc-3577-408c-bbca-ce0014bf1056",
+		"name": "Tgdex-Auditing-Server",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20457128"
+	},
+	"item": [
+		{
+			"name": "Token",
+			"item": [
+				{
+					"name": "Consumer Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"consumerToken\", jsonData.access_token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "frontend-client",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "{{consumer-username}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{consumer-password}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://{{keycloak-url}}/auth/realms/tgdex-pilot/protocol/openid-connect/token",
+							"protocol": "https",
+							"host": [
+								"{{keycloak-url}}"
+							],
+							"path": [
+								"auth",
+								"realms",
+								"tgdex-pilot",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provider Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"providerToken\", jsonData.access_token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "frontend-client",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "{{provider-username}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{provider-password}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://{{keycloak-url}}/auth/realms/tgdex-pilot/protocol/openid-connect/token",
+							"protocol": "https",
+							"host": [
+								"{{keycloak-url}}"
+							],
+							"path": [
+								"auth",
+								"realms",
+								"tgdex-pilot",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cos Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"cosAdmin\", jsonData.access_token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "frontend-client",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "{{cos-admin-username}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{cos-admin-password}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://{{keycloak-url}}/auth/realms/tgdex-pilot/protocol/openid-connect/token",
+							"protocol": "https",
+							"host": [
+								"{{keycloak-url}}"
+							],
+							"path": [
+								"auth",
+								"realms",
+								"tgdex-pilot",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Report",
+			"item": [
+				{
+					"name": "200 - Consumer Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{consumerToken}}"
+							}
+						],
+						"url": {
+							"raw": "https://{{tgdex-audit}}/dx/auditing/reportactivity/consumer",
+							"protocol": "https",
+							"host": [
+								"{{tgdex-audit}}"
+							],
+							"path": [
+								"dx",
+								"auditing",
+								"reportactivity",
+								"consumer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "200 - Admin Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{cosAdmin}}"
+							}
+						],
+						"url": {
+							"raw": "https://{{tgdex-audit}}/dx/auditing/reportactivity/admin",
+							"protocol": "https",
+							"host": [
+								"{{tgdex-audit}}"
+							],
+							"path": [
+								"dx",
+								"auditing",
+								"reportactivity",
+								"admin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "403 - Admin Report",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is 401 (Not Authorized)\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{consumerToken}}"
+							}
+						],
+						"url": {
+							"raw": "https://{{tgdex-audit}}/dx/auditing/reportactivity/admin",
+							"protocol": "https",
+							"host": [
+								"{{tgdex-audit}}"
+							],
+							"path": [
+								"dx",
+								"auditing",
+								"reportactivity",
+								"admin"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Activity",
+			"item": [
+				{
+					"name": "200 - Admin Activity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{cosAdmin}}"
+							}
+						],
+						"url": {
+							"raw": "https://{{tgdex-audit}}/dx/auditing/admin/activity?userId&starttime&endtime&page=1&size=1000",
+							"protocol": "https",
+							"host": [
+								"{{tgdex-audit}}"
+							],
+							"path": [
+								"dx",
+								"auditing",
+								"admin",
+								"activity"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": null
+								},
+								{
+									"key": "starttime",
+									"value": null
+								},
+								{
+									"key": "endtime",
+									"value": null
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "1000"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "200 - Consumer Activity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{consumerToken}}"
+							}
+						],
+						"url": {
+							"raw": "https://{{tgdex-audit}}/dx/auditing/consumer/activity?page=1&size=1000",
+							"protocol": "https",
+							"host": [
+								"{{tgdex-audit}}"
+							],
+							"path": [
+								"dx",
+								"auditing",
+								"consumer",
+								"activity"
+							],
+							"query": [
+								{
+									"key": "starttime",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "endtime",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "1000"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "400 - Consumer Activity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{consumerToken}}"
+							}
+						],
+						"url": {
+							"raw": "https://{{tgdex-audit}}/dx/auditing/consumer/activity?starttime=T&endtime=T&page=1&size=1000",
+							"protocol": "https",
+							"host": [
+								"{{tgdex-audit}}"
+							],
+							"path": [
+								"dx",
+								"auditing",
+								"consumer",
+								"activity"
+							],
+							"query": [
+								{
+									"key": "starttime",
+									"value": "T"
+								},
+								{
+									"key": "endtime",
+									"value": "T"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "1000"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "403 - Admin Activity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{consumerToken}}"
+							}
+						],
+						"url": {
+							"raw": "https://{{tgdex-audit}}/dx/auditing/admin/activity?userId&starttime&endtime&page=1&size=1000",
+							"protocol": "https",
+							"host": [
+								"{{tgdex-audit}}"
+							],
+							"path": [
+								"dx",
+								"auditing",
+								"admin",
+								"activity"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": null
+								},
+								{
+									"key": "starttime",
+									"value": null
+								},
+								{
+									"key": "endtime",
+									"value": null
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "1000"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
