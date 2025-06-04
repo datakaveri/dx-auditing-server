@@ -1,5 +1,7 @@
 package org.cdpg.dx.common;
 
+import static org.cdpg.dx.util.Constants.HEADER_ALLOW_ORIGIN;
+
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
@@ -7,10 +9,6 @@ import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.common.response.DxErrorResponse;
 import org.cdpg.dx.common.util.ExceptionHttpStatusMapper;
 import org.cdpg.dx.common.util.ThrowableUtils;
-
-import java.time.LocalDateTime;
-
-import static org.cdpg.dx.util.Constants.HEADER_ALLOW_ORIGIN;
 
 public class FailureHandler implements Handler<RoutingContext> {
 
@@ -46,9 +44,9 @@ public class FailureHandler implements Handler<RoutingContext> {
       context
           .response()
           .putHeader("Content-Type", "application/json")
-              .putHeader(HEADER_ALLOW_ORIGIN, "*")
-              .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-              .putHeader("Access-Control-Allow-Headers", "Authorization, Content-Type")
+          .putHeader(HEADER_ALLOW_ORIGIN, "*")
+          .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+          .putHeader("Access-Control-Allow-Headers", "Authorization, Content-Type")
           .setStatusCode(status)
           .end(errorResponse.toJson().encode());
     }

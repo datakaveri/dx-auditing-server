@@ -4,7 +4,7 @@ import io.vertx.core.Future;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLog;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLogRequest;
 import org.cdpg.dx.common.request.PaginatedRequest;
-import org.cdpg.dx.database.postgres.models.PagedResult;
+import org.cdpg.dx.database.postgres.models.PaginatedResult;
 
 public interface ActivityService {
   /**
@@ -13,14 +13,14 @@ public interface ActivityService {
    * @param activityLogRequest The ID of the user for whom the activity log is to be fetched.
    * @return A Future containing the activity log for the specified user.
    */
-  Future<PagedResult<ActivityLog>> getActivityLogByUserId(ActivityLogRequest activityLogRequest);
+  Future<PaginatedResult<ActivityLog>> getActivityLogByUserId(ActivityLogRequest activityLogRequest);
 
   /**
    * This method is used to get all activity logs for admin users.
    *
    * @return A Future containing a list of all activity logs.
    */
-  Future<PagedResult<ActivityLog>> getAllActivityLogsForAdmin(PaginatedRequest paginatedRequest);
+  Future<PaginatedResult<ActivityLog>> getAllActivityLogsForAdmin(PaginatedRequest paginatedRequest);
 
   /**
    * This method is used to create a new activity log.
@@ -36,5 +36,5 @@ public interface ActivityService {
    * @param paginatedRequest The paginated request containing filter and pagination information.
    * @return A `Future` containing the paginated activity logs for the consumer.
    */
-  Future<PagedResult<ActivityLog>> getActivityLogForConsumer(PaginatedRequest paginatedRequest);
+  Future<PaginatedResult<ActivityLog>> getActivityLogForConsumer(PaginatedRequest paginatedRequest);
 }
