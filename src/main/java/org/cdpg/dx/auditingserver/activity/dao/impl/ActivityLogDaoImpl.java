@@ -13,7 +13,8 @@ import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.auditingserver.activity.dao.ActivityLogDao;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLog;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLogRequest;
-import org.cdpg.dx.database.postgres.models.PagedResult;
+import org.cdpg.dx.common.util.PaginationInfo;
+import org.cdpg.dx.database.postgres.models.PaginatedResult;
 import org.cdpg.dx.common.exception.BaseDxException;
 import org.cdpg.dx.database.postgres.base.dao.AbstractBaseDAO;
 import org.cdpg.dx.database.postgres.models.Condition;
@@ -34,7 +35,7 @@ public class ActivityLogDaoImpl extends AbstractBaseDAO<ActivityLog> implements 
   }
 
   @Override
-  public Future<PagedResult<ActivityLog>> getAllActivityLogsByUserId(ActivityLogRequest req) {
+  public Future<PaginatedResult<ActivityLog>> getAllActivityLogsByUserId(ActivityLogRequest req) {
     LOGGER.info("getAllActivityLogsByUserId() started with request: {}", req.getUserId());
 
     int page = req.getPage() > 0 ? req.getPage() : 1;
@@ -90,7 +91,7 @@ public class ActivityLogDaoImpl extends AbstractBaseDAO<ActivityLog> implements 
   }
 
   @Override
-  public Future<PagedResult<ActivityLog>> getAllActivityLogsForAdmin(ActivityLogRequest req) {
+  public Future<PaginatedResult<ActivityLog>> getAllActivityLogsForAdmin(ActivityLogRequest req) {
     LOGGER.info("getAllActivityLogsForAdmin() called");
 
     int page = req.getPage() > 0 ? req.getPage() : 1;
@@ -155,7 +156,7 @@ public class ActivityLogDaoImpl extends AbstractBaseDAO<ActivityLog> implements 
         .collect(Collectors.toList());
   }
 
-  private PagedResult<ActivityLog> toPaginatedResult(QueryResult result, int page, int size) {
+  private PaginatedResult<ActivityLog> toPaginatedResult(QueryResult result, int page, int size) {
     List<ActivityLog> entities =
         result.getRows().stream()
             .map(row -> fromJson.apply((JsonObject) row))
@@ -165,6 +166,8 @@ public class ActivityLogDaoImpl extends AbstractBaseDAO<ActivityLog> implements 
     boolean hasNext = page < totalPages;
     boolean hasPrevious = page > 1;
 
-    return new PagedResult<>(page, size, totalCount, totalPages, hasNext, hasPrevious, entities);
+    PaginationInfo paginationInfo =
+        new PaginationInfo(page, size, totalCount, totalPages, hasNext, hasPrevious);
+    return new PaginatedResult<>(paginationInfo, entities);
   }
 }

@@ -2,14 +2,13 @@ openapi: 3.0.3
 info:
   version: 1.0.0
   title: Telangana-Data-Exchange-Auditing
-  description: |
-
+  description: >
     # Introduction
-    
-      The **Telangana Data Exchange (TgDeX) Auditing Server** offers a set of secure and standardized HTTP APIs for recording and retrieving audit logs across the TgDeX platform. 
-      It functions as a centralized repository to track both user and system activities, enabling support for compliance, operational monitoring, and traceability.
-      The auditing server ingests activity data streamed from various TgDeX components and ensures secure, structured, and efficient storage. 
-      It exposes these audit logs through well-defined API endpoints, making them accessible for administrative review and analytical use.
+
+    The **Telangana Data Exchange (TgDeX) Auditing Server** offers a set of secure and standardized HTTP APIs for recording and retrieving audit logs across the TgDeX platform.
+    It functions as a centralized repository to track both user and system activities, enabling support for compliance, operational monitoring, and traceability.
+    The auditing server ingests activity data streamed from various TgDeX components and ensures secure, structured, and efficient storage.
+    It exposes these audit logs through well-defined API endpoints, making them accessible for administrative review and analytical use.
 
   contact:
     name: For support contact CDPG Team at
@@ -20,15 +19,15 @@ info:
 
 tags:
   - name: Activity Logs
-    x-displayName: "Activity logs"
-    description: |
+    x-displayName: "Activity Logs"
+    description: >
       APIs for managing activity logs in the Telangana Data Exchange (TgDeX) platform.
       These APIs allow users to retrieve their own activity logs as well as administrative logs for auditing purposes.
       The endpoints support filtering by time range and pagination, and they also provide CSV export functionality for both consumer and admin activity logs.
 
   - name: Report
     x-displayName: "Report"
-    description: |
+    description: >
       APIs for generating CSV reports of activity logs.
       These endpoints allow administrators and consumers to download activity logs in CSV format for offline analysis and reporting.
 
@@ -51,20 +50,56 @@ components:
         type: string
         format: uuid
         pattern: '^[0-9a-f]{8}\b-[0-9a-f]{4}\b-[0-9a-f]{4}\b-[0-9a-f]{4}\b-[0-9a-f]{12}$'
-    StartTimeParam:
-      name: starttime
+
+    TimeParam:
+      name: time
       in: query
-      description: ISO8601 formatted start time
+      description: 'This parameter specifies the <b>start time</b> for the temporal-query in `ISO8601` format.'
       schema:
         type: string
         #format: date-time
+
     EndTimeParam:
       name: endtime
       in: query
-      description: ISO8601 formatted end time
+      description: 'This parameter specifies the <b>endtime</b> for the temporal-query in `ISO8601` format.'
       schema:
         type: string
         #format: date-time
+
+    TimeRelParam:
+      name: timerel
+      in: query
+      description: >
+        The temporal relation type to be applied for the time filter.
+        Must be one of: <b>between</b>, <b>before</b>, or <b>after</b>.
+        <b>between</b> must be used with both `time` and `endtime`.
+        <b>before</b> or <b>after</b> must be used with only `time`.
+      required: false
+      schema:
+        type: string
+        enum: [ "between", "before", "after" ]
+
+    AssetTypeParam:
+      name: assetType
+      in: query
+      description: >
+        The type of asset to filter the activity logs.
+        This parameter allows filtering by specific asset types.
+      required: false
+      schema:
+        type: string
+
+    OperationParam:
+      name: operation
+      in: query
+      description: >
+        The type of operation to filter the activity logs.
+        This parameter allows filtering by specific operations, such as `View`, `created`, etc.
+      required: false
+      schema:
+        type: string
+
     PageParam:
       name: page
       in: query
@@ -74,6 +109,7 @@ components:
         type: integer
         default: 1
         minimum: 1
+
     SizeParam:
       name: size
       in: query
@@ -85,7 +121,6 @@ components:
         minimum: 1
 
   schemas:
-
     AuditActivitySuccessResponse:
       type: object
       properties:
@@ -171,7 +206,6 @@ components:
           type: boolean
           example: false
 
-
     UnauthorizedResponse:
       type: object
       properties:
@@ -230,14 +264,17 @@ paths:
       tags:
         - Activity Logs
       operationId: get-ActivityLogs-for-consumer
-      summary: consumer activity
+      summary: Consumer Activity
       description: >
         Retrieve a list of activity logs for the authenticated DX user.
-        This endpoint allows users to view their own activity and filter logs based on a specified time range (starttime, endtime).
+        This endpoint allows users to view their own activity and filter logs based on <b>assetType</b>, <b>operation</b> and a specified time range (time, endtime).
         Pagination is supported for large result sets.
       parameters:
-        - $ref: '#/components/parameters/StartTimeParam'
+        - $ref: '#/components/parameters/AssetTypeParam'
+        - $ref: '#/components/parameters/OperationParam'
+        - $ref: '#/components/parameters/TimeParam'
         - $ref: '#/components/parameters/EndTimeParam'
+        - $ref: '#/components/parameters/TimeRelParam'
         - $ref: '#/components/parameters/PageParam'
         - $ref: '#/components/parameters/SizeParam'
       responses:
@@ -283,16 +320,19 @@ paths:
       tags:
         - Activity Logs
       operationId: get-activityLogs-for-admin
-      summary: admin activity
+      summary: Admin Activity
       description: >
         Retrieve a list of activity logs for DX users.
-        This endpoint allows filtering activity logs based on userId and a specified time range (starttime, endtime).
+        This endpoint allows filtering activity logs based on <b>userId</b>,<b>assetType</b>, <b>operation</b> and a specified time range (time, endtime).
         Use this API to get detailed audit records for administrative purposes, including pagination support for large result sets.
 
       parameters:
         - $ref: '#/components/parameters/UserIdParam'
-        - $ref: '#/components/parameters/StartTimeParam'
+        - $ref: '#/components/parameters/AssetTypeParam'
+        - $ref: '#/components/parameters/OperationParam'
+        - $ref: '#/components/parameters/TimeParam'
         - $ref: '#/components/parameters/EndTimeParam'
+        - $ref: '#/components/parameters/TimeRelParam'
         - $ref: '#/components/parameters/PageParam'
         - $ref: '#/components/parameters/SizeParam'
       responses:
@@ -416,3 +456,4 @@ paths:
           source: |
             curl --location 'https://example-auditing.com/dx/auditing/reportactivity/consumer' \
             --header 'Authorization: Bearer <your-token>'
+

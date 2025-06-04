@@ -1,5 +1,7 @@
 package org.cdpg.dx.common.util;
 
+import io.vertx.ext.web.validation.BodyProcessorException;
+import io.vertx.ext.web.validation.ParameterProcessorException;
 import org.cdpg.dx.auth.authentication.exception.AuthenticationException;
 import org.cdpg.dx.common.HttpStatusCode;
 import org.cdpg.dx.common.exception.*;
@@ -13,6 +15,8 @@ public class ExceptionHttpStatusMapper {
       case UniqueConstraintViolationException e -> HttpStatusCode.CONFLICT;
       case AuthenticationException e -> HttpStatusCode.UNAUTHORIZED;
       case DxForbiddenException e -> HttpStatusCode.FORBIDDEN;
+      case BodyProcessorException e -> HttpStatusCode.BAD_REQUEST;
+      case ParameterProcessorException e -> HttpStatusCode.BAD_REQUEST;
       case DxBadRequestException e -> HttpStatusCode.BAD_REQUEST;
       case BaseDxException e -> HttpStatusCode.BAD_REQUEST;
       default -> HttpStatusCode.INTERNAL_SERVER_ERROR;

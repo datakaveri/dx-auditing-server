@@ -16,9 +16,10 @@ import org.cdpg.dx.common.exception.BaseDxException;
 import org.cdpg.dx.common.exception.DxPgException;
 import org.cdpg.dx.common.exception.NoRowFoundException;
 import org.cdpg.dx.common.request.PaginatedRequest;
+import org.cdpg.dx.common.util.PaginationInfo;
 import org.cdpg.dx.database.postgres.base.entity.BaseEntity;
 import org.cdpg.dx.database.postgres.models.*;
-import org.cdpg.dx.database.postgres.models.PagedResult;
+import org.cdpg.dx.database.postgres.models.PaginatedResult;
 import org.cdpg.dx.database.postgres.service.PostgresService;
 import org.cdpg.dx.database.postgres.util.DxPgExceptionMapper;
 
@@ -194,10 +195,10 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
   }
 
   @Override
-  public Future<PagedResult<T>> get(UUID id, PaginationInfo paginationInfo) {
+  public Future<PaginatedResult<T>> get(UUID id, PageInfo pageInfo) {
 
-    int page = paginationInfo.getPage() > 0 ? paginationInfo.getPage() : 1;
-    int size = paginationInfo.getSize() > 0 ? paginationInfo.getSize() : 10;
+    int page = pageInfo.getPage() > 0 ? pageInfo.getPage() : 1;
+    int size = pageInfo.getSize() > 0 ? pageInfo.getSize() : 10;
     int offset = (page - 1) * size;
 
     Condition condition =
@@ -223,10 +224,10 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
   }
 
   @Override
-  public Future<PagedResult<T>> getAll(PaginationInfo paginationInfo) {
+  public Future<PaginatedResult<T>> getAll(PageInfo pageInfo) {
 
-    int page = paginationInfo.getPage() > 0 ? paginationInfo.getPage() : 1;
-    int size = paginationInfo.getSize() > 0 ? paginationInfo.getSize() : 10;
+    int page = pageInfo.getPage() > 0 ? pageInfo.getPage() : 1;
+    int size = pageInfo.getSize() > 0 ? pageInfo.getSize() : 10;
     int offset = (page - 1) * size;
 
     SelectQuery query = new SelectQuery(tableName, List.of("*"), null, null, null, size, offset);
@@ -249,11 +250,11 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
   }
 
   @Override
-  public Future<PagedResult<T>> getAllWithFilters(
-      Map<String, Object> filters, PaginationInfo paginationInfo) {
+  public Future<PaginatedResult<T>> getAllWithFilters(
+      Map<String, Object> filters, PageInfo pageInfo) {
 
-    int page = paginationInfo.getPage() > 0 ? paginationInfo.getPage() : 1;
-    int size = paginationInfo.getSize() > 0 ? paginationInfo.getSize() : 10;
+    int page = pageInfo.getPage() > 0 ? pageInfo.getPage() : 1;
+    int size = pageInfo.getSize() > 0 ? pageInfo.getSize() : 10;
     int offset = (page - 1) * size;
     Condition condition =
         filters.entrySet().stream()
@@ -280,7 +281,7 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
             });
   }
 
-  public Future<PagedResult<T>> getAllWithFilters(PaginatedRequest request) {
+  public Future<PaginatedResult<T>> getAllWithFilters(PaginatedRequest request) {
     int page = request.page() > 0 ? request.page() : 1;
     int size = request.size() > 0 ? request.size() : 10;
     int offset = (page - 1) * size;
@@ -303,7 +304,7 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
             });
   }
 
-  private PagedResult<T> toPaginatedResult(QueryResult result, int page, int size) {
+  private PaginatedResult<T> toPaginatedResult(QueryResult result, int page, int size) {
     List<T> entities =
         result.getRows().stream()
             .map(row -> fromJson.apply((JsonObject) row))
@@ -313,6 +314,8 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
     boolean hasNext = page < totalPages;
     boolean hasPrevious = page > 1;
 
-    return new PagedResult<>(page, size, totalCount, totalPages, hasNext, hasPrevious, entities);
+    PaginationInfo paginationInfo =
+        new PaginationInfo(page, size, totalCount, totalPages, hasNext, hasPrevious);
+    return new PaginatedResult<>(paginationInfo, entities);
   }
 }

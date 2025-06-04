@@ -1,5 +1,6 @@
 package org.cdpg.dx.auditingserver.apiserver;
 
+import static org.cdpg.dx.auditingserver.activity.util.ActivityConstants.allowedQueryParamsForConsumer;
 import static org.cdpg.dx.common.config.ServiceProxyAddressConstants.*;
 
 import io.vertx.core.Vertx;
@@ -13,6 +14,7 @@ import org.cdpg.dx.auditingserver.activity.service.ActivityService;
 import org.cdpg.dx.auditingserver.report.controller.ReportController;
 import org.cdpg.dx.auditingserver.report.factory.ReportFactory;
 import org.cdpg.dx.auditingserver.report.service.ReportService;
+import org.cdpg.dx.common.validator.QueryParamValidationHandler;
 import org.cdpg.dx.database.postgres.service.PostgresService;
 
 public class ControllerFactory {

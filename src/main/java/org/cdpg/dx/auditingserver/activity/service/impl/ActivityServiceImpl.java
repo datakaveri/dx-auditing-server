@@ -8,7 +8,7 @@ import org.cdpg.dx.auditingserver.activity.model.ActivityLog;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLogRequest;
 import org.cdpg.dx.auditingserver.activity.service.ActivityService;
 import org.cdpg.dx.common.request.PaginatedRequest;
-import org.cdpg.dx.database.postgres.models.PagedResult;
+import org.cdpg.dx.database.postgres.models.PaginatedResult;
 
 public class ActivityServiceImpl implements ActivityService {
   private static final Logger LOGGER = LogManager.getLogger(ActivityServiceImpl.class);
@@ -19,13 +19,13 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
-  public Future<PagedResult<ActivityLog>> getActivityLogByUserId(
+  public Future<PaginatedResult<ActivityLog>> getActivityLogByUserId(
       ActivityLogRequest activityLogRequest) {
     return activityLogDAO.getAllActivityLogsByUserId(activityLogRequest);
   }
 
   @Override
-  public Future<PagedResult<ActivityLog>> getAllActivityLogsForAdmin(
+  public Future<PaginatedResult<ActivityLog>> getAllActivityLogsForAdmin(
       PaginatedRequest paginatedRequest) {
     return activityLogDAO.getAllWithFilters(paginatedRequest);
   }
@@ -36,7 +36,7 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
-  public Future<PagedResult<ActivityLog>> getActivityLogForConsumer(
+  public Future<PaginatedResult<ActivityLog>> getActivityLogForConsumer(
       PaginatedRequest paginatedRequest) {
     return activityLogDAO.getAllWithFilters(paginatedRequest);
   }

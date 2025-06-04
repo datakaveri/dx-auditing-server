@@ -3,6 +3,7 @@ package org.cdpg.dx.common.response;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import org.cdpg.dx.common.HttpStatusCode;
+import org.cdpg.dx.common.util.PaginationInfo;
 
 public class ResponseBuilder {
 

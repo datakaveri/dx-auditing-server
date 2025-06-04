@@ -1,6 +1,4 @@
-package org.cdpg.dx.common.response;
-
-import org.cdpg.dx.database.postgres.models.PagedResult;
+package org.cdpg.dx.common.util;
 
 public class PaginationInfo {
   private int page;
@@ -18,16 +16,6 @@ public class PaginationInfo {
     this.totalPages = totalPages;
     this.hasNext = hasNext;
     this.hasPrevious = hasPrevious;
-  }
-
-  public static PaginationInfo fromPagedResult(PagedResult<?> pagedResult) {
-    return new PaginationInfo(
-        pagedResult.page(),
-        pagedResult.size(),
-        pagedResult.totalCount(),
-        pagedResult.totalPages(),
-        pagedResult.hasNext(),
-        pagedResult.hasPrevious());
   }
 
   public int getPage() {

@@ -1,10 +1,10 @@
 package org.cdpg.dx.database.postgres.models;
 
-public class PaginationInfo {
+public class PageInfo {
   int page;
   int size;
 
-  public PaginationInfo(int page, int size) {
+  public PageInfo(int page, int size) {
     this.page = page;
     this.size = size;
   }

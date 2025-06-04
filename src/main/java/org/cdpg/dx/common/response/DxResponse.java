@@ -1,6 +1,7 @@
 package org.cdpg.dx.common.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.cdpg.dx.common.util.PaginationInfo;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DxResponse<T> {
