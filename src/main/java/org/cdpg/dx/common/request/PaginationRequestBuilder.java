@@ -18,7 +18,7 @@ public class PaginationRequestBuilder {
    * @param allowedTimeFields The field representing the time in the request (e.g., "created_at").
    * @return A PaginatedRequest object containing pagination, filters, and temporal requests.
    */
-  public static PaginatedRequest builder(
+  public static PaginatedRequest fromRoutingContext(
       RoutingContext ctx,
       Set<String> allowedFilterKeys,
       Map<String, String> apiToDbMap,

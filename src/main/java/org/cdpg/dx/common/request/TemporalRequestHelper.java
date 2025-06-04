@@ -10,16 +10,6 @@ import org.cdpg.dx.common.exception.DxBadRequestException;
 public class TemporalRequestHelper {
   private static final Logger LOGGER = LogManager.getLogger(TemporalRequestHelper.class);
 
-  /**
-   * Builds a TemporalRequest based on the provided parameters.
-   *
-   * @param timeField The field representing the time in the request.
-   * @param timeRel The relationship of the time (e.g., "before", "after", "between", "during").
-   * @param time The start time for the request.
-   * @param endtime The end time for the request (optional, required for "between" and "during").
-   * @return A TemporalRequest object or null if no valid relationship is provided.
-   * @throws DxBadRequestException if the parameters are invalid.
-   */
   public static TemporalRequest buildTemporalRequest(
       String timeField, String timeRel, String time, String endtime) {
 
@@ -56,6 +46,9 @@ public class TemporalRequestHelper {
       LocalDateTime t2 = LocalDateTime.parse(endtime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
       return !t1.isAfter(t2);
     } catch (DateTimeParseException e) {
+      LOGGER.error(
+          "Invalid datetime format. Expected ISO format (e.g., '2025-06-04T12:30:00') : {}",
+          e.getMessage());
       throw new DxBadRequestException("Invalid datetime format: " + e.getMessage());
     }
   }

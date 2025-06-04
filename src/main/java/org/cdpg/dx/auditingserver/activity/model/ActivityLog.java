@@ -23,6 +23,7 @@ public record ActivityLog(
     String role,
     UUID userId,
     String originServer,
+    String shortDescription,
     Boolean myactivityEnabled)
     implements BaseEntity<ActivityLog> {
 
@@ -40,6 +41,7 @@ public record ActivityLog(
         json.getString(ActivityConstants.ROLE),
         EntityUtil.parseUUID(json.getString(ActivityConstants.USER_ID)),
         json.getString(ActivityConstants.ORIGIN_SERVER),
+        json.getString(ActivityConstants.SHORT_DESCRIPTION),
         json.getBoolean(ActivityConstants.MYACTIVITY_ENABLED, null));
   }
 
@@ -58,6 +60,7 @@ public record ActivityLog(
     EntityUtil.putIfNonEmpty(map, ActivityConstants.ROLE, role);
     EntityUtil.putIfNonEmpty(map, ActivityConstants.USER_ID, userId.toString());
     EntityUtil.putIfNonEmpty(map, ActivityConstants.ORIGIN_SERVER, originServer);
+    EntityUtil.putIfNonEmpty(map, ActivityConstants.SHORT_DESCRIPTION, shortDescription);
     EntityUtil.putIfNonEmpty(map, ActivityConstants.MYACTIVITY_ENABLED, myactivityEnabled);
     return map;
   }
@@ -77,6 +80,7 @@ public record ActivityLog(
     putIfNonEmpty(json, ActivityConstants.ROLE, role);
     putIfNonEmpty(json, ActivityConstants.USER_ID, userId.toString());
     putIfNonEmpty(json, ActivityConstants.ORIGIN_SERVER, originServer);
+    putIfNonEmpty(json, ActivityConstants.SHORT_DESCRIPTION, shortDescription);
     putIfNonEmpty(json, ActivityConstants.MYACTIVITY_ENABLED, myactivityEnabled);
     return json;
   }
