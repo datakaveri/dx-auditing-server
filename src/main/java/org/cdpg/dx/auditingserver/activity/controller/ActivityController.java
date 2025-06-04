@@ -55,7 +55,7 @@ public class ActivityController implements ApiController {
     Set<String> allowedTimeFields = Set.of("created_at");
 
     PaginatedRequest request =
-        PaginationRequestBuilder.builder(
+        PaginationRequestBuilder.fromRoutingContext(
             context,
             allowedFilters,
             apiToDbMap,
@@ -69,6 +69,7 @@ public class ActivityController implements ApiController {
         .getActivityLogForConsumer(request)
         .onSuccess(
             pagedResult -> {
+              LOGGER.info("Successfully fetched activity logs for user: {}", user.subject());
               ResponseBuilder.sendSuccess(
                   context, pagedResult.data(), PaginationInfo.fromPagedResult(pagedResult));
             })
@@ -90,7 +91,7 @@ public class ActivityController implements ApiController {
     Set<String> allowedTimeFields = Set.of("created_at");
 
     PaginatedRequest request =
-        PaginationRequestBuilder.builder(
+        PaginationRequestBuilder.fromRoutingContext(
             context, allowedFilters, apiToDbMap, null, allowedTimeFields, "created_at");
 
     LOGGER.info("PaginatedRequest created for handleGetAllActivityLogsForAdmin:  {}", request);
@@ -99,6 +100,7 @@ public class ActivityController implements ApiController {
         .getAllActivityLogsForAdmin(request)
         .onSuccess(
             pagedResult -> {
+              LOGGER.info("Successfully fetched all activity logs for admin");
               ResponseBuilder.sendSuccess(
                   context, pagedResult.data(), PaginationInfo.fromPagedResult(pagedResult));
             })

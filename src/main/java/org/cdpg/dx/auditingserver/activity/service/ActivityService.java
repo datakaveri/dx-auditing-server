@@ -20,8 +20,7 @@ public interface ActivityService {
    *
    * @return A Future containing a list of all activity logs.
    */
-  Future<PagedResult<ActivityLog>> getAllActivityLogsForAdmin(
-      PaginatedRequest paginatedRequest);
+  Future<PagedResult<ActivityLog>> getAllActivityLogsForAdmin(PaginatedRequest paginatedRequest);
 
   /**
    * This method is used to create a new activity log.
