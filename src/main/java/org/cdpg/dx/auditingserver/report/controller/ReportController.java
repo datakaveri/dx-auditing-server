@@ -28,7 +28,6 @@ public class ReportController implements ApiController {
 
   @Override
   public void register(RouterBuilder builder) {
-
     Handler<RoutingContext> adminAccessHandler =
         AuthorizationHandler.forRoles(DxRole.ORG_ADMIN, DxRole.COS_ADMIN);
     Handler<RoutingContext> consumerAccessHandler = AuthorizationHandler.forRoles(DxRole.CONSUMER);
