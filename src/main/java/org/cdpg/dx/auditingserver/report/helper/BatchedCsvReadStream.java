@@ -7,18 +7,20 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.ReadStream;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.UUID;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.auditingserver.report.dao.ActivityLogDao;
+import org.cdpg.dx.common.exception.CsvLimitExceedNoRecordFound;
+import org.cdpg.dx.common.request.PaginatedRequest;
+import org.cdpg.dx.database.postgres.models.PaginatedResult;
 
 public class BatchedCsvReadStream implements ReadStream<Buffer> {
+  private static final Logger LOGGER = LogManager.getLogger(BatchedCsvReadStream.class);
   private final ActivityLogDao dao;
   private final CsvGenerator generator;
   private final Vertx vertx;
-  private final int limit;
-  private final long totalCount;
   private final Queue<Buffer> bufferQueue = new LinkedList<>();
-  private final String userId;
-  private int offset;
+  private PaginatedRequest paginatedRequest;
   private boolean writeHeader = true;
   private Handler<Buffer> dataHandler;
   private Handler<Void> endHandler;
@@ -27,46 +29,41 @@ public class BatchedCsvReadStream implements ReadStream<Buffer> {
   private boolean ended = false;
 
   public BatchedCsvReadStream(
-      ActivityLogDao dao,
-      CsvGenerator generator,
-      Vertx vertx,
-      int limit,
-      long totalCount,
-      int offset,
-      UUID userId) {
+      ActivityLogDao dao, CsvGenerator generator, Vertx vertx, PaginatedRequest paginatedRequest) {
     this.dao = dao;
     this.generator = generator;
     this.vertx = vertx;
-    this.limit = limit;
-    this.totalCount = totalCount;
-    this.offset = offset;
-    if (userId == null) {
-      this.userId = null;
-    } else {
-      this.userId = userId.toString();
-    }
+    this.paginatedRequest = paginatedRequest;
     fetchNextBatch();
   }
 
   private void fetchNextBatch() {
-    if (offset >= totalCount) {
-      ended = true;
-      if (endHandler != null) endHandler.handle(null);
+    if (ended) {
       return;
     }
-
-    dao.getCsvGeneratedByPaginated(limit, offset, userId)
+    dao.getAllWithFilters(paginatedRequest)
         .compose(
             batch -> {
-              if (batch.isEmpty()) {
-                offset += limit;
-                fetchNextBatch();
-                return Future.failedFuture("empty");
+              LOGGER.trace(
+                  "page {} and size {} totalCount {} totalPages {}",
+                  batch.paginationInfo().getPage(),
+                  batch.paginationInfo().getSize(),
+                  batch.paginationInfo().getTotalCount(),
+                  batch.paginationInfo().getTotalPages());
+
+              if (batch.data().isEmpty()) {
+                ended = true;
+                return Future.failedFuture(
+                    new CsvLimitExceedNoRecordFound("No data available for CSV generation"));
               }
-              return generator.toCsvStream(batch, vertx, writeHeader);
+              return generator
+                  .toCsvStream(batch.data(), vertx, writeHeader)
+                  .map(csvStream -> new Object[] {batch, csvStream});
             })
         .onSuccess(
-            csvStream -> {
+            pair -> {
+              var batch = (PaginatedResult<?>) pair[0];
+              var csvStream = (ReadStream<Buffer>) pair[1];
               writeHeader = false;
               csvStream.handler(
                   buffer -> {
@@ -78,21 +75,35 @@ public class BatchedCsvReadStream implements ReadStream<Buffer> {
                   });
               csvStream.endHandler(
                   v -> {
-                    offset += limit;
-                    if (!paused) {
-                      fetchNextBatch();
+                    if (batch.paginationInfo().isHasNext()) {
+                      paginatedRequest =
+                          new PaginatedRequest(
+                              batch.paginationInfo().getPage() + 1,
+                              batch.paginationInfo().getSize(),
+                              paginatedRequest.filters(),
+                              paginatedRequest.temporalRequests());
+                      if (!paused) {
+                        fetchNextBatch();
+                      }
+                    } else {
+                      ended = true;
+                      if (endHandler != null) endHandler.handle(null);
                     }
                   });
               csvStream.exceptionHandler(
                   e -> {
-                    if (exceptionHandler != null) exceptionHandler.handle(e);
+                    if (exceptionHandler != null)
+                      exceptionHandler.handle(
+                          new CsvLimitExceedNoRecordFound("No data available for CSV generation"));
                   });
             })
         .onFailure(
             e -> {
-              if (!"empty".equals(e.getMessage()) && exceptionHandler != null) {
-                exceptionHandler.handle(e);
+              if (exceptionHandler != null) {
+                exceptionHandler.handle(
+                    new CsvLimitExceedNoRecordFound("Error in CSV generation: " + e.getMessage()));
               }
+              ended = true;
             });
   }
 
@@ -123,7 +134,7 @@ public class BatchedCsvReadStream implements ReadStream<Buffer> {
             while (!paused && !bufferQueue.isEmpty() && dataHandler != null) {
               dataHandler.handle(bufferQueue.poll());
             }
-            if (!paused && !ended && offset < totalCount) {
+            if (!paused && !ended) {
               fetchNextBatch();
             }
           });
