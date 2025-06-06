@@ -41,6 +41,9 @@ public class ReportController implements ApiController {
   private void handleGenerateCsvForAdmin(RoutingContext routingContext) {
     HttpServerResponse response = routingContext.response();
     response
+        .putHeader("Access-Control-Allow-Origin", "*")
+        .putHeader("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        .putHeader("Access-Control-Allow-Methods", "GET, POST,PUT, DELETE, OPTIONS")
         .putHeader("Content-Type", "text/csv")
         .putHeader("Content-Disposition", "attachment; filename=\"admin_report.csv\"")
         .setChunked(true);
@@ -71,6 +74,9 @@ public class ReportController implements ApiController {
   private void handleGenerateCsvForConsumer(RoutingContext routingContext) {
     HttpServerResponse response = routingContext.response();
     response
+        .putHeader("Access-Control-Allow-Origin", "*")
+        .putHeader("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        .putHeader("Access-Control-Allow-Methods", "GET, POST,PUT, DELETE, OPTIONS")
         .putHeader("Content-Type", "text/csv")
         .putHeader("Content-Disposition", "attachment; filename=\"consumer_report.csv\"")
         .setChunked(true);
