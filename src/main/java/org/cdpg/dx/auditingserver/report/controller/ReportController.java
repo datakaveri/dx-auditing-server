@@ -1,5 +1,6 @@
 package org.cdpg.dx.auditingserver.report.controller;
 
+import static org.cdpg.dx.auditingserver.activity.util.ActivityConstants.API_TO_DB_MAP;
 import static org.cdpg.dx.auditingserver.report.util.ActivityConstants.*;
 
 import io.vertx.core.Handler;
@@ -17,6 +18,7 @@ import org.cdpg.dx.auth.authorization.handler.AuthorizationHandler;
 import org.cdpg.dx.auth.authorization.model.DxRole;
 import org.cdpg.dx.common.request.PaginatedRequest;
 import org.cdpg.dx.common.request.PaginationRequestBuilder;
+import org.cdpg.dx.common.request.PaginationRequestConfig;
 
 public class ReportController implements ApiController {
   private static final Logger LOGGER = LogManager.getLogger(ReportController.class);
@@ -53,15 +55,20 @@ public class ReportController implements ApiController {
         .setChunked(true);
 
     Set<String> allowedTimeFields = Set.of("created_at");
+    Set<String> allowedSortFields = Set.of("createdAt", "userId", "assetType", "operation");
 
-    PaginatedRequest request =
-        PaginationRequestBuilder.fromRoutingContext(
-            routingContext,
-            ALLOW_FILTER_ADMIN,
-            API_TO_DB_MAP_ADMIN,
-            null,
-            allowedTimeFields,
-            "created_at");
+    PaginationRequestConfig config =
+        new PaginationRequestConfig.Builder()
+            .ctx(routingContext)
+            .allowedFilterKeys(ALLOW_FILTER_ADMIN)
+            .apiToDbMap(API_TO_DB_MAP)
+            .allowedTimeFields(allowedTimeFields)
+            .defaultTimeField("created_at")
+            .defaultSortBy("created_at")
+            .defaultOrder("desc")
+            .allowedSortFields(allowedSortFields)
+            .build();
+    PaginatedRequest request = PaginationRequestBuilder.fromRoutingContext(config);
 
     LOGGER.info("PaginatedRequest created for handleGetAllActivityLogsForAdmin:  {}", request);
     reportService
@@ -100,17 +107,26 @@ public class ReportController implements ApiController {
 
     Set<String> allowedFilters = Set.of("assetType", "operation", "assetname", "api", "role");
     Set<String> allowedTimeFields = Set.of("created_at");
-
     User user = routingContext.user();
     Map<String, String> additionalFilters = Map.of("user_id", user.subject());
-    PaginatedRequest request =
-        PaginationRequestBuilder.fromRoutingContext(
-            routingContext,
-            allowedFilters,
-            API_TO_DB_MAP_CONSUMER,
-            additionalFilters,
-            allowedTimeFields,
-            "created_at");
+
+    Set<String> allowedSortFields = Set.of("createdAt", "userId", "assetType", "operation");
+
+    PaginationRequestConfig config =
+        new PaginationRequestConfig.Builder()
+            .ctx(routingContext)
+            .allowedFilterKeys(allowedFilters)
+            .apiToDbMap(API_TO_DB_MAP)
+            .additionalFilters(additionalFilters)
+            .allowedTimeFields(allowedTimeFields)
+            .defaultTimeField("created_at")
+            .defaultSortBy("created_at")
+            .defaultOrder("DESC")
+            .allowedSortFields(allowedSortFields)
+            .build();
+
+    PaginatedRequest request = PaginationRequestBuilder.fromRoutingContext(config);
+
     reportService
         .streamConsumerCsvBatched(request)
         .onSuccess(

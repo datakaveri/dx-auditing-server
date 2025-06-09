@@ -1,7 +1,6 @@
 package org.cdpg.dx.auditingserver.activity.controller;
 
-import static org.cdpg.dx.auditingserver.activity.util.ActivityConstants.allowedQueryParamsForAdmin;
-import static org.cdpg.dx.auditingserver.activity.util.ActivityConstants.allowedQueryParamsForConsumer;
+import static org.cdpg.dx.auditingserver.activity.util.ActivityConstants.*;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.auth.User;
@@ -38,7 +37,7 @@ public class ActivityController implements ApiController {
         new QueryParamValidationHandler(allowedQueryParamsForAdmin);
 
     Handler<RoutingContext> adminAccessHandler =
-        AuthorizationHandler.forRoles(DxRole.ORG_ADMIN, DxRole.ORG_ADMIN);
+        AuthorizationHandler.forRoles(DxRole.ORG_ADMIN, DxRole.COS_ADMIN);
     Handler<RoutingContext> consumerAccessHandler = AuthorizationHandler.forRoles(DxRole.CONSUMER);
 
     builder
@@ -49,7 +48,7 @@ public class ActivityController implements ApiController {
     builder
         .operation("get-activityLogs-for-admin")
         .handler(adminParamValidationHandler)
-        // .handler(adminAccessHandler)
+        .handler(adminAccessHandler)
         .handler(this::handleGetAllActivityLogsForAdmin);
   }
 
@@ -59,19 +58,17 @@ public class ActivityController implements ApiController {
     User user = context.user();
 
     Set<String> allowedFilters = Set.of("userId", "assetType", "operation");
-    Map<String, String> apiToDbMap =
-        Map.of("userId", "user_id", "assetType", "asset_type", "operation", "operation");
 
     Map<String, String> additionalFilters = Map.of("user_id", user.subject());
 
     Set<String> allowedTimeFields = Set.of("created_at");
-    Set<String> allowedSortFields = Set.of("created_at", "user_id", "asset_type", "operation");
+    Set<String> allowedSortFields = Set.of("createdAt", "UserId", "assetType", "operation");
 
     PaginationRequestConfig config =
         new PaginationRequestConfig.Builder()
             .ctx(context)
             .allowedFilterKeys(allowedFilters)
-            .apiToDbMap(apiToDbMap)
+            .apiToDbMap(API_TO_DB_MAP)
             .additionalFilters(additionalFilters)
             .allowedTimeFields(allowedTimeFields)
             .defaultTimeField("created_at")
@@ -103,18 +100,14 @@ public class ActivityController implements ApiController {
     LOGGER.info("handleGetAllActivityLogsForAdmin() started");
 
     Set<String> allowedFilters = Set.of("userId", "assetType", "operation");
-    Map<String, String> apiToDbMap =
-        Map.of("userId", "user_id", "assetType", "asset_type", "operation", "operation");
-
     Set<String> allowedTimeFields = Set.of("created_at");
-    Set<String> allowedSortFields = Set.of("created_at", "user_id", "asset_type", "operation");
+    Set<String> allowedSortFields = Set.of("createdAt", "UserId", "assetType", "operation");
 
     PaginationRequestConfig config =
         new PaginationRequestConfig.Builder()
             .ctx(context)
             .allowedFilterKeys(allowedFilters)
-            .apiToDbMap(apiToDbMap)
-            .additionalFilters(null)
+            .apiToDbMap(API_TO_DB_MAP)
             .allowedTimeFields(allowedTimeFields)
             .defaultTimeField("created_at")
             .defaultSortBy("created_at")

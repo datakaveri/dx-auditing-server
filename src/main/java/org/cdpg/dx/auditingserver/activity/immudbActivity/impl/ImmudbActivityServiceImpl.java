@@ -22,8 +22,10 @@ public class ImmudbActivityServiceImpl implements ImmudbActivityService {
   public Future<Void> insertActivityLogIntoImmudb(ImmudbActivityLog activityLogEntity) {
     var columns = activityLogEntity.toNonEmptyFieldsMap().keySet().stream().toList();
     var values = activityLogEntity.toNonEmptyFieldsMap().values().stream().toList();
-    LOGGER.debug("Inserting activity log into immudb with columns: {}, values: {}", columns, values);
-    InsertQuery insertQuery = new InsertQuery().setTable(DB_TABLE_NAME).setColumns(columns).setValues(values);
+    LOGGER.debug(
+        "Inserting activity log into immudb with columns: {}, values: {}", columns, values);
+    InsertQuery insertQuery =
+        new InsertQuery().setTable(DB_TABLE_NAME).setColumns(columns).setValues(values);
     return immudbService.executeQuery(insertQuery).mapEmpty();
   }
 }

@@ -28,7 +28,7 @@ public class PaginationRequestBuilder {
     LOGGER.debug("Extracted order by list: {}", orderByList);
 
     PaginatedRequest request =
-        new PaginatedRequest(page, size, filters, temporalRequests,orderByList);
+        new PaginatedRequest(page, size, filters, temporalRequests, orderByList);
     LOGGER.debug("PaginatedRequest successfully built: {}", request);
     return request;
   }
@@ -143,6 +143,8 @@ public class PaginationRequestBuilder {
         String field = parts[0].trim();
         String direction = parts[1].trim().toLowerCase();
 
+        LOGGER.debug("Processing sort field: '{}', direction: '{}'", field, direction);
+
         if (!config.getAllowedSortFields().contains(field)) {
           LOGGER.warn("Invalid sort field encountered: '{}'", field);
           throw new DxBadRequestException("Invalid sort field: " + field);
@@ -152,7 +154,10 @@ public class PaginationRequestBuilder {
           throw new DxBadRequestException("Invalid sort order: " + direction);
         }
 
-        OrderBy orderBy = new OrderBy(field, OrderBy.Direction.valueOf(direction.toUpperCase()));
+        String dbField = config.getApiToDbMap().get(field);
+        LOGGER.debug("Mapping API sort field '{}' to DB field '{}'", field, dbField);
+
+        OrderBy orderBy = new OrderBy(dbField, OrderBy.Direction.valueOf(direction.toUpperCase()));
         LOGGER.debug("Adding sort order: {}", orderBy);
         orderByList.add(orderBy);
       }

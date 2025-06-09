@@ -81,7 +81,8 @@ public class BatchedCsvReadStream implements ReadStream<Buffer> {
                               batch.paginationInfo().getPage() + 1,
                               batch.paginationInfo().getSize(),
                               paginatedRequest.filters(),
-                              paginatedRequest.temporalRequests());
+                              paginatedRequest.temporalRequests(),
+                              paginatedRequest.orderByList());
                       if (!paused) {
                         fetchNextBatch();
                       }
