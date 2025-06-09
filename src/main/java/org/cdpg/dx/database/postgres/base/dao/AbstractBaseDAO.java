@@ -205,9 +205,9 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
 
   private Future<PaginatedResult<T>> getPaginatedResults(
       PaginatedRequest request, boolean applyFilters) {
-    final int page = Math.max(request.page(), 1);
-    final int size = Math.max(request.size(), 10);
-    final int offset = (page - 1) * size;
+    int page = request.page() > 0 ? request.page() : 1;
+    int size = request.size() > 0 ? request.size() : 10;
+    int offset = (page - 1) * size;
 
     Condition condition = fromFilters(request.filters(), request.temporalRequests());
     List<OrderBy> orderBy = request.orderByList();
