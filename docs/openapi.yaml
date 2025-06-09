@@ -90,6 +90,34 @@ components:
       schema:
         type: string
 
+    AssetNameParam:
+      name: assetname
+      in: query
+      description: >
+        This asset name is used to filter the activity logs.
+        This parameter allows filtering by specific asset name.
+      required: false
+      schema:
+        type: string
+
+    ApiParam:
+      name: api
+      in: query
+      description: >
+        This parameter allows filtering by specific api endpoint name.
+      required: false
+      schema:
+        type: string
+
+    RoleParam:
+      name: role
+      in: query
+      description: >
+        This parameter allows filtering by specific role.
+      required: false
+      schema:
+        type: string
+
     OperationParam:
       name: operation
       in: query
@@ -114,6 +142,16 @@ components:
       name: size
       in: query
       description: Page size for pagination
+      required: false
+      schema:
+        type: integer
+        default: 1000
+        minimum: 1
+
+    SizeParamReport:
+      name: size
+      in: query
+      description: Page size for pagination , used as limit for query request
       required: false
       schema:
         type: integer
@@ -380,6 +418,18 @@ paths:
       operationId: get-admin-report
       summary: Admin report
       description: Csv file for a list of activity logs for admin.
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/AssetTypeParam'
+        - $ref: '#/components/parameters/AssetNameParam'
+        - $ref: '#/components/parameters/ApiParam'
+        - $ref: '#/components/parameters/RoleParam'
+        - $ref: '#/components/parameters/OperationParam'
+        - $ref: '#/components/parameters/TimeParam'
+        - $ref: '#/components/parameters/EndTimeParam'
+        - $ref: '#/components/parameters/TimeRelParam'
+        - $ref: '#/components/parameters/SizeParamReport'
+
       responses:
         '200':
           description: Csv file generation success
@@ -389,7 +439,7 @@ paths:
                 type: string
                 format: binary
         '400':
-          description: Bad request. No data available for CSV generation/Too many records.
+          description: Bad request. No data available for CSV generation
         '401':
           description: Unauthorized
           content:
@@ -422,6 +472,16 @@ paths:
       operationId: get-consumer-report
       summary: Consumer report
       description: Csv file for a list of activity logs for consumer.
+      parameters:
+        - $ref: '#/components/parameters/AssetTypeParam'
+        - $ref: '#/components/parameters/AssetNameParam'
+        - $ref: '#/components/parameters/ApiParam'
+        - $ref: '#/components/parameters/RoleParam'
+        - $ref: '#/components/parameters/OperationParam'
+        - $ref: '#/components/parameters/TimeParam'
+        - $ref: '#/components/parameters/EndTimeParam'
+        - $ref: '#/components/parameters/TimeRelParam'
+        - $ref: '#/components/parameters/SizeParamReport'
       responses:
         '200':
           description: Csv file generation success
@@ -431,7 +491,7 @@ paths:
                 type: string
                 format: binary
         '400':
-          description: Bad request. No data available for CSV generation/Too many records.
+          description: Bad request. No data available for CSV generation
         '401':
           description: Unauthorized
           content:

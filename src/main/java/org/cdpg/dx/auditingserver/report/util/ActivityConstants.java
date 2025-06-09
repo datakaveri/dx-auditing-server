@@ -1,5 +1,8 @@
 package org.cdpg.dx.auditingserver.report.util;
 
+import java.util.Map;
+import java.util.Set;
+
 public final class ActivityConstants {
   // Table names
   public static final String ACTIVITY_LOG_TABLE_NAME = "user_activity_log";
@@ -24,6 +27,37 @@ public final class ActivityConstants {
   public static final String ROLE = "role";
   public static final String ORIGIN_SERVER = "origin_server";
   public static final String MYACTIVITY_ENABLED = "myactivity_enabled";
+
+  public static final Set<String> ALLOW_FILTER_ADMIN =
+      Set.of("userId", "assetType", "operation", "assetname", "api", "role");
+
+  public static final Map<String, String> API_TO_DB_MAP_ADMIN =
+      Map.of(
+          "userId",
+          "user_id",
+          "assetType",
+          "asset_type",
+          "operation",
+          "operation",
+          "assetname",
+          "asset_name",
+          "api",
+          "api",
+          "role",
+          "role");
+
+  public static final Map<String, String> API_TO_DB_MAP_CONSUMER =
+      Map.of(
+          "assetType",
+          "asset_type",
+          "operation",
+          "operation",
+          "assetname",
+          "asset_name",
+          "api",
+          "api",
+          "role",
+          "role");
 
   private ActivityConstants() {
     // Utility class; prevent instantiation
