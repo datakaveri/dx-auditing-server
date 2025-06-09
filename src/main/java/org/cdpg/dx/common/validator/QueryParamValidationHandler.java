@@ -1,6 +1,7 @@
 package org.cdpg.dx.common.validator;
 
 import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
 import io.vertx.ext.web.RoutingContext;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,20 +18,26 @@ public class QueryParamValidationHandler implements Handler<RoutingContext> {
    * Validates query parameters in the RoutingContext against a set of allowed parameters. If any
    * unknown parameters are found, it fails the context with a DxQueryParamValidationException.
    *
+   * <p>This version uses ctx.request().params(true) to safely parse and decode raw query strings.
+   *
    * @param ctx the RoutingContext containing the query parameters to validate
    */
   @Override
   public void handle(RoutingContext ctx) {
+    MultiMap params = ctx.request().params(true); // decode raw URI safely
+
     Set<String> unknownParams =
-        ctx.queryParams().names().stream()
+        params.names().stream()
             .filter(param -> !allowedParams.contains(param))
             .collect(Collectors.toSet());
+
     if (!unknownParams.isEmpty()) {
       ctx.fail(
           new DxQueryParamValidationException(
               "Invalid query parameters: " + String.join(", ", unknownParams)));
       return;
     }
+
     ctx.next();
   }
 }

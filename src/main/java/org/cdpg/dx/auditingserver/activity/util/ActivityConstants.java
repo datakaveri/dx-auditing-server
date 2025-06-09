@@ -1,5 +1,6 @@
 package org.cdpg.dx.auditingserver.activity.util;
 
+import java.util.Map;
 import java.util.Set;
 
 public final class ActivityConstants {
@@ -25,12 +26,29 @@ public final class ActivityConstants {
   public static final String ROLE = "role";
   public static final String ORIGIN_SERVER = "origin_server";
   public static final String MYACTIVITY_ENABLED = "myactivity_enabled";
-
+  public static final Map<String, String> API_TO_DB_MAP =
+      Map.of(
+          "userId",
+          "user_id",
+          "assetType",
+          "asset_type",
+          "operation",
+          "operation",
+          "createdAt",
+          "created_at",
+          "assetId",
+          "asset_id",
+          "assetName",
+          "asset_name",
+          "role",
+          "role",
+          "api",
+          "api");
   public static Set<String> allowedQueryParamsForConsumer =
-      Set.of("assetType", "operation", "time", "endtime", "timerel", "page", "size");
-
+      Set.of("assetType", "operation", "time", "endtime", "timerel", "page", "size", "sort");
   public static Set<String> allowedQueryParamsForAdmin =
-      Set.of("userId", "assetType", "operation", "time", "endtime", "timerel", "page", "size");
+      Set.of(
+          "userId", "assetType", "operation", "time", "endtime", "timerel", "page", "size", "sort");
 
   private ActivityConstants() {
     // Utility class; prevent instantiation

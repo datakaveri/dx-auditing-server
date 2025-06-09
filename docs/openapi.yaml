@@ -158,6 +158,18 @@ components:
         default: 1000
         minimum: 1
 
+    SortingParam:
+      name: sort
+      in: query
+      description:
+        'This parameter allows sorting the results by up to 3 fields, separated by a semicolon (`;`).
+           The format for each field is `fieldName:asc` or `fieldName:desc`.
+           For example: `createdAt:desc;assetType:asc;userId:desc` will sort by creation date (descending), then asset type (ascending), then user ID (descending).'
+      required: false
+      schema:
+        type: string
+
+
   schemas:
     AuditActivitySuccessResponse:
       type: object
@@ -315,6 +327,7 @@ paths:
         - $ref: '#/components/parameters/TimeRelParam'
         - $ref: '#/components/parameters/PageParam'
         - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortingParam'
       responses:
         '200':
           description: List of consumer activity logs
@@ -373,6 +386,7 @@ paths:
         - $ref: '#/components/parameters/TimeRelParam'
         - $ref: '#/components/parameters/PageParam'
         - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortingParam'
       responses:
         '200':
           description: List of admin activity logs
@@ -429,6 +443,7 @@ paths:
         - $ref: '#/components/parameters/EndTimeParam'
         - $ref: '#/components/parameters/TimeRelParam'
         - $ref: '#/components/parameters/SizeParamReport'
+        - $ref: '#/components/parameters/SortingParam'
 
       responses:
         '200':
@@ -482,6 +497,7 @@ paths:
         - $ref: '#/components/parameters/EndTimeParam'
         - $ref: '#/components/parameters/TimeRelParam'
         - $ref: '#/components/parameters/SizeParamReport'
+        - $ref: '#/components/parameters/SortingParam'
       responses:
         '200':
           description: Csv file generation success

@@ -1,7 +1,6 @@
 package org.cdpg.dx.auditingserver.activity.controller;
 
-import static org.cdpg.dx.auditingserver.activity.util.ActivityConstants.allowedQueryParamsForAdmin;
-import static org.cdpg.dx.auditingserver.activity.util.ActivityConstants.allowedQueryParamsForConsumer;
+import static org.cdpg.dx.auditingserver.activity.util.ActivityConstants.*;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.auth.User;
@@ -17,6 +16,7 @@ import org.cdpg.dx.auth.authorization.handler.AuthorizationHandler;
 import org.cdpg.dx.auth.authorization.model.DxRole;
 import org.cdpg.dx.common.request.PaginatedRequest;
 import org.cdpg.dx.common.request.PaginationRequestBuilder;
+import org.cdpg.dx.common.request.PaginationRequestConfig;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.validator.QueryParamValidationHandler;
 
@@ -37,7 +37,7 @@ public class ActivityController implements ApiController {
         new QueryParamValidationHandler(allowedQueryParamsForAdmin);
 
     Handler<RoutingContext> adminAccessHandler =
-        AuthorizationHandler.forRoles(DxRole.ORG_ADMIN, DxRole.ORG_ADMIN);
+        AuthorizationHandler.forRoles(DxRole.ORG_ADMIN, DxRole.COS_ADMIN);
     Handler<RoutingContext> consumerAccessHandler = AuthorizationHandler.forRoles(DxRole.CONSUMER);
 
     builder
@@ -58,21 +58,26 @@ public class ActivityController implements ApiController {
     User user = context.user();
 
     Set<String> allowedFilters = Set.of("userId", "assetType", "operation");
-    Map<String, String> apiToDbMap =
-        Map.of("userId", "user_id", "assetType", "asset_type", "operation", "operation");
 
     Map<String, String> additionalFilters = Map.of("user_id", user.subject());
 
     Set<String> allowedTimeFields = Set.of("created_at");
+    Set<String> allowedSortFields = Set.of("createdAt", "UserId", "assetType", "operation");
 
-    PaginatedRequest request =
-        PaginationRequestBuilder.fromRoutingContext(
-            context,
-            allowedFilters,
-            apiToDbMap,
-            additionalFilters,
-            allowedTimeFields,
-            "created_at");
+    PaginationRequestConfig config =
+        new PaginationRequestConfig.Builder()
+            .ctx(context)
+            .allowedFilterKeys(allowedFilters)
+            .apiToDbMap(API_TO_DB_MAP)
+            .additionalFilters(additionalFilters)
+            .allowedTimeFields(allowedTimeFields)
+            .defaultTimeField("created_at")
+            .defaultSortBy("created_at")
+            .defaultOrder("DESC")
+            .allowedSortFields(allowedSortFields)
+            .build();
+
+    PaginatedRequest request = PaginationRequestBuilder.fromRoutingContext(config);
 
     LOGGER.info("PaginatedRequest created for getActivityLogForConsumer:  {}", request);
 
@@ -95,15 +100,21 @@ public class ActivityController implements ApiController {
     LOGGER.info("handleGetAllActivityLogsForAdmin() started");
 
     Set<String> allowedFilters = Set.of("userId", "assetType", "operation");
-    Map<String, String> apiToDbMap =
-        Map.of("userId", "user_id", "assetType", "asset_type", "operation", "operation");
-
-    // No additional filters for admin, as they can access all logs
     Set<String> allowedTimeFields = Set.of("created_at");
+    Set<String> allowedSortFields = Set.of("createdAt", "UserId", "assetType", "operation");
 
-    PaginatedRequest request =
-        PaginationRequestBuilder.fromRoutingContext(
-            context, allowedFilters, apiToDbMap, null, allowedTimeFields, "created_at");
+    PaginationRequestConfig config =
+        new PaginationRequestConfig.Builder()
+            .ctx(context)
+            .allowedFilterKeys(allowedFilters)
+            .apiToDbMap(API_TO_DB_MAP)
+            .allowedTimeFields(allowedTimeFields)
+            .defaultTimeField("created_at")
+            .defaultSortBy("created_at")
+            .defaultOrder("asc")
+            .allowedSortFields(allowedSortFields)
+            .build();
+    PaginatedRequest request = PaginationRequestBuilder.fromRoutingContext(config);
 
     LOGGER.info("PaginatedRequest created for handleGetAllActivityLogsForAdmin:  {}", request);
 
