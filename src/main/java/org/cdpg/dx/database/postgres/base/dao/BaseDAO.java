@@ -7,7 +7,6 @@ import java.util.UUID;
 import org.cdpg.dx.common.request.PaginatedRequest;
 import org.cdpg.dx.database.postgres.base.entity.BaseEntity;
 import org.cdpg.dx.database.postgres.models.PaginatedResult;
-import org.cdpg.dx.database.postgres.models.PageInfo;
 
 public interface BaseDAO<T extends BaseEntity<T>> {
 
@@ -23,12 +22,7 @@ public interface BaseDAO<T extends BaseEntity<T>> {
 
   Future<T> get(UUID id);
 
-  Future<PaginatedResult<T>> get(UUID id, PageInfo pageInfo);
-
-  Future<PaginatedResult<T>> getAll(PageInfo pageInfo);
-
-  Future<PaginatedResult<T>> getAllWithFilters(
-      Map<String, Object> filters, PageInfo pageInfo);
+  Future<PaginatedResult<T>> getAll(PaginatedRequest request);
 
   Future<PaginatedResult<T>> getAllWithFilters(PaginatedRequest request);
 }

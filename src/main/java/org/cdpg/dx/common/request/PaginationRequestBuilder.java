@@ -1,84 +1,192 @@
 package org.cdpg.dx.common.request;
 
-import io.vertx.ext.web.RoutingContext;
+import io.vertx.core.MultiMap;
 import java.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.common.exception.DxBadRequestException;
+import org.cdpg.dx.database.postgres.models.OrderBy;
 
 public class PaginationRequestBuilder {
   private static final Logger LOGGER = LogManager.getLogger(PaginationRequestBuilder.class);
 
-  /**
-   * Extracts a paginated request from the routing context, applying filters and temporal requests.
-   *
-   * @param ctx The routing context containing query parameters.
-   * @param allowedFilterKeys Set of allowed filter keys to extract from the query parameters.
-   * @param apiToDbMap Mapping from API filter keys to database column names.
-   * @param allowedTimeFields The field representing the time in the request (e.g., "created_at").
-   * @return A PaginatedRequest object containing pagination, filters, and temporal requests.
-   */
-  public static PaginatedRequest fromRoutingContext(
-      RoutingContext ctx,
-      Set<String> allowedFilterKeys,
-      Map<String, String> apiToDbMap,
-      Map<String, String> additionalFilters,
-      Set<String> allowedTimeFields,
-      String defaultTimeField) {
-    int page = parseIntOrDefault(ctx.queryParam("page"), 1);
-    int size = parseIntOrDefault(ctx.queryParam("size"), 1000);
+  public static PaginatedRequest fromRoutingContext(PaginationRequestConfig config) {
+    MultiMap params = config.getCtx().request().params(true);
+    LOGGER.debug("Starting to build PaginatedRequest with parameters: {}", params);
 
+    int page = parsePage(params);
+    int size = parseSize(params);
+    LOGGER.debug("Parsed pagination parameters - page: {}, size: {}", page, size);
+
+    Map<String, String> filters = extractFilters(params, config);
+    LOGGER.debug("Extracted filters: {}", filters);
+
+    List<TemporalRequest> temporalRequests = getTemporalRequests(params, config);
+    LOGGER.debug("Extracted temporal requests: {}", temporalRequests);
+
+    List<OrderBy> orderByList = getSortOrders(params, config);
+    LOGGER.debug("Extracted order by list: {}", orderByList);
+
+    PaginatedRequest request =
+        new PaginatedRequest(page, size, filters, temporalRequests,orderByList);
+    LOGGER.debug("PaginatedRequest successfully built: {}", request);
+    return request;
+  }
+
+  private static int parsePage(MultiMap params) {
+    int page = parseIntOrDefault(params.getAll("page"), 1);
+    LOGGER.debug("parsePage(): Using page number {}", page);
+    return page;
+  }
+
+  private static int parseSize(MultiMap params) {
+    int size = parseIntOrDefault(params.getAll("size"), 1000);
+    LOGGER.debug("parseSize(): Using page size {}", size);
+    return size;
+  }
+
+  private static Map<String, String> extractFilters(
+      MultiMap params, PaginationRequestConfig config) {
     Map<String, String> rawFilters = new HashMap<>();
-    for (String key : allowedFilterKeys) {
-      ctx.queryParam(key).stream().findFirst().ifPresent(value -> rawFilters.put(key, value));
+    for (String key : config.getAllowedFilterKeys()) {
+      List<String> values = params.getAll(key);
+      if (!values.isEmpty()) {
+        rawFilters.put(key, values.get(0));
+        LOGGER.debug("Filter found - key: {}, value: {}", key, values.get(0));
+      }
     }
-
-    Map<String, String> mappedFilters = FilterMapper.mapFilters(rawFilters, apiToDbMap);
-    if (additionalFilters != null) {
-      mappedFilters.putAll(additionalFilters);
+    Map<String, String> mapped = FilterMapper.mapFilters(rawFilters, config.getApiToDbMap());
+    if (config.getAdditionalFilters() != null) {
+      LOGGER.debug("Adding additional filters: {}", config.getAdditionalFilters());
+      mapped.putAll(config.getAdditionalFilters());
     }
+    LOGGER.debug("Mapped filters after transformation: {}", mapped);
+    return mapped;
+  }
 
-    List<TemporalRequest> temporalRequests = new ArrayList<>();
+  private static List<TemporalRequest> getTemporalRequests(
+      MultiMap params, PaginationRequestConfig config) {
+    List<TemporalRequest> list = new ArrayList<>();
 
-    // Handle default time params (no prefix)
-    String time = ctx.queryParam("time").stream().findFirst().orElse(null);
-    String endtime = ctx.queryParam("endtime").stream().findFirst().orElse(null);
-    String timeRel = ctx.queryParam("timerel").stream().findFirst().orElse(null);
+    String time = firstParam(params, "time");
+    String endtime = firstParam(params, "endtime");
+    String timeRel = firstParam(params, "timerel");
 
     if (endtime != null && time == null) {
+      LOGGER.warn("Parameter 'endtime' provided without 'time'");
       throw new DxBadRequestException("Parameter 'endtime' cannot be used without 'time'.");
     }
     if (time != null && timeRel == null) {
+      LOGGER.warn("Parameter 'timerel' missing when 'time' is provided");
       throw new DxBadRequestException(
-          "Parameter 'timerel' is required when 'temporal query ' is provided.");
+          "Parameter 'timerel' is required when 'temporal query' is provided.");
     }
     if (timeRel != null) {
       TemporalRequest tr =
-          TemporalRequestHelper.buildTemporalRequest(defaultTimeField, timeRel, time, endtime);
-      if (tr != null) temporalRequests.add(tr);
-    }
-
-    // Handle additional time fields
-    for (String timeField : allowedTimeFields) {
-      String t = ctx.queryParam(timeField + "_time").stream().findFirst().orElse(null);
-      String et = ctx.queryParam(timeField + "_endtime").stream().findFirst().orElse(null);
-      String trl = ctx.queryParam(timeField + "_timerel").stream().findFirst().orElse(null);
-      if (trl != null) {
-        TemporalRequest tr = TemporalRequestHelper.buildTemporalRequest(timeField, trl, t, et);
-        if (tr != null) temporalRequests.add(tr);
+          TemporalRequestHelper.buildTemporalRequest(
+              config.getDefaultTimeField(), timeRel, time, endtime);
+      if (tr != null) {
+        LOGGER.debug(
+            "Adding temporal request for default field '{}': {}", config.getDefaultTimeField(), tr);
+        list.add(tr);
+      } else {
+        LOGGER.warn("TemporalRequestHelper returned null for default temporal request");
       }
     }
 
-    LOGGER.debug("Extracted temporal requests: {}", temporalRequests);
-    return new PaginatedRequest(page, size, mappedFilters, temporalRequests);
+    for (String timeField : config.getAllowedTimeFields()) {
+      String t = firstParam(params, timeField + "_time");
+      String et = firstParam(params, timeField + "_endtime");
+      String trl = firstParam(params, timeField + "_timerel");
+
+      if (trl != null) {
+        TemporalRequest tr = TemporalRequestHelper.buildTemporalRequest(timeField, trl, t, et);
+        if (tr != null) {
+          LOGGER.debug("Adding temporal request for field '{}': {}", timeField, tr);
+          list.add(tr);
+        } else {
+          LOGGER.warn(
+              "TemporalRequestHelper returned null for temporal request with field '{}'",
+              timeField);
+        }
+      }
+    }
+
+    return list;
+  }
+
+  private static List<OrderBy> getSortOrders(MultiMap params, PaginationRequestConfig config) {
+    List<OrderBy> orderByList = new ArrayList<>();
+    String sort = firstParam(params, "sort");
+    final int MAX_SORT_FIELDS = 3;
+
+    LOGGER.debug("Extracting sort orders from parameter: {}", sort);
+
+    if (sort != null && !sort.isEmpty()) {
+      String[] sortItems = sort.split(";");
+      if (sortItems.length > MAX_SORT_FIELDS) {
+        LOGGER.debug(
+            "Too many sort fields: {} provided, max allowed is {}",
+            sortItems.length,
+            MAX_SORT_FIELDS);
+        throw new DxBadRequestException("Too many sort fields. Max allowed is " + MAX_SORT_FIELDS);
+      }
+
+      for (String item : sortItems) {
+        String[] parts = item.split(":");
+        if (parts.length != 2) {
+          LOGGER.warn("Invalid sort format detected: '{}'. Expected 'field:order'", item);
+          throw new DxBadRequestException(
+              "Invalid sort format: " + item + ". Expected field:order");
+        }
+
+        String field = parts[0].trim();
+        String direction = parts[1].trim().toLowerCase();
+
+        if (!config.getAllowedSortFields().contains(field)) {
+          LOGGER.warn("Invalid sort field encountered: '{}'", field);
+          throw new DxBadRequestException("Invalid sort field: " + field);
+        }
+        if (!direction.equals("asc") && !direction.equals("desc")) {
+          LOGGER.warn("Invalid sort order encountered: '{}'. Must be 'asc' or 'desc'", direction);
+          throw new DxBadRequestException("Invalid sort order: " + direction);
+        }
+
+        OrderBy orderBy = new OrderBy(field, OrderBy.Direction.valueOf(direction.toUpperCase()));
+        LOGGER.debug("Adding sort order: {}", orderBy);
+        orderByList.add(orderBy);
+      }
+    } else {
+      LOGGER.warn("No sort parameter provided so that using default sort order");
+      OrderBy defaultOrder =
+          new OrderBy(
+              config.getDefaultSortBy(),
+              OrderBy.Direction.valueOf(config.getDefaultOrder().toUpperCase()));
+      orderByList.add(defaultOrder);
+    }
+
+    return orderByList;
   }
 
   private static int parseIntOrDefault(List<String> values, int defaultValue) {
-    if (values == null || values.isEmpty()) return defaultValue;
-    try {
-      return Integer.parseInt(values.get(0));
-    } catch (NumberFormatException e) {
+    if (values == null || values.isEmpty()) {
+      LOGGER.debug("Parameter missing, using default value: {}", defaultValue);
       return defaultValue;
     }
+    try {
+      int parsed = Integer.parseInt(values.getFirst());
+      LOGGER.debug("Parsed integer parameter value: {}", parsed);
+      return parsed;
+    } catch (NumberFormatException e) {
+      LOGGER.warn(
+          "Failed to parse int from value '{}', using default {}", values.get(0), defaultValue);
+      return defaultValue;
+    }
+  }
+
+  // Helper to get first value of param or null
+  private static String firstParam(MultiMap params, String key) {
+    List<String> values = params.getAll(key);
+    return values.isEmpty() ? null : values.getFirst();
   }
 }

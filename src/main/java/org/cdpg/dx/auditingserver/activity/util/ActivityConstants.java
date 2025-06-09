@@ -27,10 +27,11 @@ public final class ActivityConstants {
   public static final String MYACTIVITY_ENABLED = "myactivity_enabled";
 
   public static Set<String> allowedQueryParamsForConsumer =
-      Set.of("assetType", "operation", "time", "endtime", "timerel", "page", "size");
+      Set.of("assetType", "operation", "time", "endtime", "timerel", "page", "size", "sort");
 
   public static Set<String> allowedQueryParamsForAdmin =
-      Set.of("userId", "assetType", "operation", "time", "endtime", "timerel", "page", "size");
+      Set.of(
+          "userId", "assetType", "operation", "time", "endtime", "timerel", "page", "size", "sort");
 
   private ActivityConstants() {
     // Utility class; prevent instantiation

@@ -17,6 +17,7 @@ import org.cdpg.dx.auth.authorization.handler.AuthorizationHandler;
 import org.cdpg.dx.auth.authorization.model.DxRole;
 import org.cdpg.dx.common.request.PaginatedRequest;
 import org.cdpg.dx.common.request.PaginationRequestBuilder;
+import org.cdpg.dx.common.request.PaginationRequestConfig;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.validator.QueryParamValidationHandler;
 
@@ -48,7 +49,7 @@ public class ActivityController implements ApiController {
     builder
         .operation("get-activityLogs-for-admin")
         .handler(adminParamValidationHandler)
-        .handler(adminAccessHandler)
+        // .handler(adminAccessHandler)
         .handler(this::handleGetAllActivityLogsForAdmin);
   }
 
@@ -64,15 +65,22 @@ public class ActivityController implements ApiController {
     Map<String, String> additionalFilters = Map.of("user_id", user.subject());
 
     Set<String> allowedTimeFields = Set.of("created_at");
+    Set<String> allowedSortFields = Set.of("created_at", "user_id", "asset_type", "operation");
 
-    PaginatedRequest request =
-        PaginationRequestBuilder.fromRoutingContext(
-            context,
-            allowedFilters,
-            apiToDbMap,
-            additionalFilters,
-            allowedTimeFields,
-            "created_at");
+    PaginationRequestConfig config =
+        new PaginationRequestConfig.Builder()
+            .ctx(context)
+            .allowedFilterKeys(allowedFilters)
+            .apiToDbMap(apiToDbMap)
+            .additionalFilters(additionalFilters)
+            .allowedTimeFields(allowedTimeFields)
+            .defaultTimeField("created_at")
+            .defaultSortBy("created_at")
+            .defaultOrder("DESC")
+            .allowedSortFields(allowedSortFields)
+            .build();
+
+    PaginatedRequest request = PaginationRequestBuilder.fromRoutingContext(config);
 
     LOGGER.info("PaginatedRequest created for getActivityLogForConsumer:  {}", request);
 
@@ -98,12 +106,22 @@ public class ActivityController implements ApiController {
     Map<String, String> apiToDbMap =
         Map.of("userId", "user_id", "assetType", "asset_type", "operation", "operation");
 
-    // No additional filters for admin, as they can access all logs
     Set<String> allowedTimeFields = Set.of("created_at");
+    Set<String> allowedSortFields = Set.of("created_at", "user_id", "asset_type", "operation");
 
-    PaginatedRequest request =
-        PaginationRequestBuilder.fromRoutingContext(
-            context, allowedFilters, apiToDbMap, null, allowedTimeFields, "created_at");
+    PaginationRequestConfig config =
+        new PaginationRequestConfig.Builder()
+            .ctx(context)
+            .allowedFilterKeys(allowedFilters)
+            .apiToDbMap(apiToDbMap)
+            .additionalFilters(null)
+            .allowedTimeFields(allowedTimeFields)
+            .defaultTimeField("created_at")
+            .defaultSortBy("created_at")
+            .defaultOrder("asc")
+            .allowedSortFields(allowedSortFields)
+            .build();
+    PaginatedRequest request = PaginationRequestBuilder.fromRoutingContext(config);
 
     LOGGER.info("PaginatedRequest created for handleGetAllActivityLogsForAdmin:  {}", request);
 

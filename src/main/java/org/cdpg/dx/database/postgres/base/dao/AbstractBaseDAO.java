@@ -21,7 +21,6 @@ import org.cdpg.dx.database.postgres.base.entity.BaseEntity;
 import org.cdpg.dx.database.postgres.models.*;
 import org.cdpg.dx.database.postgres.models.PaginatedResult;
 import org.cdpg.dx.database.postgres.service.PostgresService;
-import org.cdpg.dx.database.postgres.util.DxPgExceptionMapper;
 
 public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDAO<T> {
 
@@ -195,103 +194,38 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
   }
 
   @Override
-  public Future<PaginatedResult<T>> get(UUID id, PageInfo pageInfo) {
-
-    int page = pageInfo.getPage() > 0 ? pageInfo.getPage() : 1;
-    int size = pageInfo.getSize() > 0 ? pageInfo.getSize() : 10;
-    int offset = (page - 1) * size;
-
-    Condition condition =
-        new Condition(idFileld, Condition.Operator.EQUALS, List.of(id.toString()));
-    SelectQuery query =
-        new SelectQuery(tableName, List.of("*"), condition, null, null, size, offset);
-
-    return postgresService
-        .select(query, true)
-        .map(result -> toPaginatedResult(result, page, size))
-        .recover(
-            err -> {
-              LOGGER.error(
-                  "Error fetching all from: {}, msg: {}", tableName, err.getMessage(), err);
-              return Future.failedFuture(BaseDxException.from(err));
-            })
-        .recover(
-            err -> {
-              LOGGER.error(
-                  "Error fetching all from: {}, msg: {}", tableName, err.getMessage(), err);
-              return Future.failedFuture(BaseDxException.from(err));
-            });
+  public Future<PaginatedResult<T>> getAll(PaginatedRequest request) {
+    return getPaginatedResults(request, false);
   }
 
   @Override
-  public Future<PaginatedResult<T>> getAll(PageInfo pageInfo) {
-
-    int page = pageInfo.getPage() > 0 ? pageInfo.getPage() : 1;
-    int size = pageInfo.getSize() > 0 ? pageInfo.getSize() : 10;
-    int offset = (page - 1) * size;
-
-    SelectQuery query = new SelectQuery(tableName, List.of("*"), null, null, null, size, offset);
-
-    return postgresService
-        .select(query, true)
-        .map(result -> toPaginatedResult(result, page, size))
-        .recover(
-            err -> {
-              LOGGER.error(
-                  "Error fetching all from: {}, msg: {}", tableName, err.getMessage(), err);
-              return Future.failedFuture(BaseDxException.from(err));
-            })
-        .recover(
-            err -> {
-              LOGGER.error(
-                  "Error fetching all from: {}, msg: {}", tableName, err.getMessage(), err);
-              return Future.failedFuture(BaseDxException.from(err));
-            });
-  }
-
-  @Override
-  public Future<PaginatedResult<T>> getAllWithFilters(
-      Map<String, Object> filters, PageInfo pageInfo) {
-
-    int page = pageInfo.getPage() > 0 ? pageInfo.getPage() : 1;
-    int size = pageInfo.getSize() > 0 ? pageInfo.getSize() : 10;
-    int offset = (page - 1) * size;
-    Condition condition =
-        filters.entrySet().stream()
-            .map(e -> new Condition(e.getKey(), Condition.Operator.EQUALS, List.of(e.getValue())))
-            .reduce((c1, c2) -> new Condition(List.of(c1, c2), Condition.LogicalOperator.AND))
-            .orElse(null);
-
-    SelectQuery query =
-        new SelectQuery(tableName, List.of("*"), condition, null, null, size, offset);
-
-    return postgresService
-        .select(query, true)
-        .map(result -> toPaginatedResult(result, page, size))
-        .recover(
-            err -> {
-              LOGGER.error(
-                  "Error fetching all from: {}, msg: {}", tableName, err.getMessage(), err);
-              return Future.failedFuture(BaseDxException.from(err));
-            })
-        .recover(
-            err -> {
-              LOGGER.error("Error fetching paginated activity logs: {}", err.getMessage(), err);
-              return Future.failedFuture(DxPgExceptionMapper.from(err));
-            });
-  }
-
   public Future<PaginatedResult<T>> getAllWithFilters(PaginatedRequest request) {
-    int page = request.page() > 0 ? request.page() : 1;
-    int size = request.size() > 0 ? request.size() : 10;
-    int offset = (page - 1) * size;
+    return getPaginatedResults(request, true);
+  }
+
+  private Future<PaginatedResult<T>> getPaginatedResults(
+      PaginatedRequest request, boolean applyFilters) {
+    final int page = Math.max(request.page(), 1);
+    final int size = Math.max(request.size(), 10);
+    final int offset = (page - 1) * size;
 
     Condition condition = fromFilters(request.filters(), request.temporalRequests());
+    List<OrderBy> orderBy = request.orderByList();
+
+    LOGGER.debug("Preparing to execute paginated query for table: {}", tableName);
+    LOGGER.debug("Pagination - Page: {}, Size: {}, Offset: {}", page, size, offset);
+    LOGGER.debug("OrderBy fields: {}", orderBy.size());
+
+    orderBy.forEach(
+        ob ->
+            LOGGER.info(
+                "Ordering by field: '{}' direction: '{}'", ob.getColumn(), ob.getDirection()));
 
     SelectQuery query =
-        new SelectQuery(tableName, List.of("*"), condition, null, null, size, offset);
+        new SelectQuery(
+            tableName, List.of("*"), applyFilters ? condition : null, null, orderBy, size, offset);
 
-    LOGGER.info("Executing paginated query: {}", query);
+    LOGGER.info("Executing query: {}", query);
 
     return postgresService
         .select(query, true)
@@ -299,7 +233,10 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
         .recover(
             err -> {
               LOGGER.error(
-                  "Error fetching paginated results from {}: {}", tableName, err.getMessage(), err);
+                  "Failed to fetch paginated results from {}: {}",
+                  tableName,
+                  err.getMessage(),
+                  err);
               return Future.failedFuture(BaseDxException.from(err));
             });
   }
@@ -309,6 +246,7 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
         result.getRows().stream()
             .map(row -> fromJson.apply((JsonObject) row))
             .collect(Collectors.toList());
+
     long totalCount = result.getTotalCount();
     int totalPages = (int) Math.ceil((double) totalCount / size);
     boolean hasNext = page < totalPages;
@@ -316,6 +254,8 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
 
     PaginationInfo paginationInfo =
         new PaginationInfo(page, size, totalCount, totalPages, hasNext, hasPrevious);
+    LOGGER.debug("Pagination Info: {}", paginationInfo);
+
     return new PaginatedResult<>(paginationInfo, entities);
   }
 }
