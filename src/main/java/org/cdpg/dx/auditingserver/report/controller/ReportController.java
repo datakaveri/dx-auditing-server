@@ -2,6 +2,7 @@ package org.cdpg.dx.auditingserver.report.controller;
 
 import static org.cdpg.dx.auditingserver.activity.util.ActivityConstants.API_TO_DB_MAP;
 import static org.cdpg.dx.auditingserver.report.util.ActivityConstants.*;
+import static org.cdpg.dx.database.postgres.util.Constants.DEFAULT_SORTIMG_ORDER;
 
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerResponse;
@@ -65,7 +66,7 @@ public class ReportController implements ApiController {
             .allowedTimeFields(allowedTimeFields)
             .defaultTimeField("created_at")
             .defaultSortBy("created_at")
-            .defaultOrder("desc")
+            .defaultOrder(DEFAULT_SORTIMG_ORDER)
             .allowedSortFields(allowedSortFields)
             .build();
     PaginatedRequest request = PaginationRequestBuilder.fromRoutingContext(config);
@@ -121,7 +122,7 @@ public class ReportController implements ApiController {
             .allowedTimeFields(allowedTimeFields)
             .defaultTimeField("created_at")
             .defaultSortBy("created_at")
-            .defaultOrder("DESC")
+            .defaultOrder(DEFAULT_SORTIMG_ORDER)
             .allowedSortFields(allowedSortFields)
             .build();
 

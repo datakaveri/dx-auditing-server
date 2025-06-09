@@ -1,6 +1,7 @@
 package org.cdpg.dx.auditingserver.activity.controller;
 
 import static org.cdpg.dx.auditingserver.activity.util.ActivityConstants.*;
+import static org.cdpg.dx.database.postgres.util.Constants.DEFAULT_SORTIMG_ORDER;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.auth.User;
@@ -73,7 +74,7 @@ public class ActivityController implements ApiController {
             .allowedTimeFields(allowedTimeFields)
             .defaultTimeField("created_at")
             .defaultSortBy("created_at")
-            .defaultOrder("DESC")
+            .defaultOrder(DEFAULT_SORTIMG_ORDER)
             .allowedSortFields(allowedSortFields)
             .build();
 
@@ -111,7 +112,7 @@ public class ActivityController implements ApiController {
             .allowedTimeFields(allowedTimeFields)
             .defaultTimeField("created_at")
             .defaultSortBy("created_at")
-            .defaultOrder("asc")
+            .defaultOrder(DEFAULT_SORTIMG_ORDER)
             .allowedSortFields(allowedSortFields)
             .build();
     PaginatedRequest request = PaginationRequestBuilder.fromRoutingContext(config);
