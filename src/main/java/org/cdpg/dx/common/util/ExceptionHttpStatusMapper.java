@@ -18,6 +18,7 @@ public class ExceptionHttpStatusMapper {
       case BodyProcessorException e -> HttpStatusCode.BAD_REQUEST;
       case ParameterProcessorException e -> HttpStatusCode.BAD_REQUEST;
       case DxBadRequestException e -> HttpStatusCode.BAD_REQUEST;
+      case DxImmudbQueryException e -> HttpStatusCode.INTERNAL_SERVER_ERROR;
       case BaseDxException e -> HttpStatusCode.BAD_REQUEST;
       default -> HttpStatusCode.INTERNAL_SERVER_ERROR;
     };

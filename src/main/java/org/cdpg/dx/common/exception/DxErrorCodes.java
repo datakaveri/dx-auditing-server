@@ -12,6 +12,7 @@ public class DxErrorCodes {
     public static final int PG_NO_ROW_ERROR = 11001;
     public static final int PG_INVALID_COL_ERROR = 11002;
     public static final int PG_UNIQUE_CONSTRAINT_VIOLATION_ERROR = 11003;
+    public static final int IMMUDB_QUERY_ERROR = 11004;
 
     // 12000 – 12999: Auth
     public static final int UNAUTHORIZED = 12000;

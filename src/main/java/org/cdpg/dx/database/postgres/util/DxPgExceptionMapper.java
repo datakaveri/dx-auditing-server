@@ -12,6 +12,7 @@ public class DxPgExceptionMapper {
         case "42P01" -> new DxPgException("Undefined table", pgEx);
         case "42P02" -> new DxPgException("Undefined parameter", pgEx);
 
+
         // Class 23 — Integrity Constraint Violation
         case "23505" -> new UniqueConstraintViolationException(pgEx.getMessage());
         case "23503" -> new DxPgException("Foreign key violation", pgEx);

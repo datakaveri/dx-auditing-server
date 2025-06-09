@@ -5,21 +5,26 @@ import io.vertx.rabbitmq.QueueOptions;
 import io.vertx.rabbitmq.RabbitMQClient;
 import io.vertx.rabbitmq.RabbitMQConsumer;
 import io.vertx.rabbitmq.RabbitMQMessage;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.auditingserver.activity.immudbActivity.ImmudbActivityService;
 import org.cdpg.dx.auditingserver.activity.model.ActivityLog;
+import org.cdpg.dx.auditingserver.activity.model.ImmudbActivityLog;
 import org.cdpg.dx.auditingserver.activity.service.ActivityService;
+import org.cdpg.dx.database.immudb.service.ImmudbService;
 
-public class AuditMessageConsumer implements RabitMqConsumer {
+public class ImmudbConsumer implements RabitMqConsumer {
 
-  private static final Logger LOGGER = LogManager.getLogger(AuditMessageConsumer.class);
-  private static final String QUEUE_NAME = "auditing-messages";
+  private static final Logger LOGGER = LogManager.getLogger(ImmudbConsumer.class);
+  private static final String QUEUE_NAME = "immudb-msg";
   private final RabbitMQClient rabbitMqClient;
-  private final ActivityService activityService;
+  private final ImmudbActivityService activityService;
   private final QueueOptions options =
       new QueueOptions().setMaxInternalQueueSize(100).setKeepMostRecent(true).setAutoAck(false);
+  private ImmudbActivityLog immudbActivityLog;
 
-  public AuditMessageConsumer(RabbitMQClient rabbitMqClient, ActivityService activityService) {
+  public ImmudbConsumer(RabbitMQClient rabbitMqClient, ImmudbActivityService activityService) {
     this.rabbitMqClient = rabbitMqClient;
     this.activityService = activityService;
   }
@@ -56,26 +61,28 @@ public class AuditMessageConsumer implements RabitMqConsumer {
     LOGGER.info("Consuming message: {}", message.body());
     long deliveryTag = message.envelope().getDeliveryTag();
     JsonObject json = message.body().toJsonObject();
-    ActivityLog activityLogEntity = ActivityLog.fromJson(json);
+    try {
+      immudbActivityLog = ImmudbActivityLog.fromJson(json);
+      // proceed with activityLogEntity
+    } catch (Exception e) {
+      LOGGER.error("Failed to parse ActivityLog from JSON: {}", e.getMessage());
+      LOGGER.error("Failed to parse ImmudbActivityLog from JSON: {}", e.getMessage());
+      ackMessage(deliveryTag);
+    }
 
-    activityService
-        .insertActivityLogIntoDb(activityLogEntity)
+    activityService.insertActivityLogIntoImmudb(immudbActivityLog)
         .onSuccess(
             v -> {
-              LOGGER.info("Activity log inserted successfully.");
-              ackMessage(deliveryTag); // Only ack on success
+              LOGGER.info("Activity log inserted into Immudb successfully.");
+              ackMessage(deliveryTag);
             })
         .onFailure(
             err -> {
-              if (err.getMessage() != null && err.getMessage().contains("duplicate key")) {
-                LOGGER.warn("Duplicate key error. Ignoring message.");
-                ackMessage(deliveryTag); // Ack for duplicate key to avoid retry
-              } else {
-                LOGGER.error("Error inserting activity log: {}", err.getMessage());
-                // Do NOT ack here; message will remain in queue for retry
-              }
+              LOGGER.error("Error inserting activity log into Immudb: {}", err.getMessage());
             });
+
   }
+
 
   private void ackMessage(long deliveryTag) {
     rabbitMqClient.basicAck(deliveryTag, false);

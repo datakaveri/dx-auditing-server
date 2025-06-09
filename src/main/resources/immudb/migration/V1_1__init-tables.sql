@@ -35,6 +35,11 @@ create table auditing_consent (_id varchar[128] not null,item_id varchar[256] no
 ---
 
 CREATE TABLE auditing_ogc (id varchar[128] not null,userid varchar[128] not null,api varchar[512] not null,resourceid varchar[128] not null,providerid varchar[128] not null, resource_group varchar[128] not null,epochtime Integer not null,isotime varchar[128] not null,size Integer not null, PRIMARY KEY id);
+
+--
+--- user_activity_log for tgdex environment
+--
+CREATE TABLE user_activity_log (id VARCHAR(128) NOT NULL, asset_name VARCHAR(255) NOT NULL, asset_id VARCHAR(36) NOT NULL, asset_type VARCHAR(60) NOT NULL, operation VARCHAR(60) NOT NULL, created_at VARCHAR(64) NOT NULL, api VARCHAR(255) NOT NULL, method VARCHAR(16) NOT NULL, size VARCHAR(100) NOT NULL, role VARCHAR(32) NOT NULL, user_id VARCHAR(36) NOT NULL, origin_server VARCHAR(32) NOT NULL, myactivity_enabled VARCHAR(10) NOT NULL, short_description VARCHAR(2046) NOT NULL, PRIMARY KEY (id));
 ---
 --- creating index for the tables
 ---
@@ -69,3 +74,9 @@ CREATE INDEX IF NOT EXISTS ON auditing_consent(item_id, aiu_id, dp_id);
 --- auditing_ogc
 ---
 CREATE INDEX IF NOT EXISTS ON auditing_ogc (userid, providerid, resourceid, epochtime);
+
+
+--
+--- user_activity_log
+--
+CREATE INDEX IF NOT EXISTS ON user_activity_log (user_id, asset_id,operation, created_at);
