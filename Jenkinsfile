@@ -15,6 +15,15 @@ pipeline {
   }
 
   stages {
+    stage('Trivy Code Scan (Dependencies)') {
+      steps {
+        script {
+          sh '''
+            trivy fs --scanners vuln,secret,misconfig --output trivy-fs-report.txt .
+          '''
+        }
+      }
+    }
     
     stage('Build images') {
       steps{
@@ -24,7 +33,34 @@ pipeline {
         }
       }
     }
-
+    stage('Trivy Docker Image Scan') {
+      steps {
+        script {
+          sh "trivy image --output trivy-dev-image-report.txt ${devImage.imageName()}"
+          sh "trivy image --output trivy-depl-image-report.txt ${deplImage.imageName()}"
+        }
+      }
+    }
+    stage('Archive Trivy Reports') {
+      steps {
+        archiveArtifacts artifacts: 'trivy-*.txt', allowEmptyArchive: true
+        publishHTML(target: [
+          allowMissing: true,
+          keepAll: true,
+          reportDir: '.',
+          reportFiles: 'trivy-fs-report.txt, trivy-dev-image-report.txt, trivy-depl-image-report.txt',
+          reportName: 'Trivy Reports'
+        ])
+      }
+      post {
+        success {
+          echo "Trivy scan and Docker build completed successfully."
+        }
+        failure {
+          echo "Trivy scan or Docker build failed!"
+        }
+      }
+    }
     stage('Unit Tests and Code Coverage Test'){
       steps{
         script{
@@ -67,52 +103,36 @@ pipeline {
       }
     }
 
-    stage('Continuous Deployment') {
-      when {
-        allOf {
-          anyOf {
-            changeset "docker/**"
-            changeset "docs/**"
-            changeset "pom.xml"
-            changeset "src/main/**"
-            triggeredBy cause: 'UserIdCause'
-          }
-          expression {
-            return env.GIT_BRANCH == 'origin/main';
-          }
+    stage('Push Images') {
+  	when {
+      allOf {
+        anyOf {
+          changeset "docker/**"
+          changeset "docs/**"
+          changeset "pom.xml"
+          changeset "src/main/**"
+          triggeredBy cause: 'UserIdCause'
+        }
+        expression {
+          return env.GIT_BRANCH == 'origin/5.6.0';
         }
       }
-      stages {
-        stage('Push Images') {
-          steps {
-            script {
-              docker.withRegistry( registryUri, registryCredential ) {
-                devImage.push("5.6.0-alpha-${env.GIT_HASH}")
-                deplImage.push("5.6.0-alpha-${env.GIT_HASH}")
-              }
-            }
+  	}
+      steps {
+        script {
+          docker.withRegistry( registryUri, registryCredential ) {
+            devImage.push("5.6.0-${env.GIT_HASH}")
+            deplImage.push("5.6.0-${env.GIT_HASH}")
           }
-        }
-        stage('Docker Swarm deployment') {
-          steps {
-            script {
-              sh "ssh azureuser@docker-swarm 'docker service update auditing_auditing --image ghcr.io/datakaveri/auditing-server-depl:5.6.0-alpha-${env.GIT_HASH}'"
-              sh 'sleep 10'
-            }
-          }
-          post{
-            failure{
-              error "Failed to deploy image in Docker Swarm"
-            }
-          }          
         }
       }
     }
+
   }
   post{
     failure{
       script{
-        if (env.GIT_BRANCH == 'origin/main')
+        if (env.GIT_BRANCH == 'origin/5.6.0')
         emailext recipientProviders: [buildUser(), developers()], to: '$AS_RECIPIENTS, $DEFAULT_RECIPIENTS', subject: '$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!', body: '''$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:
 Check console output at $BUILD_URL to view the results.'''
       }
