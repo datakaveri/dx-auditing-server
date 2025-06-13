@@ -18,7 +18,7 @@ public class PaginationRequestBuilder {
     int size = parseSize(params);
     LOGGER.debug("Parsed pagination parameters - page: {}, size: {}", page, size);
 
-    Map<String, String> filters = extractFilters(params, config);
+    Map<String, Object> filters = extractFilters(params, config);
     LOGGER.debug("Extracted filters: {}", filters);
 
     List<TemporalRequest> temporalRequests = getTemporalRequests(params, config);
@@ -45,7 +45,7 @@ public class PaginationRequestBuilder {
     return size;
   }
 
-  private static Map<String, String> extractFilters(
+  private static Map<String, Object> extractFilters(
       MultiMap params, PaginationRequestConfig config) {
     Map<String, String> rawFilters = new HashMap<>();
     for (String key : config.getAllowedFilterKeys()) {
@@ -55,7 +55,7 @@ public class PaginationRequestBuilder {
         LOGGER.debug("Filter found - key: {}, value: {}", key, values.get(0));
       }
     }
-    Map<String, String> mapped = FilterMapper.mapFilters(rawFilters, config.getApiToDbMap());
+    Map<String, Object> mapped = FilterMapper.mapFilters(rawFilters, config.getApiToDbMap());
     if (config.getAdditionalFilters() != null) {
       LOGGER.debug("Adding additional filters: {}", config.getAdditionalFilters());
       mapped.putAll(config.getAdditionalFilters());

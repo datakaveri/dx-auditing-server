@@ -8,7 +8,7 @@ public class PaginationRequestConfig {
   private final RoutingContext ctx;
   private final Set<String> allowedFilterKeys;
   private final Map<String, String> apiToDbMap;
-  private final Map<String, String> additionalFilters;
+  private final Map<String, Object> additionalFilters;
   private final Set<String> allowedTimeFields;
   private final String defaultTimeField;
   private final String defaultSortBy;
@@ -39,7 +39,7 @@ public class PaginationRequestConfig {
     return apiToDbMap;
   }
 
-  public Map<String, String> getAdditionalFilters() {
+  public Map<String, Object> getAdditionalFilters() {
     return additionalFilters;
   }
 
@@ -67,7 +67,7 @@ public class PaginationRequestConfig {
     private RoutingContext ctx;
     private Set<String> allowedFilterKeys;
     private Map<String, String> apiToDbMap;
-    private Map<String, String> additionalFilters;
+    private Map<String, Object> additionalFilters;
     private Set<String> allowedTimeFields;
     private String defaultTimeField;
     private String defaultSortBy;
@@ -89,7 +89,7 @@ public class PaginationRequestConfig {
       return this;
     }
 
-    public Builder additionalFilters(Map<String, String> additionalFilters) {
+    public Builder additionalFilters(Map<String, Object> additionalFilters) {
       this.additionalFilters = additionalFilters;
       return this;
     }
