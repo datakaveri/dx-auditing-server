@@ -57,6 +57,7 @@ public class ReportController implements ApiController {
 
     Set<String> allowedTimeFields = Set.of("created_at");
     Set<String> allowedSortFields = Set.of("createdAt", "userId", "assetType", "operation");
+    Map<String, Object> additionalFilters = Map.of("myactivity_enabled", true);
 
     PaginationRequestConfig config =
         new PaginationRequestConfig.Builder()
@@ -68,6 +69,7 @@ public class ReportController implements ApiController {
             .defaultSortBy("created_at")
             .defaultOrder(DEFAULT_SORTIMG_ORDER)
             .allowedSortFields(allowedSortFields)
+            .additionalFilters(additionalFilters)
             .build();
     PaginatedRequest request = PaginationRequestBuilder.fromRoutingContext(config);
 
@@ -109,7 +111,8 @@ public class ReportController implements ApiController {
     Set<String> allowedFilters = Set.of("assetType", "operation", "assetname", "api", "role");
     Set<String> allowedTimeFields = Set.of("created_at");
     User user = routingContext.user();
-    Map<String, String> additionalFilters = Map.of("user_id", user.subject());
+    Map<String, Object> additionalFilters =
+        Map.of("user_id", user.subject(), "myactivity_enabled", true);
 
     Set<String> allowedSortFields = Set.of("createdAt", "userId", "assetType", "operation");
 
