@@ -6,6 +6,7 @@ import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.common.config.CorsUtil;
 import org.cdpg.dx.common.response.DxErrorResponse;
 import org.cdpg.dx.common.util.ExceptionHttpStatusMapper;
 import org.cdpg.dx.common.util.ThrowableUtils;
@@ -41,14 +42,25 @@ public class FailureHandler implements Handler<RoutingContext> {
         status = 500;
       }
 
-      context
-          .response()
-          .putHeader("Content-Type", "application/json")
-          .putHeader(HEADER_ALLOW_ORIGIN, "*")
-          .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-          .putHeader("Access-Control-Allow-Headers", "Authorization, Content-Type")
-          .setStatusCode(status)
-          .end(errorResponse.toJson().encode());
+      String requestOrigin = context.request().getHeader("Origin");
+      if (CorsUtil.allowedOrigins != null
+          && requestOrigin != null
+          && CorsUtil.allowedOrigins.contains(requestOrigin)) {
+        context
+            .response()
+            .putHeader("Content-Type", "application/json")
+            .putHeader(HEADER_ALLOW_ORIGIN, requestOrigin)
+            .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+            .putHeader("Access-Control-Allow-Headers", "Authorization, Content-Type")
+            .setStatusCode(status)
+            .end(errorResponse.toJson().encode());
+      } else {
+        context
+            .response()
+            .putHeader("Content-Type", "application/json")
+            .setStatusCode(status)
+            .end(errorResponse.toJson().encode());
+      }
     }
   }
 }
