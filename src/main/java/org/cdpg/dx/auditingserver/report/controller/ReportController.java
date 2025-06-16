@@ -1,7 +1,6 @@
 package org.cdpg.dx.auditingserver.report.controller;
 
-import static org.cdpg.dx.auditingserver.activity.util.ActivityConstants.API_TO_DB_MAP;
-import static org.cdpg.dx.auditingserver.report.util.ActivityConstants.*;
+import static org.cdpg.dx.auditingserver.activity.util.ActivityConstants.*;
 import static org.cdpg.dx.database.postgres.util.Constants.DEFAULT_SORTIMG_ORDER;
 
 import io.vertx.core.Handler;
@@ -19,7 +18,6 @@ import org.cdpg.dx.auth.authorization.handler.AuthorizationHandler;
 import org.cdpg.dx.auth.authorization.model.DxRole;
 import org.cdpg.dx.common.request.PaginatedRequest;
 import org.cdpg.dx.common.request.PaginationRequestBuilder;
-import org.cdpg.dx.common.request.PaginationRequestConfig;
 
 public class ReportController implements ApiController {
   private static final Logger LOGGER = LogManager.getLogger(ReportController.class);
@@ -55,23 +53,14 @@ public class ReportController implements ApiController {
         .putHeader("Content-Disposition", "attachment; filename=\"admin_report.csv\"")
         .setChunked(true);
 
-    Set<String> allowedTimeFields = Set.of("created_at");
-    Set<String> allowedSortFields = Set.of("createdAt", "userId", "assetType", "operation");
-    Map<String, Object> additionalFilters = Map.of("myactivity_enabled", true);
-
-    PaginationRequestConfig config =
-        new PaginationRequestConfig.Builder()
-            .ctx(routingContext)
-            .allowedFilterKeys(ALLOW_FILTER_ADMIN)
-            .apiToDbMap(API_TO_DB_MAP)
-            .allowedTimeFields(allowedTimeFields)
-            .defaultTimeField("created_at")
-            .defaultSortBy("created_at")
-            .defaultOrder(DEFAULT_SORTIMG_ORDER)
-            .allowedSortFields(allowedSortFields)
-            .additionalFilters(additionalFilters)
-            .build();
-    PaginatedRequest request = PaginationRequestBuilder.fromRoutingContext(config);
+      PaginatedRequest request = PaginationRequestBuilder.from(routingContext)
+              .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ADMIN)
+              .additionalFilters(Map.of(MYACTIVITY_ENABLED, true))
+              .allowedTimeFields(Set.of(CREATED_AT))
+              .defaultTimeField(CREATED_AT)
+              .defaultSort(CREATED_AT, DEFAULT_SORTIMG_ORDER)
+              .allowedSortFields(ALLOWED_SORT_FEILDS)
+              .build();
 
     LOGGER.info("PaginatedRequest created for handleGetAllActivityLogsForAdmin:  {}", request);
     reportService
@@ -108,28 +97,18 @@ public class ReportController implements ApiController {
         .putHeader("Content-Disposition", "attachment; filename=\"consumer_report.csv\"")
         .setChunked(true);
 
-    Set<String> allowedFilters = Set.of("assetType", "operation", "assetname", "api", "role");
-    Set<String> allowedTimeFields = Set.of("created_at");
     User user = routingContext.user();
     Map<String, Object> additionalFilters =
         Map.of("user_id", user.subject(), "myactivity_enabled", true);
 
-    Set<String> allowedSortFields = Set.of("createdAt", "userId", "assetType", "operation");
-
-    PaginationRequestConfig config =
-        new PaginationRequestConfig.Builder()
-            .ctx(routingContext)
-            .allowedFilterKeys(allowedFilters)
-            .apiToDbMap(API_TO_DB_MAP)
-            .additionalFilters(additionalFilters)
-            .allowedTimeFields(allowedTimeFields)
-            .defaultTimeField("created_at")
-            .defaultSortBy("created_at")
-            .defaultOrder(DEFAULT_SORTIMG_ORDER)
-            .allowedSortFields(allowedSortFields)
-            .build();
-
-    PaginatedRequest request = PaginationRequestBuilder.fromRoutingContext(config);
+      PaginatedRequest request = PaginationRequestBuilder.from(routingContext)
+              .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_USER)
+              .additionalFilters(additionalFilters)
+              .allowedTimeFields(Set.of(CREATED_AT))
+              .defaultTimeField(CREATED_AT)
+              .defaultSort(CREATED_AT, DEFAULT_SORTIMG_ORDER)
+              .allowedSortFields(ALLOWED_SORT_FEILDS)
+              .build();
 
     reportService
         .streamConsumerCsvBatched(request)
