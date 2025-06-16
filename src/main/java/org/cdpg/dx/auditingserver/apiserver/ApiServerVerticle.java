@@ -2,6 +2,7 @@ package org.cdpg.dx.auditingserver.apiserver;
 
 // import static org.cdpg.dx.auditingserver.apiserver.config.ApiConstants.*;
 
+import static org.cdpg.dx.common.config.CorsUtil.allowedOrigins;
 import static org.cdpg.dx.util.Constants.*;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -52,6 +53,7 @@ public class ApiServerVerticle extends AbstractVerticle {
   @Override
   public void start() {
     port = config().getInteger("httpPort", 8443);
+    allowedOrigins = config().getJsonArray("corsAllowedOrigin").getList();
 
     ObjectMapper mapper = DatabindCodec.mapper();
     mapper.registerModule(new JavaTimeModule());
@@ -147,16 +149,23 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
   private void configureCorsHandler(Router router) {
-    router.route().handler(CorsHandler.create("*")
-            .allowedMethod(HttpMethod.GET)
-            .allowedMethod(HttpMethod.POST)
-            .allowedMethod(HttpMethod.OPTIONS)
-            .allowedMethod(HttpMethod.PUT)
-            .allowedMethod(HttpMethod.DELETE)
-            .allowedHeader("Content-Type")
-            .allowedHeader("Authorization")
-            .allowCredentials(true)
-    );
+    CorsHandler corsHandler = CorsHandler.create();
+
+    for (String origin : allowedOrigins) {
+      corsHandler.addOrigin(origin);
+    }
+
+    corsHandler
+        .allowedMethod(HttpMethod.GET)
+        .allowedMethod(HttpMethod.POST)
+        .allowedMethod(HttpMethod.OPTIONS)
+        .allowedMethod(HttpMethod.PUT)
+        .allowedMethod(HttpMethod.DELETE)
+        .allowedHeader("Content-Type")
+        .allowedHeader("Authorization")
+        .allowCredentials(true);
+
+    router.route().handler(corsHandler);
   }
 
   private void putCommonResponseHeaders() {
