@@ -34,8 +34,6 @@ public class ResponseBuilder {
         new DxResponse<>(status.getUrn(), status.getDescription(), detail, result, pageInfo);
 
     String requestOrigin = ctx.request().getHeader("Origin");
-    System.out.println("Request Origin: " + requestOrigin);
-    System.out.println("Allowed Origins: " + allowedOrigins);
     if (allowedOrigins != null && requestOrigin != null && allowedOrigins.contains(requestOrigin)) {
       ctx.response()
           .putHeader("Content-Type", "application/json")
@@ -45,7 +43,6 @@ public class ResponseBuilder {
           .setStatusCode(status.getValue())
           .end(JsonObject.mapFrom(response).encode());
     } else {
-        System.out.println("CORS not allowed for origin: " + requestOrigin);
       ctx.response()
           .putHeader("Content-Type", "application/json")
           .setStatusCode(status.getValue())
