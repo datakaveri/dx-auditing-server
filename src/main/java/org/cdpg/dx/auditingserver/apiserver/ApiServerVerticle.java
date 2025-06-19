@@ -21,10 +21,7 @@ import io.vertx.core.net.KeyStoreOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.AuthenticationHandler;
-import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.ext.web.handler.CorsHandler;
-import io.vertx.ext.web.handler.TimeoutHandler;
+import io.vertx.ext.web.handler.*;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
 import io.vertx.serviceproxy.HelperUtils;
@@ -92,6 +89,14 @@ public class ApiServerVerticle extends AbstractVerticle {
 
                 LOGGER.debug("Creating router...");
                 router = routerBuilder.createRouter();
+
+                // Serve Redoc JS and other static files (with caching disabled for dev)
+                router
+                    .route("/static/*")
+                    .handler(
+                        StaticHandler.create("static")
+                            .setCachingEnabled(true)
+                            .setAlwaysAsyncFS(true));
 
                 LOGGER.debug("Configuring CORS and error handlers...");
                 configureCorsHandler(router);
