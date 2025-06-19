@@ -458,26 +458,27 @@
             </plugin>
 
             <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.0.0</version>
                 <executions>
                     <execution>
-                        <id>copy-redoc-to-static</id>
-                        <phase>process-resources</phase>
-                        <goals><goal>copy-resources</goal></goals>
+                        <id>download-redoc-js</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
                         <configuration>
-                            <outputDirectory>${project.build.outputDirectory}/static/js</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.build.directory}/generated-resources/docs/js</directory>
-                                    <includes>
-                                        <include>redoc.standalone.js</include>
-                                    </includes>
-                                </resource>
-                            </resources>
+                            <target name="fetch-redoc">
+                                <mkdir dir="${basedir}/src/main/resources/static/js"/>
+                                <get src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"
+                                     dest="${basedir}/src/main/resources/static/js/redoc.standalone.js"
+                                     skipexisting="true"/>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
 
         </plugins>
     </build>
