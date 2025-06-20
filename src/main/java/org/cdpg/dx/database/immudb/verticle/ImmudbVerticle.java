@@ -51,11 +51,10 @@ public class ImmudbVerticle extends AbstractVerticle {
             .setReconnectAttempts(2)
             .setReconnectInterval(1000);
 
-
     this.poolOptions = new PoolOptions().setMaxSize(poolSize);
     this.pool = Pool.pool(vertx, connectOptions, poolOptions);
     binder = new ServiceBinder(vertx);
-    immuDbService = new ImmudbServiceImpl(pool);
+    immuDbService = new ImmudbServiceImpl(vertx, pool, connectOptions, poolOptions);
     consumer =
         binder.setAddress(IMMUDB_SERVICE_ADDRESS).register(ImmudbService.class, immuDbService);
     LOGGER.info("ImmudbVerticle Verticle Started");
