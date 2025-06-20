@@ -34,7 +34,7 @@ public class ResponseBuilder {
         new DxResponse<>(status.getUrn(), status.getDescription(), detail, result, pageInfo);
 
     String requestOrigin = ctx.request().getHeader("Origin");
-    if (allowedOrigins != null && requestOrigin != null && allowedOrigins.contains(requestOrigin)) {
+    if (allowedOrigins != null && requestOrigin != null && allowedOrigins.contains(requestOrigin) || allowedOrigins.contains("*")) {
       ctx.response()
           .putHeader("Content-Type", "application/json")
           .putHeader(HEADER_ALLOW_ORIGIN, requestOrigin)

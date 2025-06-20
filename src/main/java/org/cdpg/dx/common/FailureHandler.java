@@ -1,5 +1,6 @@
 package org.cdpg.dx.common;
 
+import static org.cdpg.dx.common.config.CorsUtil.allowedOrigins;
 import static org.cdpg.dx.util.Constants.HEADER_ALLOW_ORIGIN;
 
 import io.vertx.core.Handler;
@@ -43,9 +44,8 @@ public class FailureHandler implements Handler<RoutingContext> {
       }
 
       String requestOrigin = context.request().getHeader("Origin");
-      if (CorsUtil.allowedOrigins != null
-          && requestOrigin != null
-          && CorsUtil.allowedOrigins.contains(requestOrigin)) {
+      if (allowedOrigins != null && requestOrigin != null && allowedOrigins.contains(requestOrigin)
+          || allowedOrigins.contains("*")) {
         context
             .response()
             .putHeader("Content-Type", "application/json")

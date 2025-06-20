@@ -8,6 +8,7 @@ secrets/*.jks
 .*.env
 docker-compose.temp.yml
 config.properties
+/src/main/resources/static/js
 
 
 ### STS ###
