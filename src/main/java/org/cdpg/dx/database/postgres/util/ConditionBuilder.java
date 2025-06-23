@@ -30,12 +30,9 @@ public class ConditionBuilder {
                       if (listVal.isEmpty()) {
                         return null; // skip empty lists
                       } else if (listVal.size() == 1) {
-                        LOGGER.error("Single value in list for key: {} ; Value :{}", key, listVal);
                         return new Condition(
                             key, Condition.Operator.EQUALS, List.of(listVal.get(0)));
                       } else {
-                        LOGGER.error(
-                            "Multiple  value in list for key: {} ; Value :{}", key, listVal);
                         return new Condition(key, Condition.Operator.IN, new ArrayList<>(listVal));
                       }
                     } else if (value != null) {
