@@ -14,6 +14,7 @@ public class AuditMessageConsumer implements RabitMqConsumer {
 
   private static final Logger LOGGER = LogManager.getLogger(AuditMessageConsumer.class);
   private static final String QUEUE_NAME = "test-auditing";
+  static int PG_COUNTER = 0;
   private final RabbitMQClient rabbitMqClient;
   private final ActivityService activityService;
   private final QueueOptions options =
@@ -63,21 +64,29 @@ public class AuditMessageConsumer implements RabitMqConsumer {
         .onSuccess(
             v -> {
               LOGGER.info("Activity log inserted successfully.");
-              ackMessage(deliveryTag); // Only ack on success
+              rabbitMqClient.basicAck(deliveryTag, false); // Only ack on success
             })
         .onFailure(
             err -> {
               if (err.getMessage() != null && err.getMessage().contains("duplicate key")) {
                 LOGGER.warn("Duplicate key error. Ignoring message.");
-                ackMessage(deliveryTag); // Ack for duplicate key to avoid retry
+                rabbitMqClient.basicAck(deliveryTag, false); // Ack for duplicate key to avoid retry
               } else {
                 LOGGER.error("Error inserting activity log: {}", err.getMessage());
-                // Do NOT ack here; message will remain in queue for retry
+                if (PG_COUNTER < 6) {
+                  rabbitMqClient.basicNack(deliveryTag, false, true);
+                  try {
+                    Thread.sleep(5000);
+                  } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                  }
+                  PG_COUNTER++;
+                } else {
+                  LOGGER.debug("sending message to dead letter queue");
+                  rabbitMqClient.basicNack(deliveryTag, false, false);
+                  PG_COUNTER = 0;
+                }
               }
             });
-  }
-
-  private void ackMessage(long deliveryTag) {
-    rabbitMqClient.basicAck(deliveryTag, false);
   }
 }
