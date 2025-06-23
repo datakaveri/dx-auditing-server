@@ -14,6 +14,7 @@ public class ImmudbConsumer implements RabitMqConsumer {
 
   private static final Logger LOGGER = LogManager.getLogger(ImmudbConsumer.class);
   private static final String QUEUE_NAME = "immudb-msg";
+  static int IMMUDB_COUNTER = 0;
   private final RabbitMQClient rabbitMqClient;
   private final ImmudbActivityService activityService;
   private final QueueOptions options =
@@ -61,9 +62,8 @@ public class ImmudbConsumer implements RabitMqConsumer {
       immudbActivityLog = ImmudbActivityLog.fromJson(json);
       // proceed with activityLogEntity
     } catch (Exception e) {
-      LOGGER.error("Failed to parse ActivityLog from JSON: {}", e.getMessage());
       LOGGER.error("Failed to parse ImmudbActivityLog from JSON: {}", e.getMessage());
-      ackMessage(deliveryTag);
+      rabbitMqClient.basicAck(deliveryTag, false);
     }
 
     activityService
@@ -71,15 +71,24 @@ public class ImmudbConsumer implements RabitMqConsumer {
         .onSuccess(
             v -> {
               LOGGER.info("Activity log inserted into Immudb successfully.");
-              ackMessage(deliveryTag);
+              rabbitMqClient.basicAck(deliveryTag, false);
             })
         .onFailure(
             err -> {
               LOGGER.error("Error inserting activity log into Immudb: {}", err.getMessage());
+              if (IMMUDB_COUNTER < 6) {
+                rabbitMqClient.basicNack(deliveryTag, false, true);
+                try {
+                  Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                  throw new RuntimeException(e);
+                }
+                IMMUDB_COUNTER++;
+              } else {
+                LOGGER.debug("sending message to dead letter queue");
+                rabbitMqClient.basicNack(deliveryTag, false, false);
+                IMMUDB_COUNTER = 0;
+              }
             });
-  }
-
-  private void ackMessage(long deliveryTag) {
-    rabbitMqClient.basicAck(deliveryTag, false);
   }
 }
