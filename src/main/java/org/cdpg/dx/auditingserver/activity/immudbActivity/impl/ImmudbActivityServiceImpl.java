@@ -26,6 +26,6 @@ public class ImmudbActivityServiceImpl implements ImmudbActivityService {
         "Inserting activity log into immudb with columns: {}, values: {}", columns, values);
     InsertQuery insertQuery =
         new InsertQuery().setTable(DB_TABLE_NAME).setColumns(columns).setValues(values);
-    return immudbService.executeQuery(insertQuery).mapEmpty();
+    return immudbService.executeQuery(insertQuery, activityLogEntity.id()).mapEmpty();
   }
 }

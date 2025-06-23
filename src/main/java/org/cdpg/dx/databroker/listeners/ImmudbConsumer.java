@@ -5,14 +5,10 @@ import io.vertx.rabbitmq.QueueOptions;
 import io.vertx.rabbitmq.RabbitMQClient;
 import io.vertx.rabbitmq.RabbitMQConsumer;
 import io.vertx.rabbitmq.RabbitMQMessage;
-import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.auditingserver.activity.immudbActivity.ImmudbActivityService;
-import org.cdpg.dx.auditingserver.activity.model.ActivityLog;
 import org.cdpg.dx.auditingserver.activity.model.ImmudbActivityLog;
-import org.cdpg.dx.auditingserver.activity.service.ActivityService;
-import org.cdpg.dx.database.immudb.service.ImmudbService;
 
 public class ImmudbConsumer implements RabitMqConsumer {
 
@@ -70,7 +66,8 @@ public class ImmudbConsumer implements RabitMqConsumer {
       ackMessage(deliveryTag);
     }
 
-    activityService.insertActivityLogIntoImmudb(immudbActivityLog)
+    activityService
+        .insertActivityLogIntoImmudb(immudbActivityLog)
         .onSuccess(
             v -> {
               LOGGER.info("Activity log inserted into Immudb successfully.");
@@ -80,9 +77,7 @@ public class ImmudbConsumer implements RabitMqConsumer {
             err -> {
               LOGGER.error("Error inserting activity log into Immudb: {}", err.getMessage());
             });
-
   }
-
 
   private void ackMessage(long deliveryTag) {
     rabbitMqClient.basicAck(deliveryTag, false);
