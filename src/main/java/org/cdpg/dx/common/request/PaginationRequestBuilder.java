@@ -212,7 +212,6 @@ public class PaginationRequestBuilder {
   private String getQueryParam(String paramName) {
     MultiMap params = ctx.request().params(true);
     String values = params.get(paramName);
-    LOGGER.error("getQueryParam: {} = {}", paramName, values);
     return (values != null && !values.isEmpty()) ? values : null;
   }
 }
