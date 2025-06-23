@@ -21,7 +21,30 @@ public class ConditionBuilder {
     if (filters != null) {
       conditions.addAll(
           filters.entrySet().stream()
-              .map(e -> new Condition(e.getKey(), Condition.Operator.EQUALS, List.of(e.getValue())))
+              .map(
+                  e -> {
+                    String key = e.getKey();
+                    Object value = e.getValue();
+
+                    if (value instanceof List<?> listVal) {
+                      if (listVal.isEmpty()) {
+                        return null; // skip empty lists
+                      } else if (listVal.size() == 1) {
+                        LOGGER.error("Single value in list for key: {} ; Value :{}", key, listVal);
+                        return new Condition(
+                            key, Condition.Operator.EQUALS, List.of(listVal.get(0)));
+                      } else {
+                        LOGGER.error(
+                            "Multiple  value in list for key: {} ; Value :{}", key, listVal);
+                        return new Condition(key, Condition.Operator.IN, new ArrayList<>(listVal));
+                      }
+                    } else if (value != null) {
+                      return new Condition(key, Condition.Operator.EQUALS, List.of(value));
+                    } else {
+                      return null;
+                    }
+                  })
+              .filter(c -> c != null)
               .toList());
     }
 

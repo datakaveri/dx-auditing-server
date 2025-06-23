@@ -30,17 +30,18 @@ public record ActivityLog(
 
   public static ActivityLog fromJson(JsonObject json) {
     return new ActivityLog(
-        EntityUtil.parseUUID(json.getString(ActivityConstants.ID)),
+        EntityUtil.parseUUID(json.getString(ActivityConstants.ID), ActivityConstants.ID),
         json.getString(ActivityConstants.ASSET_NAME),
         json.getString(ActivityConstants.ASSET_TYPE),
         json.getString(ActivityConstants.OPERATION),
         DateTimeHelper.parse(json.getString(ActivityConstants.CREATED_AT)),
-        EntityUtil.parseUUID(json.getString(ActivityConstants.ASSET_ID)),
+        EntityUtil.parseUUID(
+            json.getString(ActivityConstants.ASSET_ID), ActivityConstants.ASSET_ID),
         json.getString(ActivityConstants.API),
         json.getString(ActivityConstants.METHOD),
         json.getLong(ActivityConstants.SIZE),
         json.getString(ActivityConstants.ROLE),
-        EntityUtil.parseUUID(json.getString(ActivityConstants.USER_ID)),
+        EntityUtil.parseUUID(json.getString(ActivityConstants.USER_ID), ActivityConstants.USER_ID),
         json.getString(ActivityConstants.ORIGIN_SERVER),
         json.getBoolean(ActivityConstants.MYACTIVITY_ENABLED, null));
   }
