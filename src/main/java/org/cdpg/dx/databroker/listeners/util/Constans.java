@@ -9,7 +9,7 @@ public class Constans {
     public static final String RESULT = "result";
     public static final String RMQ_SERVICE_ADDRESS = "iudx.auditing.rabbit.service";
     public static final String MSG_PROCESS_ADDRESS = "iudx.auditing.msg.service";
-    public static final String IMMUDB_SERVICE_ADDRESS = "iudx.auditing.immudb.service";
+
     public static final String PG_SERVICE_ADDRESS = "iudx.auditing.postgres.service";
     public static final String CACHE_SERVICE_ADDRESS = "iudx.auditing.cache.service";
     public static final String PG_INSERT_QUERY_KEY = "postgresInsertQuery";

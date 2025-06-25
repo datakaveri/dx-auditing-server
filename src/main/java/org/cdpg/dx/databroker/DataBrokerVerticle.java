@@ -1,7 +1,6 @@
 package org.cdpg.dx.databroker;
 
 import static org.cdpg.dx.common.config.ServiceProxyAddressConstants.*;
-import static org.cdpg.dx.databroker.listeners.util.Constans.IMMUDB_SERVICE_ADDRESS;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
