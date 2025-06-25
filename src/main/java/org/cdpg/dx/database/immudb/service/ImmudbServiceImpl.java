@@ -3,9 +3,9 @@ package org.cdpg.dx.database.immudb.service;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.pgclient.PgConnectOptions;
 import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.PoolOptions;
-import io.vertx.sqlclient.SqlConnectOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.database.immudb.query.InsertQuery;
@@ -14,12 +14,12 @@ public class ImmudbServiceImpl implements ImmudbService {
   private static final Logger LOGGER = LogManager.getLogger(ImmudbServiceImpl.class);
   private static final int MAX_RETRIES = 2;
   private final Vertx vertx;
-  private final SqlConnectOptions connectOptions;
+  private final PgConnectOptions connectOptions;
   private final PoolOptions poolOptions;
   private Pool pool;
 
   public ImmudbServiceImpl(
-      Vertx vertx, Pool pool, SqlConnectOptions connectOptions, PoolOptions poolOptions) {
+      Vertx vertx, Pool pool, PgConnectOptions connectOptions, PoolOptions poolOptions) {
     this.vertx = vertx;
     this.pool = pool;
     this.connectOptions = connectOptions;
