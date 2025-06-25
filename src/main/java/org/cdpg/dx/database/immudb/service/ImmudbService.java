@@ -12,7 +12,7 @@ import org.cdpg.dx.database.immudb.query.InsertQuery;
 @ProxyGen
 public interface ImmudbService {
 
-  Future<Boolean> executeQuery(InsertQuery insertQuery, String verificatioFild);
+  Future<Boolean> executeQuery(InsertQuery insertQuery);
 
   static ImmudbService createProxy(Vertx vertx, String address) {
     return new ImmudbServiceVertxEBProxy(vertx, address);
