@@ -32,6 +32,7 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   public Future<Void> insertActivityLogIntoDb(ActivityLog activityLogEntity) {
+    LOGGER.debug("Inserting activity log into DB: {}", activityLogEntity);
     return activityLogDAO.createActivityLog(activityLogEntity).mapEmpty();
   }
 

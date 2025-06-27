@@ -58,12 +58,15 @@ public class AuditMessageConsumer implements RabitMqConsumer {
     long deliveryTag = message.envelope().getDeliveryTag();
     JsonObject json = message.body().toJsonObject();
     ActivityLog activityLogEntity = ActivityLog.fromJson(json);
+    LOGGER.debug("Activity log entity created: {}", activityLogEntity);
 
     activityService
         .insertActivityLogIntoDb(activityLogEntity)
         .onSuccess(
             v -> {
-              LOGGER.info("Activity log inserted successfully.");
+              LOGGER.info(
+                  "Activity log inserted successfully for server {}",
+                  activityLogEntity.originServer());
               rabbitMqClient.basicAck(deliveryTag, false); // Only ack on success
             })
         .onFailure(

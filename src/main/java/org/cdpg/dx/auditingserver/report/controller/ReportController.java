@@ -13,11 +13,14 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.auditingserver.apiserver.ApiController;
+import org.cdpg.dx.auditingserver.common.ControllerUtil;
 import org.cdpg.dx.auditingserver.report.service.ReportService;
 import org.cdpg.dx.auth.authorization.handler.AuthorizationHandler;
 import org.cdpg.dx.auth.authorization.model.DxRole;
+import org.cdpg.dx.common.model.DxUser;
 import org.cdpg.dx.common.request.PaginatedRequest;
 import org.cdpg.dx.common.request.PaginationRequestBuilder;
+import org.cdpg.dx.util.RoutingContextHelper;
 
 public class ReportController implements ApiController {
   private static final Logger LOGGER = LogManager.getLogger(ReportController.class);
@@ -53,14 +56,20 @@ public class ReportController implements ApiController {
         .putHeader("Content-Disposition", "attachment; filename=\"admin_report.csv\"")
         .setChunked(true);
 
-      PaginatedRequest request = PaginationRequestBuilder.from(routingContext)
-              .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ADMIN)
-              .additionalFilters(Map.of(MYACTIVITY_ENABLED, true))
-              .allowedTimeFields(Set.of(CREATED_AT))
-              .defaultTimeField(CREATED_AT)
-              .defaultSort(CREATED_AT, DEFAULT_SORTIMG_ORDER)
-              .allowedSortFields(ALLOWED_SORT_FEILDS)
-              .build();
+    DxUser user = RoutingContextHelper.fromPrincipal(routingContext);
+
+    Map<String, Object> additionalFilters = ControllerUtil.getAdditionalFilters(user);
+    Map<String, String> allowedFilterMap = ControllerUtil.getAllowedFilterMapForAdmin(user);
+
+    PaginatedRequest request =
+        PaginationRequestBuilder.from(routingContext)
+            .allowedFiltersDbMap(allowedFilterMap)
+            .additionalFilters(additionalFilters)
+            .allowedTimeFields(Set.of(CREATED_AT))
+            .defaultTimeField(CREATED_AT)
+            .defaultSort(CREATED_AT, DEFAULT_SORTIMG_ORDER)
+            .allowedSortFields(ALLOWED_SORT_FEILDS)
+            .build();
 
     LOGGER.info("PaginatedRequest created for handleGetAllActivityLogsForAdmin:  {}", request);
     reportService
@@ -101,14 +110,15 @@ public class ReportController implements ApiController {
     Map<String, Object> additionalFilters =
         Map.of("user_id", user.subject(), "myactivity_enabled", true);
 
-      PaginatedRequest request = PaginationRequestBuilder.from(routingContext)
-              .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_USER)
-              .additionalFilters(additionalFilters)
-              .allowedTimeFields(Set.of(CREATED_AT))
-              .defaultTimeField(CREATED_AT)
-              .defaultSort(CREATED_AT, DEFAULT_SORTIMG_ORDER)
-              .allowedSortFields(ALLOWED_SORT_FEILDS)
-              .build();
+    PaginatedRequest request =
+        PaginationRequestBuilder.from(routingContext)
+            .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_USER)
+            .additionalFilters(additionalFilters)
+            .allowedTimeFields(Set.of(CREATED_AT))
+            .defaultTimeField(CREATED_AT)
+            .defaultSort(CREATED_AT, DEFAULT_SORTIMG_ORDER)
+            .allowedSortFields(ALLOWED_SORT_FEILDS)
+            .build();
 
     reportService
         .streamConsumerCsvBatched(request)

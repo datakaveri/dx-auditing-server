@@ -44,8 +44,11 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
   @Override
   public Future<T> create(T entity) {
     var dataMap = entity.toNonEmptyFieldsMap();
+
     InsertQuery query =
         new InsertQuery(tableName, List.copyOf(dataMap.keySet()), List.copyOf(dataMap.values()));
+    LOGGER.debug("Executing insert query: {}", query.toSQL());
+    LOGGER.debug("Query parameters: {}", query.getQueryParams());
 
     return postgresService
         .insert(query)
@@ -225,7 +228,8 @@ public abstract class AbstractBaseDAO<T extends BaseEntity<T>> implements BaseDA
         new SelectQuery(
             tableName, List.of("*"), applyFilters ? condition : null, null, orderBy, size, offset);
 
-    LOGGER.info("Executing query: {}", query);
+    LOGGER.debug("Executing query: {}", query.toSQL());
+    LOGGER.debug("Query parameters: {}", query.getQueryParams());
 
     return postgresService
         .select(query, true)

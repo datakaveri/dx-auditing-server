@@ -2,11 +2,19 @@ package org.cdpg.dx.util;
 
 import static org.cdpg.dx.util.Constants.ID;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.common.exception.DxBadRequestException;
+import org.cdpg.dx.common.model.DxUser;
 
 // import org.cdpg.dx.common.models.User;
 
@@ -45,13 +53,13 @@ public final class RoutingContextHelper {
         .map(authHeader -> authHeader.substring(BEARER_PREFIX.length()).trim());
   }
 
-//  public static void setJwtData(RoutingContext routingContext, JwtData jwtData) {
-//    routingContext.put(JWT_DATA, jwtData);
-//  }
-//
-//  public static Optional<JwtData> getJwtData(RoutingContext routingContext) {
-//    return Optional.ofNullable(routingContext.get(JWT_DATA));
-//  }
+  //  public static void setJwtData(RoutingContext routingContext, JwtData jwtData) {
+  //    routingContext.put(JWT_DATA, jwtData);
+  //  }
+  //
+  //  public static Optional<JwtData> getJwtData(RoutingContext routingContext) {
+  //    return Optional.ofNullable(routingContext.get(JWT_DATA));
+  //  }
 
   /*  public static void setAuditingLog(RoutingContext routingContext, List<AuditLog> auditingLog) {
     routingContext.put(AUDITING_LOG, auditingLog);
@@ -87,5 +95,37 @@ public final class RoutingContextHelper {
 
   public static String getRequestPath(RoutingContext routingContext) {
     return routingContext.request().path();
+  }
+
+  public static DxUser fromPrincipal(RoutingContext ctx) {
+    JsonObject principal = ctx.user().principal();
+
+    // Handle nested JSON objects like realm_access
+    List<String> roles =
+        principal
+            .getJsonObject("realm_access", new JsonObject())
+            .getJsonArray("roles", new JsonArray())
+            .getList();
+
+    UUID userId;
+    try {
+      userId = UUID.fromString(principal.getString("sub"));
+    } catch (IllegalArgumentException | NullPointerException e) {
+      throw new DxBadRequestException("Invalid or missing 'sub' UUID in token");
+    }
+
+    return new DxUser(
+        roles,
+        principal.getString("organisation_id", null),
+        principal.getString("organisation_name", null), // assuming this is correct and intentional
+        userId,
+        principal.getBoolean("email_verified", false),
+        principal.getBoolean("kyc_verified", false),
+        principal.getString("name"),
+        principal.getString("preferred_username"),
+        principal.getString("given_name"),
+        principal.getString("family_name"),
+        principal.getString("email"),
+        new ArrayList<>());
   }
 }

@@ -168,7 +168,16 @@ components:
       required: false
       schema:
         type: string
-
+    OrganizationIdParam:
+      name: organizationId
+      in: query
+      description: >
+        The unique identifier (UUID) of the organization for which to fetch activity logs.
+        Use this parameter to filter activity logs belonging to a specific organization.
+      schema:
+        type: string
+        format: uuid
+        pattern: '^[0-9a-f]{8}\b-[0-9a-f]{4}\b-[0-9a-f]{4}\b-[0-9a-f]{4}\b-[0-9a-f]{12}$'
 
   schemas:
     AuditActivitySuccessResponse:
@@ -375,12 +384,13 @@ paths:
       description: >
         Retrieve a list of activity logs for DX users.
         This endpoint allows filtering activity logs based on <b>userId</b>,<b>assetType</b>, <b>operation</b> and a specified time range (time, endtime).
-        Use this API to get detailed audit records for administrative purposes, including pagination support for large result sets.
-
+        Use this API to get detailed audit records for administrative purposes, including pagination support for large result sets.</br>
+        Note: **Platform admins** (`cos_admin`) can access all activity logs, while **organization admins** (`cos_org`) can access logs only for their own organization.
       parameters:
         - $ref: '#/components/parameters/UserIdParam'
         - $ref: '#/components/parameters/AssetTypeParam'
         - $ref: '#/components/parameters/OperationParam'
+        - $ref: '#/components/parameters/OrganizationIdParam'
         - $ref: '#/components/parameters/TimeParam'
         - $ref: '#/components/parameters/EndTimeParam'
         - $ref: '#/components/parameters/TimeRelParam'
@@ -432,17 +442,18 @@ paths:
       operationId: get-admin-report
       summary: Admin report
       description: Csv file for a list of activity logs for admin.
+        **Platform admins** (`cos_admin`) can access all activity logs, while **organization admins** (`cos_org`) can access logs only for their own organization.
+
       parameters:
         - $ref: '#/components/parameters/UserIdParam'
         - $ref: '#/components/parameters/AssetTypeParam'
-        - $ref: '#/components/parameters/AssetNameParam'
-        - $ref: '#/components/parameters/ApiParam'
-        - $ref: '#/components/parameters/RoleParam'
         - $ref: '#/components/parameters/OperationParam'
+        - $ref: '#/components/parameters/OrganizationIdParam'
         - $ref: '#/components/parameters/TimeParam'
         - $ref: '#/components/parameters/EndTimeParam'
         - $ref: '#/components/parameters/TimeRelParam'
-        - $ref: '#/components/parameters/SizeParamReport'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
         - $ref: '#/components/parameters/SortingParam'
 
       responses:
@@ -489,14 +500,12 @@ paths:
       description: Csv file for a list of activity logs for consumer.
       parameters:
         - $ref: '#/components/parameters/AssetTypeParam'
-        - $ref: '#/components/parameters/AssetNameParam'
-        - $ref: '#/components/parameters/ApiParam'
-        - $ref: '#/components/parameters/RoleParam'
         - $ref: '#/components/parameters/OperationParam'
         - $ref: '#/components/parameters/TimeParam'
         - $ref: '#/components/parameters/EndTimeParam'
         - $ref: '#/components/parameters/TimeRelParam'
-        - $ref: '#/components/parameters/SizeParamReport'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
         - $ref: '#/components/parameters/SortingParam'
       responses:
         '200':
