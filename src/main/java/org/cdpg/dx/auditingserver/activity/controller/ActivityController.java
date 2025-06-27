@@ -13,12 +13,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.auditingserver.activity.service.ActivityService;
 import org.cdpg.dx.auditingserver.apiserver.ApiController;
+import org.cdpg.dx.auditingserver.common.ControllerUtil;
 import org.cdpg.dx.auth.authorization.handler.AuthorizationHandler;
 import org.cdpg.dx.auth.authorization.model.DxRole;
+import org.cdpg.dx.common.model.DxUser;
 import org.cdpg.dx.common.request.PaginatedRequest;
 import org.cdpg.dx.common.request.PaginationRequestBuilder;
 import org.cdpg.dx.common.response.ResponseBuilder;
-import org.cdpg.dx.common.validator.QueryParamValidationHandler;
+import org.cdpg.dx.util.RoutingContextHelper;
 
 public class ActivityController implements ApiController {
   private static final Logger LOGGER = LogManager.getLogger(ActivityController.class);
@@ -30,7 +32,6 @@ public class ActivityController implements ApiController {
 
   @Override
   public void register(RouterBuilder builder) {
-
 
     Handler<RoutingContext> adminAccessHandler =
         AuthorizationHandler.forRoles(DxRole.ORG_ADMIN, DxRole.COS_ADMIN);
@@ -54,7 +55,8 @@ public class ActivityController implements ApiController {
     Map<String, Object> additionalFilters =
         Map.of(USER_ID, user.subject(), MYACTIVITY_ENABLED, true);
 
-    PaginatedRequest request = PaginationRequestBuilder.from(context)
+    PaginatedRequest request =
+        PaginationRequestBuilder.from(context)
             .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_USER)
             .additionalFilters(additionalFilters)
             .allowedTimeFields(Set.of(CREATED_AT))
@@ -83,9 +85,15 @@ public class ActivityController implements ApiController {
   private void handleGetAllActivityLogsForAdmin(RoutingContext context) {
     LOGGER.info("handleGetAllActivityLogsForAdmin() started");
 
-    PaginatedRequest request = PaginationRequestBuilder.from(context)
-            .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ADMIN)
-            .additionalFilters(Map.of(MYACTIVITY_ENABLED, true))
+    DxUser user = RoutingContextHelper.fromPrincipal(context);
+
+    Map<String, Object> additionalFilters = ControllerUtil.getAdditionalFilters(user);
+    Map<String, String> allowedFilterMap = ControllerUtil.getAllowedFilterMapForAdmin(user);
+
+    PaginatedRequest request =
+        PaginationRequestBuilder.from(context)
+            .allowedFiltersDbMap(allowedFilterMap)
+            .additionalFilters(additionalFilters)
             .allowedTimeFields(Set.of(CREATED_AT))
             .defaultTimeField(CREATED_AT)
             .defaultSort(CREATED_AT, DEFAULT_SORTIMG_ORDER)

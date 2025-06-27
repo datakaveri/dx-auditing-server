@@ -9,13 +9,13 @@ import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.database.postgres.models.*;
 import org.cdpg.dx.database.postgres.util.DxPgExceptionMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PostgresServiceImpl implements PostgresService {
-  private static final Logger LOG = LoggerFactory.getLogger(PostgresServiceImpl.class);
+  private static final Logger LOG = LogManager.getLogger(PostgresServiceImpl.class);
   private final Pool client;
 
   public PostgresServiceImpl(Pool client) {
@@ -30,7 +30,7 @@ public class PostgresServiceImpl implements PostgresService {
       JsonObject json = new JsonObject();
       for (int i = 0; i < row.size(); i++) {
         // json.put(row.getColumnName(i), row.getValue(i));
-        LOG.info("Column name: {}, value: {}", row.getColumnName(i), row.getValue(i));
+        LOG.debug("Column name: {}, value: {}", row.getColumnName(i), row.getValue(i));
         String column = row.getColumnName(i);
         value = row.getValue(i);
         if (value == null
@@ -39,7 +39,7 @@ public class PostgresServiceImpl implements PostgresService {
             || value instanceof Boolean
             || value instanceof JsonObject
             || value instanceof JsonArray) {
-          LOG.info("value:" + value);
+          LOG.debug("value:" + value);
           json.put(column, value);
         } else {
           json.put(column, value.toString());
@@ -54,8 +54,6 @@ public class PostgresServiceImpl implements PostgresService {
     } else {
       LOG.info("Rows unaffected");
     }
-    LOG.info("Returned rows: {}", jsonArray.encodePrettily());
-
     QueryResult queryResult = new QueryResult();
     queryResult.setRows(jsonArray);
     queryResult.setTotalCount(rowSet.rowCount());
@@ -91,7 +89,7 @@ public class PostgresServiceImpl implements PostgresService {
               tuple.addValue(time);
               continue;
             } catch (Exception e) {
-              LOG.info("Failed to parse timestamp, keeping as string: " + paramStr);
+              LOG.error("Failed to parse timestamp, keeping as string: " + paramStr);
             }
           }
         }
@@ -136,7 +134,7 @@ public class PostgresServiceImpl implements PostgresService {
 
   @Override
   public Future<QueryResult> select(SelectQuery query, boolean isCountQueryEnabled) {
-    LOG.info("Executing select query: {}", query.toSQL());
+    LOG.debug("Executing select query: {}", query.toSQL());
     String sql = query.toSQL();
     if (isCountQueryEnabled) {
       // Insert COUNT(*) OVER() AS total_count into the select columns
@@ -150,7 +148,8 @@ public class PostgresServiceImpl implements PostgresService {
         .map(
             result -> {
               if (isCountQueryEnabled && !result.getRows().isEmpty()) {
-                int totalCount = result.getRows().getJsonObject(0).getInteger("total_result_count", 0);
+                int totalCount =
+                    result.getRows().getJsonObject(0).getInteger("total_result_count", 0);
                 result.setTotalCount(totalCount);
                 // Optionally, remove total_count from each row if not needed in the output
                 /*for (int i = 0; i < result.getRows().size(); i++) {

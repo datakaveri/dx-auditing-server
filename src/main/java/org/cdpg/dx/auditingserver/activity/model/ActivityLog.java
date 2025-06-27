@@ -24,7 +24,9 @@ public record ActivityLog(
     UUID userId,
     String originServer,
     String shortDescription,
-    Boolean myactivityEnabled)
+    Boolean myactivityEnabled,
+    UUID organizationId,
+    String organizationName)
     implements BaseEntity<ActivityLog> {
 
   public static ActivityLog fromJson(JsonObject json) {
@@ -43,7 +45,10 @@ public record ActivityLog(
         EntityUtil.parseUUID(json.getString(ActivityConstants.USER_ID), ActivityConstants.USER_ID),
         json.getString(ActivityConstants.ORIGIN_SERVER),
         json.getString(ActivityConstants.SHORT_DESCRIPTION),
-        json.getBoolean(ActivityConstants.MYACTIVITY_ENABLED, null));
+        json.getBoolean(ActivityConstants.MYACTIVITY_ENABLED, null),
+        EntityUtil.parseUUID(
+            json.getString(ActivityConstants.ORGANIZATION_ID), ActivityConstants.ORGANIZATION_ID),
+        json.getString(ActivityConstants.ORGANIZATION_NAME));
   }
 
   @Override
@@ -63,6 +68,10 @@ public record ActivityLog(
     EntityUtil.putIfNonEmpty(map, ActivityConstants.ORIGIN_SERVER, originServer);
     EntityUtil.putIfNonEmpty(map, ActivityConstants.SHORT_DESCRIPTION, shortDescription);
     EntityUtil.putIfNonEmpty(map, ActivityConstants.MYACTIVITY_ENABLED, myactivityEnabled);
+    if (organizationId != null) {
+      map.put(ActivityConstants.ORGANIZATION_ID, organizationId.toString());
+    }
+    EntityUtil.putIfNonEmpty(map, ActivityConstants.ORGANIZATION_NAME, organizationName);
     return map;
   }
 
@@ -79,10 +88,12 @@ public record ActivityLog(
     putIfNonEmpty(json, ActivityConstants.METHOD, method);
     if (size != null && size > 0) json.put(ActivityConstants.SIZE, size);
     putIfNonEmpty(json, ActivityConstants.ROLE, role);
-    putIfNonEmpty(json, ActivityConstants.USER_ID, userId.toString());
+    putIfNonEmpty(json, ActivityConstants.USER_ID, userId);
     putIfNonEmpty(json, ActivityConstants.ORIGIN_SERVER, originServer);
     putIfNonEmpty(json, ActivityConstants.SHORT_DESCRIPTION, shortDescription);
     putIfNonEmpty(json, ActivityConstants.MYACTIVITY_ENABLED, myactivityEnabled);
+    putIfNonEmpty(json, ActivityConstants.ORGANIZATION_ID, organizationId);
+    putIfNonEmpty(json, ActivityConstants.ORGANIZATION_NAME, organizationName);
     return json;
   }
 

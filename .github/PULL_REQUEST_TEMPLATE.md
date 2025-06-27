@@ -18,7 +18,7 @@
 * **PR Checklist** :page_with_curl:
   - [ ] Relevant documentation has been updated.
   - [ ] Changes made in configuration files (`example-config`, `secrets/all-verticles-configs/config.json`) have been added to the [example-config](../example-configs/config-example.json).
-  - [ ] Backend component changes (Elasticsearch, Postgres Flyway files, ImmuDB schema, RabbitMQ) have been communicated to the DX DevOps team by tagging @datakaveri/devops in a PR comment.
+  - [ ] Backend component changes (Elasticsearch, Postgres Flyway files, ImmuDB schema, RabbitMQ) have been communicated to the DX DevOps team by tagging [at]datakaveri/devops in a PR comment.
   - [ ] Comments added to clarify complex or critical code areas.
   - [ ] No new warnings are introduced with these changes.
   - [ ] Tests have been added or updated to verify functionality.

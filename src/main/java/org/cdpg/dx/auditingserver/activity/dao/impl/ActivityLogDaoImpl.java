@@ -87,6 +87,7 @@ public class ActivityLogDaoImpl extends AbstractBaseDAO<ActivityLog> implements 
 
   @Override
   public Future<ActivityLog> createActivityLog(ActivityLog activityLogEntity) {
+    LOGGER.debug("createActivityLog() called with entity: {}", activityLogEntity);
     return create(activityLogEntity);
   }
 
