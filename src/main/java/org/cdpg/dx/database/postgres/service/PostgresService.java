@@ -10,15 +10,17 @@ import org.cdpg.dx.database.postgres.models.*;
 @ProxyGen
 public interface PostgresService {
 
-    static PostgresService createProxy(Vertx vertx, String address) {
-        return new PostgresServiceVertxEBProxy(vertx, address);
-    }
+  static PostgresService createProxy(Vertx vertx, String address) {
+    return new PostgresServiceVertxEBProxy(vertx, address);
+  }
 
-    Future<QueryResult> insert(InsertQuery query);
+  Future<QueryResult> insert(InsertQuery query);
 
-    Future<QueryResult> update(UpdateQuery query);
+  Future<QueryResult> update(UpdateQuery query);
 
-    Future<QueryResult> delete(DeleteQuery query);
+  Future<QueryResult> delete(DeleteQuery query);
 
-    Future<QueryResult> select(SelectQuery query, boolean isCountQueryEnabled);
+  Future<QueryResult> select(SelectQuery query, boolean isCountQueryEnabled);
+
+  Future<Boolean> ping();
 }

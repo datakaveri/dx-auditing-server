@@ -3,6 +3,7 @@ package org.cdpg.dx.auditingserver.apiserver;
 // import static org.cdpg.dx.auditingserver.apiserver.config.ApiConstants.*;
 
 import static org.cdpg.dx.common.config.CorsUtil.allowedOrigins;
+import static org.cdpg.dx.common.config.ServiceProxyAddressConstants.POSTGRES_SERVICE_ADDRESS;
 import static org.cdpg.dx.util.Constants.*;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -29,10 +30,14 @@ import io.vertx.serviceproxy.HelperUtils;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.auditingserver.health.controller.HealthController;
+import org.cdpg.dx.auditingserver.health.service.HealthService;
+import org.cdpg.dx.auditingserver.health.service.impl.HealthServiceImpl;
 import org.cdpg.dx.auth.authentication.handler.KeycloakJwtAuthHandler;
 import org.cdpg.dx.auth.authentication.provider.JwtAuthProvider;
 import org.cdpg.dx.common.FailureHandler;
 import org.cdpg.dx.common.HttpStatusCode;
+import org.cdpg.dx.database.postgres.service.PostgresService;
 
 public class ApiServerVerticle extends AbstractVerticle {
   private static final Logger LOGGER = LogManager.getLogger(ApiServerVerticle.class);
@@ -90,6 +95,13 @@ public class ApiServerVerticle extends AbstractVerticle {
 
                 LOGGER.debug("Creating router...");
                 router = routerBuilder.createRouter();
+
+                // Attach health endpoints before static handler
+                PostgresService postgresService =
+                    PostgresService.createProxy(vertx, POSTGRES_SERVICE_ADDRESS);
+                HealthService healthService = new HealthServiceImpl(vertx, postgresService);
+                HealthController healthController = new HealthController(router, healthService);
+                healthController.init();
 
                 // Serve Redoc JS and other static files (with caching disabled for dev)
                 router

@@ -1,6 +1,7 @@
 package org.cdpg.dx.database.postgres.service;
 
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Pool;
@@ -20,6 +21,22 @@ public class PostgresServiceImpl implements PostgresService {
 
   public PostgresServiceImpl(Pool client) {
     this.client = client;
+  }
+
+  @Override
+  public Future<Boolean> ping() {
+    Promise<Boolean> promise = Promise.promise();
+    client
+        .query("SELECT 1")
+        .execute(
+            ar -> {
+              if (ar.succeeded()) {
+                promise.complete(true);
+              } else {
+                promise.complete(false);
+              }
+            });
+    return promise.future();
   }
 
   private QueryResult convertToQueryResult(RowSet<Row> rowSet) {
