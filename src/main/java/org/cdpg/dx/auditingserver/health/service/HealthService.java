@@ -4,7 +4,7 @@ import io.vertx.core.Future;
 
 public interface HealthService {
 
-  public Future<Void> checkLiveness();
+  Future<Void> checkLiveness();
 
-  public Future<Void> checkReadiness();
+  Future<Void> checkReadiness();
 }

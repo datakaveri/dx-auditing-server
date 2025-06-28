@@ -1,30 +1,30 @@
 package org.cdpg.dx.auditingserver.health.service.impl;
 
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import java.time.Duration;
+import java.time.Instant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.auditingserver.apiserver.ApiServerVerticle;
 import org.cdpg.dx.auditingserver.health.service.HealthService;
 import org.cdpg.dx.database.postgres.service.PostgresService;
-import org.cdpg.dx.databroker.service.DataBrokerService;
 
 public class HealthServiceImpl implements HealthService {
   private static final Logger LOGGER = LogManager.getLogger(ApiServerVerticle.class);
-
+  private static final Duration MIN_INTERVAL = Duration.ofSeconds(10);
   private final Vertx vertx;
   private final PostgresService postgresService;
-  private final DataBrokerService dataBrokerService;
+  // private final DataBrokerService dataBrokerService;
   private final long eventLoopDelayThresholdMs =
       500; // Threshold for event loop delay in milliseconds
+  private Instant lastPing = Instant.MIN;
 
-  public HealthServiceImpl(
-      Vertx vertx, PostgresService postgresService, DataBrokerService dataBrokerService) {
+  public HealthServiceImpl(Vertx vertx, PostgresService postgresService) {
     this.vertx = vertx;
     this.postgresService = postgresService;
-    this.dataBrokerService = dataBrokerService;
+    // this.dataBrokerService = dataBrokerService;
   }
 
   @Override
@@ -49,19 +49,14 @@ public class HealthServiceImpl implements HealthService {
     return promise.future();
   }
 
-  @Override
   public Future<Void> checkReadiness() {
+    if (Duration.between(lastPing, Instant.now()).compareTo(MIN_INTERVAL) < 0) {
+      return Future.succeededFuture();
+    }
 
-    // todo: Implement readiness check logic need to check if the database and message broker are connected.
-    //  for that need to implement ping methods in PostgresService and DataBrokerService.
-
-   /* Future<Void> pgCheck = postgresService.ping().mapEmpty();
-    Future<Void> rmqCheck =
-        dataBrokerService.isConnected()
-            ? Future.succeededFuture()
-            : Future.failedFuture("RabbitMQ is not connected");
-
-    return CompositeFuture.all(pgCheck, rmqCheck).mapEmpty();*/
-    return null;
+    lastPing = Instant.now();
+    return postgresService
+        .ping()
+        .compose(ok -> ok ? Future.succeededFuture() : Future.failedFuture("DB not ready"));
   }
 }
