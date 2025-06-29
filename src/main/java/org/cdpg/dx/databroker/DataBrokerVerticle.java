@@ -1,7 +1,6 @@
 package org.cdpg.dx.databroker;
 
 import static org.cdpg.dx.common.config.ServiceProxyAddressConstants.*;
-import static org.cdpg.dx.databroker.listeners.util.Constans.IMMUDB_SERVICE_ADDRESS;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
@@ -49,16 +48,13 @@ public class DataBrokerVerticle extends AbstractVerticle {
   private MessageConsumer<JsonObject> consumer;
   private RabbitClient rabbitClient;
   private RabbitWebClient rabbitWebClient;
-  /*private AsyncService asyncService;*/
   private RabbitMQClient iudxRabbitMqClient;
   private RabbitMQClient iudxInternalRabbitMqClient;
   private int amqpPort;
   private String amqpUrl;
-  /*private RevokedService revokedService;
-  private UniqueAttributeService uniqueAttributeService;*/
   private AuditMessageConsumer auditConsumer;
-  private ImmudbService immudbService;
-  private ImmudbConsumer immudbConsumer;
+  /*private ImmudbService immudbService;
+  private ImmudbConsumer immudbConsumer;*/
 
   @Override
   public void start() throws Exception {
@@ -125,34 +121,20 @@ public class DataBrokerVerticle extends AbstractVerticle {
     rabbitWebClient = new RabbitWebClient(vertx, webConfig, propObj);
     iudxRabbitMqClient = RabbitMQClient.create(vertx, iudxConfig);
     iudxInternalRabbitMqClient = RabbitMQClient.create(vertx, iudxInternalConfig);
-    immudbService = ImmudbService.createProxy(vertx, IMMUDB_SERVICE_ADDRESS);
+    /*immudbService = ImmudbService.createProxy(vertx, IMMUDB_SERVICE_ADDRESS);*/
     rabbitClient =
         new RabbitClient(rabbitWebClient, iudxInternalRabbitMqClient, iudxRabbitMqClient);
     binder = new ServiceBinder(vertx);
 
-    /* Create RabbitMQ listeners for revoke client queue, unique attribute queue and async query queue. */
-    // *************************** Need only while deployment of rs server uncomment line 122-130
-    // ***************************
-    /*revokedService = RevokedService.createProxy(vertx, REVOKED_SERVICE_ADDRESS);
-    uniqueAttributeService = UniqueAttributeService.createProxy(vertx, UNIQUE_ATTRIBUTE_SERVICE_ADDRESS);
-    RevokeClientQlistener revokeQlistener =
-            new RevokeClientQlistener(iudxInternalRabbitMqClient, revokedService);
-    UniqueAttribQlistener uniqueAttrQlistener =
-            new UniqueAttribQlistener(iudxInternalRabbitMqClient, uniqueAttributeService);
-
-    revokeQlistener.start();
-    uniqueAttrQlistener.start();*/
     PostgresService postgresService = PostgresService.createProxy(vertx, POSTGRES_SERVICE_ADDRESS);
     ActivityLogDao activityLogDAO = new ActivityLogDaoImpl(postgresService);
     ActivityService activityService = new ActivityServiceImpl(activityLogDAO);
-    ImmudbActivityService immudbActivityService = new ImmudbActivityServiceImpl(immudbService);
+    /*ImmudbActivityService immudbActivityService = new ImmudbActivityServiceImpl(immudbService);*/
 
-    // *************************** Need only while deployment of auditing server uncomment line
-    // 131-135 ***************************
     auditConsumer = new AuditMessageConsumer(iudxInternalRabbitMqClient, activityService);
-    immudbConsumer = new ImmudbConsumer(iudxInternalRabbitMqClient, immudbActivityService);
+    /*immudbConsumer = new ImmudbConsumer(iudxInternalRabbitMqClient, immudbActivityService);*/
     auditConsumer.start();
-    immudbConsumer.start();
+    /*immudbConsumer.start();*/
 
     dataBrokerService =
         new DataBrokerServiceImpl(

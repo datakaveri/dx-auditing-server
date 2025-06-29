@@ -1,7 +1,5 @@
 package org.cdpg.dx.database.immudb.verticle;
 
-import static org.cdpg.dx.databroker.listeners.util.Constans.IMMUDB_SERVICE_ADDRESS;
-
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
@@ -13,6 +11,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.database.immudb.service.ImmudbService;
 import org.cdpg.dx.database.immudb.service.ImmudbServiceImpl;
+
+import static org.cdpg.dx.common.config.ServiceProxyAddressConstants.IMMUDB_SERVICE_ADDRESS;
 
 public class ImmudbVerticle extends AbstractVerticle {
   private static final Logger LOGGER = LogManager.getLogger(ImmudbVerticle.class);
