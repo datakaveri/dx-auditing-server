@@ -1,6 +1,6 @@
 package org.cdpg.dx.auditingserver.report.model;
 
-import static org.cdpg.dx.auditingserver.report.util.ActivityConstants.ACTIVITY_LOG_TABLE_NAME;
+import static org.cdpg.dx.auditingserver.report.util.ActivityConstants.*;
 
 import io.vertx.core.json.JsonObject;
 import java.time.LocalDateTime;
@@ -25,7 +25,10 @@ public record ActivityLog(
     String role,
     UUID userId,
     String originServer,
-    Boolean myactivityEnabled)
+    String shortDescription,
+    Boolean myactivityEnabled,
+    UUID organizationId,
+    String organizationName)
     implements BaseEntity<ActivityLog> {
 
   public static ActivityLog fromJson(JsonObject json) {
@@ -43,7 +46,10 @@ public record ActivityLog(
         json.getString(ActivityConstants.ROLE),
         EntityUtil.parseUUID(json.getString(ActivityConstants.USER_ID), ActivityConstants.USER_ID),
         json.getString(ActivityConstants.ORIGIN_SERVER),
-        json.getBoolean(ActivityConstants.MYACTIVITY_ENABLED, null));
+        json.getString(ActivityConstants.SHORT_DESCRIPTION),
+        json.getBoolean(ActivityConstants.MYACTIVITY_ENABLED, null),
+        EntityUtil.parseUUID(json.getString(ORGANIZATION_ID), ORGANIZATION_ID),
+        json.getString(ORGANIZATION_NAME));
   }
 
   @Override
@@ -62,6 +68,11 @@ public record ActivityLog(
     EntityUtil.putIfNonEmpty(map, ActivityConstants.USER_ID, userId.toString());
     EntityUtil.putIfNonEmpty(map, ActivityConstants.ORIGIN_SERVER, originServer);
     EntityUtil.putIfNonEmpty(map, ActivityConstants.MYACTIVITY_ENABLED, myactivityEnabled);
+    EntityUtil.putIfNonEmpty(map, ActivityConstants.SHORT_DESCRIPTION, shortDescription);
+    if (organizationId != null) {
+      map.put(ORGANIZATION_ID, organizationId.toString());
+    }
+    EntityUtil.putIfNonEmpty(map, ORGANIZATION_NAME, organizationName);
     return map;
   }
 
@@ -76,10 +87,13 @@ public record ActivityLog(
     putIfNonEmpty(json, ActivityConstants.ASSET_ID, assetId);
     putIfNonEmpty(json, ActivityConstants.API, api);
     putIfNonEmpty(json, ActivityConstants.METHOD, method);
-    if (size != null && size > 0) json.put(ActivityConstants.SIZE, size);
+    if (size != null) json.put(ActivityConstants.SIZE, size);
     putIfNonEmpty(json, ActivityConstants.ROLE, role);
     putIfNonEmpty(json, ActivityConstants.USER_ID, userId.toString());
+    putIfNonEmpty(json, SHORT_DESCRIPTION, shortDescription);
     putIfNonEmpty(json, ActivityConstants.ORIGIN_SERVER, originServer);
+    json.put(ORGANIZATION_ID, organizationId);
+    json.put(ORGANIZATION_NAME, organizationName);
     return json;
   }
 
