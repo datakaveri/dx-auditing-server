@@ -27,6 +27,9 @@ public final class ActivityConstants {
   public static final String ROLE = "role";
   public static final String ORIGIN_SERVER = "origin_server";
   public static final String MYACTIVITY_ENABLED = "myactivity_enabled";
+  public static final String ORGANIZATION_ID = "org_id";
+  public static final String ORGANIZATION_NAME = "org_name";
+  public static final String SHORT_DESCRIPTION = "short_description";
 
   public static final Set<String> ALLOW_FILTER_ADMIN =
       Set.of("userId", "assetType", "operation", "assetname", "api", "role");
