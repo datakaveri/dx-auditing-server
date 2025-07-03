@@ -96,12 +96,12 @@ public class ApiServerVerticle extends AbstractVerticle {
                 LOGGER.debug("Creating router...");
                 router = routerBuilder.createRouter();
 
-             /*   // Attach health endpoints before static handler
+                // Attach health endpoints before static handler
                 PostgresService postgresService =
                     PostgresService.createProxy(vertx, POSTGRES_SERVICE_ADDRESS);
                 HealthService healthService = new HealthServiceImpl(vertx, postgresService);
                 HealthController healthController = new HealthController(router, healthService);
-                healthController.init();*/
+                healthController.init();
 
                 // Serve Redoc JS and other static files (with caching disabled for dev)
                 router
