@@ -22,7 +22,7 @@ public class HealthController {
 
   public Router init() {
     router.get("/health/live").handler(this::handleLiveness);
-    router.get("/health/ready").handler(this::handleReadiness);
+    // router.get("/health/ready").handler(this::handleReadiness);
     return router;
   }
 
