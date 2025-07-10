@@ -1,0 +1,20 @@
+{
+  "dataBrokerIP": "",
+  "dataBrokerPort": 2468,
+  "dataBrokerUserName": "",
+  "dataBrokerPassword": "",
+  "connectionTimeout": 60000,
+  "requestedHeartbeat": 60,
+  "handshakeTimeout": 10000,
+  "requestedChannelMax": 100,
+  "networkRecoveryInterval": 5000,
+  "virtualHost": "",
+  "queueName": "immudb-msg",
+
+"immuDatabaseIP": "",
+      "immuDatabasePort": 32322,
+      "immuDatabaseName": "tgdex_testing",
+      "immuDatabaseUserName": "",
+      "immuDatabasePassword": "",
+      "immuPoolSize": 25
+}

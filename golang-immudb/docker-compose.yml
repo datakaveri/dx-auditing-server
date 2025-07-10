@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  immudb-writer:
+    build: .
+    environment:
+      METERING_DATABASE_IP: database.iudx.io
+      METERING_DATABASE_PORT: 3322
+      METERING_DATABASE_USERNAME: immudb
+      METERING_DATABASE_PASSWORD: KNQCXZvIi*8NrRnRh
+      METERING_DATABASE_NAME: tgdex_testing
+
+      DATA_BROKER_IP: databroker.iudx.io
+      DATA_BROKER_PORT: 24568
+      DATA_BROKER_USERNAME: admin
+      DATA_BROKER_PASSWORD: pxSe%dnBmdFNK#g^:Cax0I4>qGkTgX
+      VIRTUAL_HOST: IUDX_INTERNAL
+      REQUESTED_HEARTBEAT: 5000
+      CONNECTION_TIMEOUT: 60000
+    ports:
+      - "8080:8080"
+
