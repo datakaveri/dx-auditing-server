@@ -27,7 +27,6 @@ pipeline {
           } 
           else {
             echo "Skipping pipeline. Reason: No PR comment and no important file changes."
-            RUN_PIPELINE = 'false'
             currentBuild.result = 'SUCCESS'
             return
           }
