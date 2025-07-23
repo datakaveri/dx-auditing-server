@@ -34,3 +34,5 @@ RUN useradd -r -u 1001 -g root audit-user
 
 # Setting non-root user to use when container starts
 USER audit-user
+
+##Added for testing purposes
