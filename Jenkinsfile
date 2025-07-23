@@ -146,7 +146,6 @@ Check console output at $BUILD_URL to view the results.'''
       }
     }
   }
-}
 def isImportantChange() {
   def paths = ['docker/', 'docs/', 'pom.xml', 'src/main/']
   return currentBuild.changeSets.any { cs ->
