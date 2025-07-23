@@ -18,8 +18,9 @@ pipeline {
     stage('Trigger Validation') {
       steps {
         script {
-          echo "PR Comment Body: ${env.ghprbCommentBody}"
-          def isPRComment = env.ghprbCommentBody != null && env.ghprbCommentBody.trim()
+          def comment = env.ghprbCommentBody
+          echo "PR Comment Body: ${comment}"
+          def isPRComment = comment != null && !comment.trim().isEmpty()
           echo "isPRComment: ${isPRComment}"
           def changed = isImportantChange()
           if (isPRComment || changed) {
