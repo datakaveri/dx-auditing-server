@@ -20,7 +20,7 @@ pipeline {
         script {
           def comment = env.ghprbCommentBody
           echo "PR Comment Body: ${comment}"
-          def isPRComment = comment != null && !comment.trim().isEmpty()
+          def isPRComment = comment && comment != "null" && !comment.trim().isEmpty()
           echo "isPRComment: ${isPRComment}"
           def changed = isImportantChange()
           if (isPRComment || changed) {
