@@ -22,6 +22,7 @@ pipeline {
           def changed = isImportantChange()
           if (isPRComment || changed) {
             echo "Trigger valid: Running pipeline due to PR comment or file changes."
+            env.RUN_PIPELINE = 'true'
           } 
           else {
             echo "Skipping pipeline. Reason: No PR comment and no important file changes."
@@ -32,6 +33,9 @@ pipeline {
       }
     }
     stage('Trivy Code Scan (Dependencies)') {
+      when {
+        expression { return env.RUN_PIPELINE == 'true' }
+      }
       steps {
         script {
           sh '''
@@ -42,6 +46,9 @@ pipeline {
     }
     
     stage('Build images') {
+      when {
+        expression { return env.RUN_PIPELINE == 'true' }
+      }
       steps{
         script {
           devImage = docker.build( devRegistry, "-f ./docker/dev.dockerfile .")
@@ -51,6 +58,9 @@ pipeline {
     }
 
     stage('Unit Tests and Code Coverage Test'){
+      when {
+        expression { return env.RUN_PIPELINE == 'true' }
+      }
       steps{
         script{
           catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
@@ -98,7 +108,10 @@ pipeline {
 
     stage('Continuous Deployment') {
        when {
-          expression { return env.GIT_BRANCH == 'origin/master'; }
+        allOf {
+          expression { return env.GIT_BRANCH == 'origin/master' }
+          expression { return env.RUN_PIPELINE == 'true' }
+        }
       }
       stages {
         stage('Push Images') {
