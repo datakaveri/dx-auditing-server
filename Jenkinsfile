@@ -1,5 +1,5 @@
+def runPipeline = false
 pipeline {
-  def runPipeline = false
   environment {
     devRegistry = 'ghcr.io/datakaveri/auditing-server-dev'
     deplRegistry = 'ghcr.io/datakaveri/auditing-server-depl'
