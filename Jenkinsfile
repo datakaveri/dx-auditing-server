@@ -15,6 +15,31 @@ pipeline {
   }
 
   stages {
+    stage('Trigger Validation') {
+      steps {
+        script {
+          def isPRComment = env.ghprbCommentBody != null
+          def changed = isImportantChange()
+          if (isPRComment || changed) {
+            echo "Trigger valid: Running pipeline due to PR comment or file changes."
+          } 
+          else {
+            echo "Skipping pipeline. Reason: No PR comment and no important file changes."
+            currentBuild.result = 'SUCCESS'
+            return
+          }
+        }
+      }
+    }
+    stage('Trivy Code Scan (Dependencies)') {
+      steps {
+        script {
+          sh '''
+            trivy fs --scanners vuln,secret,misconfig --output trivy-fs-report.txt .
+          '''
+        }
+      }
+    }
     
     stage('Build images') {
       steps{
@@ -30,6 +55,8 @@ pipeline {
         script{
           catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
             sh 'sudo update-alternatives --set java /usr/lib/jvm/java-21-openjdk-amd64/bin/java'
+            sh 'cp /home/ubuntu/configs/audit-config-test.json ./secrets/all-verticles-configs/audit-config-test.json'
+            sh 'cp /home/ubuntu/configs/keystore-auditing.jks ./secrets/all-verticles-configs/keystore-auditing.jks'
             sh 'mvn clean test checkstyle:checkstyle pmd:pmd'
           }
         }
@@ -70,27 +97,16 @@ pipeline {
     }
 
     stage('Continuous Deployment') {
-      when {
-        allOf {
-          anyOf {
-            changeset "docker/**"
-            changeset "docs/**"
-            changeset "pom.xml"
-            changeset "src/main/**"
-            triggeredBy cause: 'UserIdCause'
-          }
-          expression {
-            return env.GIT_BRANCH == 'origin/main';
-          }
-        }
+       when {
+          expression { return env.GIT_BRANCH == 'origin/master'; }
       }
       stages {
         stage('Push Images') {
           steps {
             script {
               docker.withRegistry( registryUri, registryCredential ) {
-                devImage.push("5.6.0-alpha-${env.GIT_HASH}")
-                deplImage.push("5.6.0-alpha-${env.GIT_HASH}")
+                devImage.push("6.0.0-alpha-${env.GIT_HASH}")
+                deplImage.push("6.0.0-alpha-${env.GIT_HASH}")
               }
             }
           }
@@ -98,7 +114,7 @@ pipeline {
         stage('Docker Swarm deployment') {
           steps {
             script {
-              sh "ssh azureuser@docker-swarm 'docker service update auditing_auditing --image ghcr.io/datakaveri/auditing-server-depl:5.6.0-alpha-${env.GIT_HASH}'"
+              sh "ssh azureuser@docker-swarm 'docker service update auditing_auditing --image ghcr.io/datakaveri/auditing-server-depl:6.0.0-alpha-${env.GIT_HASH}'"
               sh 'sleep 10'
             }
           }
@@ -117,6 +133,16 @@ pipeline {
         if (env.GIT_BRANCH == 'origin/main')
         emailext recipientProviders: [buildUser(), developers()], to: '$AS_RECIPIENTS, $DEFAULT_RECIPIENTS', subject: '$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!', body: '''$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:
 Check console output at $BUILD_URL to view the results.'''
+      }
+    }
+  }
+}
+def isImportantChange() {
+  def paths = ['docker/', 'docs/', 'pom.xml', 'src/main/']
+  return currentBuild.changeSets.any { cs ->
+    cs.items.any { item ->
+      item.affectedPaths.any { path ->
+        paths.any { imp -> path.startsWith(imp) || path == imp }
       }
     }
   }
