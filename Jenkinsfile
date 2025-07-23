@@ -1,11 +1,10 @@
 pipeline {
-
+  def runPipeline = false
   environment {
     devRegistry = 'ghcr.io/datakaveri/auditing-server-dev'
     deplRegistry = 'ghcr.io/datakaveri/auditing-server-depl'
     registryUri = 'https://ghcr.io'
     registryCredential = 'datakaveri-ghcr'
-    RUN_PIPELINE = 'false'
     GIT_HASH = GIT_COMMIT.take(7)
   }
 
@@ -24,7 +23,7 @@ pipeline {
           def changed = isImportantChange()
           if (isPRComment || changed) {
             echo "Trigger valid: Running pipeline due to PR comment or file changes."
-            env.RUN_PIPELINE = 'true'
+            runPipeline = true
           } 
           else {
             echo "Skipping pipeline. Reason: No PR comment and no important file changes."
@@ -36,7 +35,7 @@ pipeline {
     }
     stage('Trivy Code Scan (Dependencies)') {
       when {
-        expression { return env.RUN_PIPELINE == 'true' }
+        expression { return runPipeline }
       }
       steps {
         script {
@@ -49,7 +48,7 @@ pipeline {
     
     stage('Build images') {
       when {
-        expression { return env.RUN_PIPELINE == 'true' }
+        expression { return runPipeline }
       }
       steps{
         script {
@@ -61,7 +60,7 @@ pipeline {
 
     stage('Unit Tests and Code Coverage Test'){
       when {
-        expression { return env.RUN_PIPELINE == 'true' }
+        expression { return runPipeline }
       }
       steps{
         script{
@@ -112,7 +111,7 @@ pipeline {
        when {
         allOf {
           expression { return env.GIT_BRANCH == 'origin/master' }
-          expression { return env.RUN_PIPELINE == 'true' }
+          expression { return runPipeline }
         }
       }
       stages {
