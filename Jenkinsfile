@@ -1,4 +1,3 @@
-//def runPipeline = false
 pipeline {
   environment {
     devRegistry = 'ghcr.io/datakaveri/auditing-server-dev'
@@ -45,7 +44,7 @@ pipeline {
       }
     }
     
-    stage('Build images') {}
+    stage('Build images') {
       steps{
         script {
           devImage = docker.build( devRegistry, "-f ./docker/dev.dockerfile .")
@@ -55,9 +54,6 @@ pipeline {
     }
 
     stage('Unit Tests and Code Coverage Test'){
-      //when {
-        //expression { return runPipeline }
-      //}
       steps{
         script{
           catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
@@ -107,7 +103,6 @@ pipeline {
        when {
         allOf {
           expression { return env.GIT_BRANCH == 'origin/master' }
-          //expression { return runPipeline }
         }
       }
       stages {
@@ -146,6 +141,7 @@ Check console output at $BUILD_URL to view the results.'''
       }
     }
   }
+}
 def isImportantChange() {
   def paths = ['docker/', 'docs/', 'pom.xml', 'src/main/']
   return currentBuild.changeSets.any { cs ->
