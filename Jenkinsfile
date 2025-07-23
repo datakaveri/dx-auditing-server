@@ -5,6 +5,7 @@ pipeline {
     deplRegistry = 'ghcr.io/datakaveri/auditing-server-depl'
     registryUri = 'https://ghcr.io'
     registryCredential = 'datakaveri-ghcr'
+    RUN_PIPELINE = 'false'
     GIT_HASH = GIT_COMMIT.take(7)
   }
 
@@ -26,6 +27,7 @@ pipeline {
           } 
           else {
             echo "Skipping pipeline. Reason: No PR comment and no important file changes."
+            RUN_PIPELINE = 'false'
             currentBuild.result = 'SUCCESS'
             return
           }
