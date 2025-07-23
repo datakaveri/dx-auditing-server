@@ -20,6 +20,7 @@ pipeline {
         script {
           echo "PR Comment Body: ${env.ghprbCommentBody}"
           def isPRComment = env.ghprbCommentBody != null && env.ghprbCommentBody.trim()
+          echo "isPRComment: ${isPRComment}"
           def changed = isImportantChange()
           if (isPRComment || changed) {
             echo "Trigger valid: Running pipeline due to PR comment or file changes."
