@@ -24,12 +24,11 @@ pipeline {
           def changed = isImportantChange()
           if (isPRComment || changed) {
             echo "Trigger valid: Running pipeline due to PR comment or file changes."
-            //runPipeline = true
           } 
           else {
             echo "Skipping pipeline. Reason: No PR comment and no important file changes."
             currentBuild.result = 'SUCCESS'
-            return
+            sh 'echo Skipping remaining stages && exit 0'
           }
         }
       }
