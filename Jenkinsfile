@@ -27,8 +27,8 @@ pipeline {
           } 
           else {
             echo "Skipping pipeline. Reason: No PR comment and no important file changes."
-            currentBuild.result = 'SUCCESS'
-            sh 'echo Skipping remaining stages && exit 0'
+            catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
+              error("Stopping pipeline early after trigger validation.")
           }
         }
       }
