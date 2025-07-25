@@ -29,6 +29,7 @@ pipeline {
             echo "Skipping pipeline. Reason: No PR comment and no important file changes."
             catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
               error("Stopping pipeline early after trigger validation.")
+            }
           }
         }
       }
