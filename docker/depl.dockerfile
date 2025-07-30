@@ -33,3 +33,5 @@ EXPOSE 9000
 RUN useradd -r -u 1001 -g root audit-user
 
 USER audit-user
+
+###line added For pipeline testing
