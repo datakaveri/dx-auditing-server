@@ -17,9 +17,13 @@ pipeline {
     stage('Conditional Execution') {
       when {
         expression {
+          def causes = currentBuild.getBuildCauses()
+          def userTriggered = causes.any {
+            it.getShortDescription().toLowerCase().contains('started by user')
+          }
           def comment = env.ghprbCommentBody
           def isPRComment = comment && comment != "null" && !comment.trim().isEmpty()
-          return isPRComment || isImportantChange()
+          return userTriggered || isPRComment || isImportantChange()
         }
       }
       stages {
