@@ -16,14 +16,16 @@ pipeline {
   stages {
     stage('Conditional Execution') {
       when {
-        expression {
-          def causes = currentBuild.rawBuild.getCauses()
-          def userTriggered = causes.any {
-            it.toString().toLowerCase().contains('user')
+        anyOf {
+          triggeredBy 'UserIdCause'
+          expression {
+            def comment = env.ghprbCommentBody
+            return comment && comment != "null" && !comment.trim().isEmpty()
           }
-          def comment = env.ghprbCommentBody
-          def isPRComment = comment && comment != "null" && !comment.trim().isEmpty()
-          return userTriggered || isPRComment || isImportantChange()
+          changeset "docker/**"
+          changeset "docs/**"
+          changeset "pom.xml"
+          changeset "src/main/**"
         }
       }
       stages {
@@ -54,10 +56,10 @@ pipeline {
           post {
             always {
               xunit (
-                thresholds: [ skipped(failureThreshold: '0'), failed(failureThreshold: '0') ],
-                tools: [ JUnit(pattern: 'target/surefire-reports/*.xml') ]
+                thresholds: [skipped(failureThreshold: '0'), failed(failureThreshold: '0')],
+                tools: [JUnit(pattern: 'target/surefire-reports/*.xml')]
               )
-              jacoco classPattern: 'target/classes', execPattern: 'target/jacoco.exec', sourcePattern: 'src/main/java', exclusionPattern:'**/*VertxEBProxy.class,...'
+              jacoco classPattern: 'target/classes', execPattern: 'target/jacoco.exec', sourcePattern: 'src/main/java', exclusionPattern: '**/*VertxEBProxy.class,...'
               recordIssues(enabledForFailure: true, tool: checkStyle(pattern: 'target/checkstyle-result.xml'))
               recordIssues(enabledForFailure: true, tool: pmdParser(pattern: 'target/pmd.xml'))
             }
@@ -114,17 +116,6 @@ pipeline {
             body: '''$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:
 Check console output at $BUILD_URL to view the results.'''
         }
-      }
-    }
-  }
-}
-
-def isImportantChange() {
-  def paths = ['docker/', 'docs/', 'pom.xml', 'src/main/']
-  return currentBuild.changeSets.any { cs ->
-    cs.items.any { item ->
-      item.affectedPaths.any { path ->
-        paths.any { imp -> path.startsWith(imp) || path == imp }
       }
     }
   }
