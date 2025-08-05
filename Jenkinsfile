@@ -76,7 +76,7 @@ pipeline {
 
         stage('Continuous Deployment') {
           when {
-            expression { env.GIT_BRANCH == 'origin/master' }
+            expression { env.GIT_BRANCH == 'origin/main' }
           }
           stages {
             stage('Push Images') {
