@@ -72,10 +72,10 @@ public class Deployer {
         new DeploymentOptions().setInstances(numInstances).setConfig(config),
         ar -> {
           if (ar.succeeded()) {
-            LOGGER.info("Deployed " + moduleName);
+            LOGGER.info("Deployed {}", moduleName);
             recursiveDeploy(vertx, configs, i + 1);
           } else {
-            LOGGER.fatal("Failed to deploy " + moduleName + " cause:", ar.cause());
+            LOGGER.fatal("Failed to deploy {} cause:", moduleName, ar.cause());
           }
         });
   }
@@ -89,7 +89,7 @@ public class Deployer {
    */
   public static void recursiveDeploy(Vertx vertx, JsonObject configs, List<String> modules) {
     if (modules.isEmpty()) {
-      LOGGER.info("Deployed requested verticle");
+      LOGGER.info("Deployed requested verticle(s)");
       return;
     }
 
@@ -104,7 +104,7 @@ public class Deployer {
             .orElse(new JsonObject());
 
     if (config.isEmpty()) {
-      LOGGER.fatal("Failed to deploy " + moduleName + " cause: Not Found");
+      LOGGER.fatal("Failed to deploy {} cause: Not Found", moduleName);
       return;
     }
 
@@ -114,11 +114,11 @@ public class Deployer {
         new DeploymentOptions().setInstances(numInstances).setConfig(config),
         ar -> {
           if (ar.succeeded()) {
-            LOGGER.info("Deployed " + moduleName);
+            LOGGER.info("Deployed {}", moduleName);
             modules.remove(0);
             recursiveDeploy(vertx, configs, modules);
           } else {
-            LOGGER.fatal("Failed to deploy " + moduleName + " cause:", ar.cause());
+            LOGGER.fatal("Failed to deploy {} cause:", moduleName, ar.cause());
           }
         });
   }
@@ -145,13 +145,17 @@ public class Deployer {
   }
 
   public static MetricsOptions getMetricsOptions() {
+    // Best-effort metrics configuration.
     return new MicrometerMetricsOptions()
         .setPrometheusOptions(
             new VertxPrometheusOptions()
                 .setEnabled(true)
                 .setStartEmbeddedServer(true)
-                .setEmbeddedServerOptions(new HttpServerOptions().setPort(9000)))
-        // .setPublishQuantiles(true))
+                .setEmbeddedServerOptions(
+                    new HttpServerOptions()
+                        .setPort(9000)
+                        // Important in Docker/Swarm
+                        .setHost("0.0.0.0")))
         .setLabels(
             EnumSet.of(Label.EB_ADDRESS, Label.EB_FAILURE, Label.HTTP_CODE, Label.HTTP_METHOD))
         .setEnabled(true);
@@ -159,6 +163,10 @@ public class Deployer {
 
   public static void setJvmMetrics() {
     MeterRegistry registry = BackendRegistries.getDefaultNow();
+    if (registry == null) {
+      LOGGER.warn("No default Micrometer registry found; JVM metrics will not be bound.");
+      return;
+    }
     new JvmMemoryMetrics().bindTo(registry);
     new JvmGcMetrics().bindTo(registry);
     new ProcessorMetrics().bindTo(registry);
@@ -177,11 +185,11 @@ public class Deployer {
     try {
       config = Files.readString(Paths.get(configPath));
     } catch (Exception e) {
-      LOGGER.fatal("Couldn't read configuration file");
+      LOGGER.fatal("Couldn't read configuration file", e);
       return;
     }
     if (config.length() < 1) {
-      LOGGER.fatal("Couldn't read configuration file");
+      LOGGER.fatal("Couldn't read configuration file: empty content");
       return;
     }
     JsonObject configuration = new JsonObject(config);
@@ -189,11 +197,16 @@ public class Deployer {
     String clusterId = configuration.getString("clusterId");
     mgr = getClusterManager(host, zookeepers, clusterId);
     EventBusOptions ebOptions = new EventBusOptions().setClusterPublicHost(host);
-    VertxOptions options =
-        new VertxOptions()
-            .setClusterManager(mgr)
-            .setEventBusOptions(ebOptions)
-            .setMetricsOptions(getMetricsOptions());
+
+    VertxOptions options = new VertxOptions().setClusterManager(mgr).setEventBusOptions(ebOptions);
+
+    // Make metrics "best-effort": if Micrometer/Prometheus is not available, continue without.
+    try {
+      options.setMetricsOptions(getMetricsOptions());
+    } catch (Throwable t) {
+      LOGGER.error(
+          "Failed to initialize Micrometer/Prometheus metrics. Continuing without metrics.", t);
+    }
 
     Vertx.clusteredVertx(
         options,
@@ -201,8 +214,13 @@ public class Deployer {
           LOGGER.info("Clustered vert.x instance result received {}", res.succeeded());
           if (res.succeeded()) {
             vertx = res.result();
-            LOGGER.debug(vertx.isMetricsEnabled());
-            setJvmMetrics();
+            LOGGER.debug("Metrics enabled: {}", vertx.isMetricsEnabled());
+            try {
+              setJvmMetrics();
+            } catch (Throwable t) {
+              LOGGER.warn("Failed to bind JVM metrics", t);
+            }
+
             if (modules.isEmpty()) {
               recursiveDeploy(vertx, configuration, 0);
             } else {
@@ -210,69 +228,108 @@ public class Deployer {
             }
 
           } else {
-            LOGGER.fatal("Could not join cluster :{}", res.cause().getMessage());
+            LOGGER.fatal("Could not join cluster :{}", res.cause().getMessage(), res.cause());
           }
         });
   }
 
   public static void gracefulShutdown() {
-    Set<String> deployIdSet = vertx.deploymentIDs();
     Logger logger = LogManager.getLogger(Deployer.class);
-    logger.info("Shutting down the application");
-    CountDownLatch latchVerticles = new CountDownLatch(deployIdSet.size());
-    CountDownLatch latchCluster = new CountDownLatch(1);
-    CountDownLatch latchVertx = new CountDownLatch(1);
-    logger.debug("number of verticles being undeployed are:" + deployIdSet.size());
-    for (String deploymentId : deployIdSet) {
-      vertx.undeploy(
-          deploymentId,
-          handler -> {
-            if (handler.succeeded()) {
-              logger.debug(deploymentId + " verticle  successfully Undeployed");
-              latchVerticles.countDown();
-            } else {
-              logger.warn(deploymentId + "Undeploy failed!");
-            }
-          });
-    }
 
-    try {
-      latchVerticles.await(5, TimeUnit.SECONDS);
-      logger.info("All the verticles undeployed");
-      Promise<Void> promise = Promise.promise();
-      // leave the cluster
-      mgr.leave(promise);
-      logger.info("vertx left cluster successfully");
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    try {
-      latchCluster.await(5, TimeUnit.SECONDS);
-      vertx.close(
-          handler -> {
-            if (handler.succeeded()) {
-              logger.info("vertx closed successfully");
-              latchVertx.countDown();
-            } else {
-              logger.warn("Vertx didn't close properly, reason:" + handler.cause());
-            }
-          });
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    try {
-      latchVertx.await(5, TimeUnit.SECONDS);
-      // then shut down log4j
+    if (vertx == null) {
+      logger.error(
+          "Vertx instance is null – cluster was never initialized or failed to start. "
+              + "Skipping graceful shutdown.");
+      // Still try to shutdown log4j cleanly
       if (LogManager.getContext() instanceof LoggerContext) {
         logger.debug("Shutting down log4j2");
         LogManager.shutdown(LogManager.getContext());
       } else {
         logger.warn("Unable to shutdown log4j2");
       }
-    } catch (Exception e) {
-      e.printStackTrace();
+      return;
+    }
+
+    Set<String> deployIdSet = vertx.deploymentIDs();
+    logger.info("Shutting down the application");
+    CountDownLatch latchVerticles = new CountDownLatch(deployIdSet.size());
+    CountDownLatch latchCluster = new CountDownLatch(1);
+    CountDownLatch latchVertx = new CountDownLatch(1);
+
+    logger.debug("Number of verticles being undeployed: {}", deployIdSet.size());
+    for (String deploymentId : deployIdSet) {
+      vertx.undeploy(
+          deploymentId,
+          handler -> {
+            if (handler.succeeded()) {
+              logger.debug("{} verticle successfully undeployed", deploymentId);
+              latchVerticles.countDown();
+            } else {
+              logger.warn("{} undeploy failed!", deploymentId, handler.cause());
+              latchVerticles.countDown();
+            }
+          });
+    }
+
+    try {
+      latchVerticles.await(5, TimeUnit.SECONDS);
+      logger.info("All the verticles undeployed (or timeout reached)");
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      logger.warn("Interrupted while waiting for verticles to undeploy", e);
+    }
+
+    // Leave the cluster if ClusterManager is available
+    if (mgr != null) {
+      Promise<Void> promise = Promise.promise();
+      mgr.leave(promise);
+      promise
+          .future()
+          .onComplete(
+              ar -> {
+                if (ar.succeeded()) {
+                  logger.info("Vert.x left cluster successfully");
+                } else {
+                  logger.warn("Error while leaving cluster", ar.cause());
+                }
+                latchCluster.countDown();
+              });
+    } else {
+      logger.warn("ClusterManager is null; skipping cluster leave()");
+      latchCluster.countDown();
+    }
+
+    try {
+      latchCluster.await(5, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      logger.warn("Interrupted while waiting for cluster leave", e);
+    }
+
+    // Close Vert.x instance
+    vertx.close(
+        handler -> {
+          if (handler.succeeded()) {
+            logger.info("Vert.x closed successfully");
+          } else {
+            logger.warn("Vert.x didn't close properly, reason:", handler.cause());
+          }
+          latchVertx.countDown();
+        });
+
+    try {
+      latchVertx.await(5, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      logger.warn("Interrupted while waiting for Vert.x to close", e);
+    }
+
+    // then shut down log4j
+    if (LogManager.getContext() instanceof LoggerContext) {
+      logger.debug("Shutting down log4j2");
+      LogManager.shutdown(LogManager.getContext());
+    } else {
+      logger.warn("Unable to shutdown log4j2");
     }
   }
 
