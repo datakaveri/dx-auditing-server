@@ -56,6 +56,7 @@ public class Deployer {
    *   <li>--hostname/-i : the hostname for clustering
    *   <li>--modules/-m : comma separated list of module names to deploy
    * </ul>
+   *
    * e.g. <i>java -jar ./fatjar.jar --host $(hostname) -c configs/config.json -m</i>
    */
   public static void recursiveDeploy(Vertx vertx, JsonObject configs, int i) {
@@ -197,6 +198,7 @@ public class Deployer {
     Vertx.clusteredVertx(
         options,
         res -> {
+          LOGGER.info("Clustered vert.x instance result received {}", res.succeeded());
           if (res.succeeded()) {
             vertx = res.result();
             LOGGER.debug(vertx.isMetricsEnabled());
@@ -208,7 +210,7 @@ public class Deployer {
             }
 
           } else {
-            LOGGER.fatal("Could not join cluster");
+            LOGGER.fatal("Could not join cluster :{}", res.cause().getMessage());
           }
         });
   }
