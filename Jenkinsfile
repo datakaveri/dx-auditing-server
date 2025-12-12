@@ -65,6 +65,10 @@ pipeline {
             }
             failure {
               sh 'docker compose -f docker-compose.test.yml down --remove-orphans'
+              xunit (
+                thresholds: [skipped(failureThreshold: '0'), failed(failureThreshold: '0')],
+                tools: [JUnit(pattern: 'target/surefire-reports/*.xml')]
+              )
               error "Test failure. Stopping pipeline execution!"
             }
             cleanup {
