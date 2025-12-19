@@ -13,7 +13,7 @@
         <hazelcast.version>4.0.2</hazelcast.version>
         <curator.version>5.7.1</curator.version>
         <micrometer.version>1.14.1</micrometer.version>
-        <apache-log4j2.version>2.24.2</apache-log4j2.version>
+        <apache-log4j2.version>2.25.3</apache-log4j2.version>
         <lmax-disruptor.version>4.0.0</lmax-disruptor.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
         <maven-javadoc-plugin.version>3.11.1</maven-javadoc-plugin.version>
